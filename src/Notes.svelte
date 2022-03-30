@@ -14,8 +14,9 @@
     import { ts, defaultHandlers } from "./timestampHandler";
     import { play, pause } from "./Video.svelte";
     import { currentTime } from "./stores";
-
+	import { saveFile } from './util.js'
     let playingNote = false;
+
 
     const playTs = (ts: string) => {
         // TODO parse ts
@@ -50,7 +51,19 @@
     const { active, doc, selection, focus, root, updateEditor } =
         editorStores(editor);
     $: console.log($selection, $focus, $active);
+
+    const  beforeUnload = (event: BeforeUnloadEvent) => {
+    if ($active.undo) {
+        event.preventDefault();
+        event.returnValue = '';
+        return '';
+    }
+  }
+    const downloadNotes = () => {
+        saveFile(new Blob([editor.getHTML()]), 'Notes.html');
+    }
 </script>
+<svelte:window on:beforeunload={beforeUnload}/>
 
 <h3>Notes</h3>
 <div class="toolbar">
@@ -104,6 +117,11 @@
             disabled={!active.redo}
             on:click={commands.redo}>redo</button
         >
+        <button
+        class="toolbar-button material-icons right"
+        disabled={!active.undo}
+        on:click={downloadNotes}>file_download</button
+    >
 </Toolbar>
 </div>
 
@@ -277,5 +295,9 @@
             transform: matrix(1, 0, 0, 1, 0, 0);
             opacity: 1;
         }
+    }
+    .right{
+        margin-left: auto; 
+        margin-right: 0;
     }
 </style>

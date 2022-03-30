@@ -8,11 +8,12 @@
 	import Notes from "./Notes.svelte";
 	import Labels from "./Labels.svelte";
 	import Gantt from "./Gantt.svelte";
-	import Tags from "./Tags.svelte";
+	// import Tags from "./Tags.svelte";
 
 	let videoFile;
 	let captionsFile;
 </script>
+
 
 <Input bind:videoFile bind:captionsFile />
 <Labels />
@@ -23,7 +24,7 @@
 	{/if}
 </div>
 
-<Tags />
+<!-- <Tags /> -->
 <!-- <Gantt /> -->
 
 

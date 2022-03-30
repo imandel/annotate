@@ -5,6 +5,7 @@
 	import { cueData, currentTime } from './stores';
 	import { onMount } from 'svelte';
 	import Toggle from 'svelte-toggle';
+	import { saveFile } from './util.js'
 	let transcriptBox;
 	let transcriptContent;
 	let currentCue;
@@ -29,20 +30,6 @@
 			};
 		});
 	});
-
-	async function saveFile(data, fileName) {
-		// create a new handle
-		const newHandle = await window.showSaveFilePicker({ suggestedName: fileName });
-
-		// create a FileSystemWritableFileStream to write to
-		const writableStream = await newHandle.createWritable();
-
-		// write our file
-		await writableStream.write(data);
-
-		// close the file and write the contents to disk.
-		await writableStream.close();
-	}
 
 	const downloadTranscript = async () => {
 		console.log(transcriptContent.childNodes[0]);
