@@ -19,7 +19,7 @@
 	let highlight;
 	let color = "#fff";
 	let colors = ["rgb(255, 255, 131)", "rgb(166, 255, 233)","rgb(255, 199, 186)","rgb(217, 195, 255)",
-				"rgb(184, 238, 255)", "rgb(255, 208, 239)"];
+				"rgb(184, 238, 255)", "rgb(255, 208, 239)","rgb(255,255,255)"];
 
     onMount(() => {
 		$cueData.forEach((cue) => {
@@ -64,6 +64,7 @@
 		if(target){
 			// set the highlight area : [start, end]
 			start = parseInt(target.id.replace("trans",""));
+			// if only one section is selected, set end to start;
 			end = start;
 		}
     }
@@ -163,11 +164,12 @@
         background-color: red;
     }
 	#tooltip {
-		background-color: #fff;
+		background-color: rgb(216, 216, 216);
 		color: white;
 		padding: 5px 10px;
 		border-radius: 25px;
 		font-size: 13px;
+		display: inline-block;
 	}
 	/* Hide the popper when the reference is hidden */
 	#tooltip[data-popper-reference-hidden] {
