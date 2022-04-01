@@ -4,7 +4,7 @@
     let selected = [];
     let newLabel;
     let tagChecks;
-    $: console.log($tags);
+    // $: console.log($tags);
 
     const addLabel = () => {
         if (newLabel) {

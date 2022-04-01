@@ -32,7 +32,7 @@
 	});
 
 	const downloadTranscript = async () => {
-		console.log(transcriptContent.childNodes[0]);
+		// console.log(transcriptContent.childNodes[0]);
 		let content = 'WEBVTT\n';
 		$cueData.forEach((cue) => {
 			const activeNode = transcriptContent.childNodes[cue.id - 1];
@@ -47,28 +47,30 @@
 
     const mouseDown = (e) => {
         mDown = true;
+		highlights = [];
         // e.preventDefault()
-        const target = e.target.closest('p')
-        // target.before(start);
-        // console.log(start)
-        selectionRange.setStartBefore(target);
+        const target = e.target.closest('p');
+		if(target){
+			start = parseInt(target.id.replace("trans",""));
+			end = start;
+		}
     }
 
     const mouseMove = (e) => {
         if(mDown){
             const target = e.target.closest('p')
-            console.log(target)
-            selectionRange.setEndAfter(target);
+			if(target){
+				end = parseInt(target.id.replace("trans",""));
+			}
         }
-
     }
 
     const mouseUp = (e) => {
         console.log('up')
         if(mDown){
             mDown = false;
-            // console.log(selectionRange.cloneContents())
-            selectionRange.detach()
+			highlights = [...Array(end-start+1).keys()].map(i => i + start);
+            console.log(highlights);
         }
     }
 </script>
@@ -87,6 +89,7 @@
 				data-startTime={cue.startTime}
 				data-endTime={cue.endTime}
 				data-idx={index}
+				id={"trans"+index}
 			>
 				<span class="bold"
 					>{new Date(cue.startTime * 1000).toISOString().substring(11, 19)}-{new Date(
