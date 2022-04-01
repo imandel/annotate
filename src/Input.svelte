@@ -1,6 +1,4 @@
 <script lang="ts">
-import { each } from "svelte/internal";
-
 
 	let files: FileList;
 	export let videoFile: string = undefined;
@@ -8,7 +6,7 @@ import { each } from "svelte/internal";
 	let fileSpan = [];
 
 	$: if (files) {
-		// console.log(files);
+		console.log(files);
 
 		for (const file of files) {
 			// console.log(`${file.name}: ${file.size} bytes`);
@@ -16,7 +14,7 @@ import { each } from "svelte/internal";
 				videoFile = URL.createObjectURL(file);
 				console.log(videoFile);
 			}
-			if (file.type == 'text/vtt') {
+			if (file.type == 'text/vtt' || file.name.endsWith('.vtt')) {
 				captionsFile = URL.createObjectURL(file);
 				console.log(captionsFile);
 				console.log(file);
