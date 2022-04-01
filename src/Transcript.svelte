@@ -57,18 +57,18 @@
     const mouseMove = (e) => {
         if(mDown){
             const target = e.target.closest('p')
-            // console.log(target)
+            console.log(target)
             selectionRange.setEndAfter(target);
         }
 
     }
 
     const mouseUp = (e) => {
-        console.log('up',e)
+        console.log('up')
         if(mDown){
-            mDown = false
-            console.log(selectionRange.cloneContents())
-            // selectionRange.detach()
+            mDown = false;
+            // console.log(selectionRange.cloneContents())
+            selectionRange.detach()
         }
     }
 </script>
