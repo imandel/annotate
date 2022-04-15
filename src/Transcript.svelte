@@ -6,15 +6,20 @@
 	import { onMount } from 'svelte';
 	import Toggle from 'svelte-toggle';
 	import { saveFile } from './util.js'
+	import { createPopper } from '@popperjs/core';
+
 	let transcriptBox;
 	let transcriptContent;
 	let currentCue;
-	let highlights = [];
 	let editable = false;
+	// the highlighted range
     let start;
     let end;
-    let selectionRange = document.createRange();
     let mDown = false;
+	let highlight;
+	let color = "#fff";
+	let colors = ["rgb(255, 255, 131)", "rgb(166, 255, 233)","rgb(255, 199, 186)","rgb(217, 195, 255)",
+				"rgb(184, 238, 255)", "rgb(255, 208, 239)","rgb(255,255,255)"];
 
     onMount(() => {
 		$cueData.forEach((cue) => {
@@ -30,6 +35,12 @@
 			};
 		});
 	});
+	
+	function change_highlightarea(){
+		// do highlight
+	}
+
+	$: start, end, change_highlightarea();
 
 	const downloadTranscript = async () => {
 		// console.log(transcriptContent.childNodes[0]);
@@ -47,11 +58,13 @@
 
     const mouseDown = (e) => {
         mDown = true;
-		highlights = [];
         // e.preventDefault()
         const target = e.target.closest('p');
+		// highlight.style.visibility='hidden';
 		if(target){
+			// set the highlight area : [start, end]
 			start = parseInt(target.id.replace("trans",""));
+			// if only one section is selected, set end to start;
 			end = start;
 		}
     }
@@ -69,8 +82,13 @@
         console.log('up')
         if(mDown){
             mDown = false;
-			highlights = [...Array(end-start+1).keys()].map(i => i + start);
-            console.log(highlights);
+			const endElement = document.getElementById("trans"+String(end));
+			// highlight.style.visibility = "visible";
+			// console.log(highlight);
+			// show tooltip
+			createPopper(endElement, highlight, {
+				placement: 'bottom-end',
+			});
         }
     }
 </script>
@@ -80,11 +98,17 @@
 		<Toggle small label="Edit transcript" bind:toggled={editable} />
 		<button on:click={downloadTranscript} style="margin-bottom: 0em;">Download</button>
 	</div>
+	<div bind:this={highlight} id="tooltip" data-popper-reference-hidden data-popper-arrow >
+		{#each colors as c}
+			<span class="liner-circle" style="background-color:{c}" on:click={()=>{color=c}}>
+			</span>
+		{/each}
+	</div>
 	<div bind:this={transcriptContent} on:mousedown={mouseDown} on:mouseup={mouseUp} on:mousemove={mouseMove}>
 		{#each $cueData as cue, index}
 			<p
 				class:activeLine={index === currentCue}
-				class:highlighted={highlights.includes(index)}
+				style={(index >= start && index <= end) ? "background-color:" + color + ";" : ""}
 				on:click ={()=>{if(!editable)$currentTime = cue.startTime}}
 				data-startTime={cue.startTime}
 				data-endTime={cue.endTime}
@@ -134,12 +158,32 @@
     .activeLine {
 		font-size: 1.1em;
 	}
-	.highlighted {
-		background-color: yellow;	
-	}
     :global(.bound){
         height: 1em;
         width: 100%;
         background-color: red;
     }
+	#tooltip {
+		background-color: rgb(216, 216, 216);
+		color: white;
+		padding: 5px 10px;
+		border-radius: 25px;
+		font-size: 13px;
+		display: inline-block;
+	}
+	/* Hide the popper when the reference is hidden */
+	#tooltip[data-popper-reference-hidden] {
+	visibility: hidden;
+	pointer-events: none;
+	}
+
+	.liner-circle {
+		height: 18px;
+		width: 18px;
+		margin: 0 5px;
+		border-radius: 50%;
+		display: inline-block;
+		cursor: pointer;
+	}
+
 </style>

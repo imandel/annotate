@@ -17,6 +17,10 @@
 			if (file.type == 'text/vtt' || file.name.endsWith('.vtt')) {
 				captionsFile = URL.createObjectURL(file);
 				console.log(captionsFile);
+				console.log(file);
+			}
+			else{
+				console.log(file);
 			}
 			fileSpan = [...fileSpan, file.name];
 		}
