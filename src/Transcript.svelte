@@ -12,6 +12,7 @@
 	let transcriptContent;
 	let currentCue;
 	let editable = false;
+
 	// the highlighted range
     let start;
     let end;
@@ -20,6 +21,11 @@
 	let color = "#fff";
 	let colors = ["rgb(255, 255, 131)", "rgb(166, 255, 233)","rgb(255, 199, 186)","rgb(217, 195, 255)",
 				"rgb(184, 238, 255)", "rgb(255, 208, 239)","rgb(255,255,255)"];
+
+	// divider
+	let dividerStart;
+	let dividerEnd;
+	let hovering;
 
     onMount(() => {
 		$cueData.forEach((cue) => {
@@ -38,9 +44,12 @@
 	
 	function change_highlightarea(){
 		// do highlight
+		const startElement = document.getElementById("trans" + String(start));
+		const endElement = document.getElementById("trans" + String(end));
+		startElement.before(dividerStart);
+		endElement.after(dividerEnd);
 	}
 
-	$: start, end, change_highlightarea();
 
 	const downloadTranscript = async () => {
 		// console.log(transcriptContent.childNodes[0]);
@@ -83,14 +92,39 @@
         if(mDown){
             mDown = false;
 			const endElement = document.getElementById("trans"+String(end));
-			// highlight.style.visibility = "visible";
-			// console.log(highlight);
 			// show tooltip
 			createPopper(endElement, highlight, {
 				placement: 'bottom-end',
 			});
+			change_highlightarea();
         }
     }
+
+
+	// divider drag
+	const dragstart = (e) => {
+		const target = e.target.closest('p');
+		let now;
+		if(target){
+			now = parseInt(target.id.replace("trans",""));
+		}
+		e.dataTransfer.effectAllowed = 'move';
+		e.dataTransfer.dropEffect = 'move';
+		e.dataTransfer.setData('text/plain', now);
+		change_highlightarea();
+	}
+
+	const drop = (e) => {
+		console.log("dropping");
+		e.dataTransfer.dropEffect = 'move'; 
+		const target = e.target.closest('p');
+		if(target){
+			start = parseInt(target.id.replace("trans",""));
+		}
+		change_highlightarea();
+
+  	}
+
 </script>
 
 <div class="transcript-container" bind:this={transcriptBox}>
@@ -98,6 +132,13 @@
 		<Toggle small label="Edit transcript" bind:toggled={editable} />
 		<button on:click={downloadTranscript} style="margin-bottom: 0em;">Download</button>
 	</div>
+
+	<div bind:this={dividerStart} draggable={true} on:dragstart={dragstart}  class="divider">
+	</div>
+	<div bind:this={dividerEnd} class="divider">
+	</div>
+
+
 	<div bind:this={highlight} id="tooltip" data-popper-reference-hidden data-popper-arrow >
 		{#each colors as c}
 			<span class="liner-circle" style="background-color:{c}" on:click={()=>{color=c}}>
@@ -110,6 +151,8 @@
 				class:activeLine={index === currentCue}
 				style={(index >= start && index <= end) ? "background-color:" + color + ";" : ""}
 				on:click ={()=>{if(!editable)$currentTime = cue.startTime}}
+				on:drop|preventDefault={drop}
+				on:dragenter={() => {hovering = index}}
 				data-startTime={cue.startTime}
 				data-endTime={cue.endTime}
 				data-idx={index}
@@ -184,6 +227,15 @@
 		border-radius: 50%;
 		display: inline-block;
 		cursor: pointer;
+	}
+
+	.divider{
+		height: 6px;
+		width: 100%;
+		border-radius: 25%;
+		background-color:rgb(219, 255, 134);
+		display:inline-block;
+		cursor:pointer;
 	}
 
 </style>
