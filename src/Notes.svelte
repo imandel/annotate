@@ -50,7 +50,7 @@
 
     const { active, doc, selection, focus, root, updateEditor } =
         editorStores(editor);
-    $: console.log($selection, $focus, $active);
+    // $: console.log($selection, $focus, $active);
 
     const  beforeUnload = (event: BeforeUnloadEvent) => {
     if ($active.undo) {

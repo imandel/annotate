@@ -80,9 +80,9 @@ export default function tsReplace(editor: Editor, index: number, prefix: string)
   return tsReplacements.some(([ regexp, getAttributes ]) => {
     const match = prefix.match(regexp);
     if (match) {
-      console.log(match)
+      // console.log(match)
       let text = match[0].slice(0, -1);
-      console.log(text)
+      // console.log(text)
       const end = index - (match[0].length - text.length);
       const attributes = getAttributes(text);
       if (!editor.typeset.formats.findByAttributes(attributes)) {
@@ -149,7 +149,7 @@ export function markReplace(editor: Editor, index: number, prefix: string, whole
     const match = prefix.match(regexp);
     if (match) {
       let [ text, _, matched, last ] = match;
-      console.log(last)
+      // console.log(last)
       const attributes = getAttributes(matched);
       if (!editor.typeset.formats.findByAttributes(attributes)) {
         return false;
