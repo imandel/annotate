@@ -2,7 +2,7 @@
 	// 	 on:mousedown={(e)=>{if(e.shiftKey){selecting=true; $curKeypoint.id = getId('transcript_')}}}
 	//  on:mousemove={selection}
 	//  on:mouseup={(e)=>{if(selecting){selection(e);selecting=false; window.getSelection().empty()}}}
-	import { cueData, currentTime } from './stores';
+	import { cueData, currentTime, tags, colors } from './stores';
 	import { onMount } from 'svelte';
 	import Toggle from 'svelte-toggle';
 	import { saveFile } from './util.js'
@@ -18,9 +18,11 @@
     let end;
     let mDown = false;
 	let highlight;
-	let color = "#fff";
-	let colors = ["rgb(255, 255, 131)", "rgb(166, 255, 233)","rgb(255, 199, 186)","rgb(217, 195, 255)",
-				"rgb(184, 238, 255)", "rgb(255, 208, 239)","rgb(255,255,255)"];
+
+	// TODO: tags with colors
+	$: show_colors = $colors.slice(0 , 1 + $tags.length);
+	let highlights = Array($cueData.length).fill(0);
+	$: shows = highlights;
 
 	// divider
 	let dividerStart;
@@ -43,11 +45,18 @@
 	});
 	
 	function change_highlightarea(){
-		// do highlight
+		// set the bounding box of the highlighted area
 		const startElement = document.getElementById("trans" + String(start));
 		const endElement = document.getElementById("trans" + String(end));
 		startElement.before(dividerStart);
 		endElement.after(dividerEnd);
+	}
+
+	function highlight_with_color(color){
+		// change [ start,  end ] to index
+		for(var i = start; i <= end; i++){
+			highlights[i] = color;
+		}
 	}
 
 
@@ -138,18 +147,20 @@
 	<div bind:this={dividerEnd} class="divider">
 	</div>
 
-
-	<div bind:this={highlight} id="tooltip" data-popper-reference-hidden data-popper-arrow >
-		{#each colors as c}
-			<span class="liner-circle" style="background-color:{c}" on:click={()=>{color=c}}>
-			</span>
-		{/each}
-	</div>
+	{#if show_colors.length != 1}
+		<div bind:this={highlight} id="tooltip" data-popper-reference-hidden data-popper-arrow >
+			{#each show_colors as c, index}
+				<span class="liner-circle" style="background-color:{c}" on:click={() => highlight_with_color(index)}>
+				</span>
+			{/each}
+			
+		</div>
+	{/if}
 	<div bind:this={transcriptContent} on:mousedown={mouseDown} on:mouseup={mouseUp} on:mousemove={mouseMove}>
 		{#each $cueData as cue, index}
 			<p
 				class:activeLine={index === currentCue}
-				style={(index >= start && index <= end) ? "background-color:" + color + ";" : ""}
+				style={"background-color:" + show_colors[shows[index]] + ";"}
 				on:click ={()=>{if(!editable)$currentTime = cue.startTime}}
 				on:drop|preventDefault={drop}
 				on:dragenter={() => {hovering = index}}
