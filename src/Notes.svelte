@@ -62,6 +62,12 @@
     const downloadNotes = () => {
         saveFile(new Blob([editor.getHTML()]), 'Notes.html');
     }
+
+    const addNote = (start: Number, end: Number) => {
+        // add '@(start) - @(end)' to the note box
+        
+    }
+
 </script>
 <svelte:window on:beforeunload={beforeUnload}/>
 

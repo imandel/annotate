@@ -53,7 +53,7 @@
 	}
 
 	function highlight_with_color(color){
-		// change [ start,  end ] to index
+		// change [ start,  end ] to color index
 		for(var i = start; i <= end; i++){
 			highlights[i] = color;
 		}
