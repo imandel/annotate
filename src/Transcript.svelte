@@ -2,7 +2,7 @@
 	// 	 on:mousedown={(e)=>{if(e.shiftKey){selecting=true; $curKeypoint.id = getId('transcript_')}}}
 	//  on:mousemove={selection}
 	//  on:mouseup={(e)=>{if(selecting){selection(e);selecting=false; window.getSelection().empty()}}}
-	import { cueData, currentTime, tags, colors } from './stores';
+	import { cueData, currentTime, tags, colors, write_now, range} from './stores';
 	import { onMount } from 'svelte';
 	import Toggle from 'svelte-toggle';
 	import { saveFile } from './util.js'
@@ -18,6 +18,8 @@
     let end;
     let mDown = false;
 	let highlight;
+	$write_now = false;
+	// $: $range = [start, end];
 
 	// TODO: tags with colors
 	$: show_colors = $colors.slice(0 , 1 + $tags.length);
@@ -51,6 +53,13 @@
 		startElement.before(dividerStart);
 		endElement.after(dividerEnd);
 	}
+
+	function change_range(){
+		const startTime = new Date($cueData[start].startTime * 1000).toISOString().substring(11, 19);
+		const endTime = new Date($cueData[end].endTime * 1000).toISOString().substring(11, 19);
+		$range = [startTime, endTime];
+	}
+	$: start, end, start && end && change_range();
 
 	function highlight_with_color(color){
 		// change [ start,  end ] to color index

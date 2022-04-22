@@ -13,8 +13,9 @@
     import BubbleMenu from "typewriter-editor/lib/BubbleMenu.svelte";
     import { ts, defaultHandlers } from "./timestampHandler";
     import { play, pause } from "./Video.svelte";
-    import { currentTime } from "./stores";
+    import { currentTime , write_now, range} from "./stores";
 	import { saveFile } from './util.js'
+import { start } from "@popperjs/core";
     let playingNote = false;
 
 
@@ -63,10 +64,15 @@
         saveFile(new Blob([editor.getHTML()]), 'Notes.html');
     }
 
-    const addNote = (start: Number, end: Number) => {
+    const addNote = () => {
         // add '@(start) - @(end)' to the note box
+        const start = "@(" + range[0] + ")";
+        const end = "@(" + range[1] + ")";
+        console.log(start);
+        editor.insert(start);
         
     }
+    $: $range, $range && addNote();
 
 </script>
 <svelte:window on:beforeunload={beforeUnload}/>
