@@ -58,6 +58,7 @@
 		const startTime = new Date($cueData[start].startTime * 1000).toISOString().substring(11, 19);
 		const endTime = new Date($cueData[end].endTime * 1000).toISOString().substring(11, 19);
 		$range = [startTime, endTime];
+		// console.log($range);
 	}
 	$: start, end, start && end && change_range();
 
@@ -156,15 +157,15 @@
 	<div bind:this={dividerEnd} class="divider">
 	</div>
 
-	{#if show_colors.length != 1}
 		<div bind:this={highlight} id="tooltip" data-popper-reference-hidden data-popper-arrow >
+			<span class="liner-circle" style="background-color:#000" on:click={() => change_range()}>
+			</span>
 			{#each show_colors as c, index}
 				<span class="liner-circle" style="background-color:{c}" on:click={() => highlight_with_color(index)}>
 				</span>
 			{/each}
 			
 		</div>
-	{/if}
 	<div bind:this={transcriptContent} on:mousedown={mouseDown} on:mouseup={mouseUp} on:mousemove={mouseMove}>
 		{#each $cueData as cue, index}
 			<p

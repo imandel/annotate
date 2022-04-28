@@ -66,11 +66,11 @@ import { start } from "@popperjs/core";
 
     const addNote = () => {
         // add '@(start) - @(end)' to the note box
-        const start = "@(" + range[0] + ")";
-        const end = "@(" + range[1] + ")";
-        console.log(start);
+        console.log($range);
+        const start = "@(" + $range[0] + ")";
+        const end = "@(" + $range[1] + ")";
         editor.insert(start);
-        
+        editor.insert(end);
     }
     $: $range, $range && addNote();
 
