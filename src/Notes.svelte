@@ -69,8 +69,10 @@ import { start } from "@popperjs/core";
         console.log($range);
         const start = "@(" + $range[0] + ")";
         const end = "@(" + $range[1] + ")";
-        editor.insert(start);
-        editor.insert(end);
+        const added = start + end;
+        console.log(added);
+        editor.insert(added);
+        // editor.insert(end);
     }
     $: $range, $range && addNote();
 
@@ -79,7 +81,6 @@ import { start } from "@popperjs/core";
 
 <h3>Notes</h3>
 <div class="toolbar">
-    <!-- TODO make toolbar sticky -->
 <Toolbar {editor} let:active let:commands>
    
         <button

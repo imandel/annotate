@@ -116,6 +116,7 @@
 				placement: 'bottom-end',
 			});
 			change_highlightarea();
+			change_range();
         }
     }
 
