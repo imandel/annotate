@@ -64,6 +64,7 @@ import { start } from "@popperjs/core";
         saveFile(new Blob([editor.getHTML()]), 'Notes.html');
     }
 
+    // TODO: Add the range of the time to editor box
     const addNote = () => {
         // add '@(start) - @(end)' to the note box
         console.log($range);
@@ -71,8 +72,7 @@ import { start } from "@popperjs/core";
         const end = "@(" + $range[1] + ")";
         const added = start + end;
         console.log(added);
-        editor.insert(added);
-        // editor.insert(end);
+        editor.insert(added); // problems?
     }
     $: $range, $range && addNote();
 

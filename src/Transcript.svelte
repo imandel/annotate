@@ -2,7 +2,7 @@
 	// 	 on:mousedown={(e)=>{if(e.shiftKey){selecting=true; $curKeypoint.id = getId('transcript_')}}}
 	//  on:mousemove={selection}
 	//  on:mouseup={(e)=>{if(selecting){selection(e);selecting=false; window.getSelection().empty()}}}
-	import { cueData, currentTime, tags, colors, write_now, range} from './stores';
+	import { cueData, currentTime, tags, colors, range} from './stores';
 	import { onMount } from 'svelte';
 	import Toggle from 'svelte-toggle';
 	import { saveFile } from './util.js'
@@ -18,18 +18,17 @@
     let end;
     let mDown = false;
 	let highlight;
-	$write_now = false;
-	// $: $range = [start, end];
 
-	// TODO: tags with colors
+	// TODO: Add more colors. Fix overflow bugs. Change colors of labels.
+	// User needs to add labels first. The colors are shown coresponding to the labels.
 	$: show_colors = $colors.slice(0 , 1 + $tags.length);
 	let highlights = Array($cueData.length).fill(0);
 	$: shows = highlights;
 
 	// divider
+	// TODO: Make divider draggable
 	let dividerStart;
 	let dividerEnd;
-	let hovering;
 
     onMount(() => {
 		$cueData.forEach((cue) => {
@@ -46,22 +45,25 @@
 		});
 	});
 	
+	// set the bounding box of the highlighted area
 	function change_highlightarea(){
-		// set the bounding box of the highlighted area
 		const startElement = document.getElementById("trans" + String(start));
 		const endElement = document.getElementById("trans" + String(end));
 		startElement.before(dividerStart);
 		endElement.after(dividerEnd);
 	}
 
+	// Get the range of time of the selected area
 	function change_range(){
 		const startTime = new Date($cueData[start].startTime * 1000).toISOString().substring(11, 19);
 		const endTime = new Date($cueData[end].endTime * 1000).toISOString().substring(11, 19);
+		// Store in the local store
+		// TODO: Add a button, clicked to add the range of time to the editor box.
 		$range = [startTime, endTime];
-		// console.log($range);
 	}
 	$: start, end, start && end && change_range();
 
+	// Change the background color of highlighted area
 	function highlight_with_color(color){
 		// change [ start,  end ] to color index
 		for(var i = start; i <= end; i++){
@@ -121,6 +123,7 @@
     }
 
 
+	// TODO: Add draggable function
 	// divider drag
 	const dragstart = (e) => {
 		const target = e.target.closest('p');
@@ -134,6 +137,7 @@
 		change_highlightarea();
 	}
 
+	// TODO: Add drop function
 	const drop = (e) => {
 		console.log("dropping");
 		e.dataTransfer.dropEffect = 'move'; 
@@ -174,7 +178,6 @@
 				style={"background-color:" + show_colors[shows[index]] + ";"}
 				on:click ={()=>{if(!editable)$currentTime = cue.startTime}}
 				on:drop|preventDefault={drop}
-				on:dragenter={() => {hovering = index}}
 				data-startTime={cue.startTime}
 				data-endTime={cue.endTime}
 				data-idx={index}
