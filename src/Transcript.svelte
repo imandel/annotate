@@ -2,7 +2,7 @@
 	// 	 on:mousedown={(e)=>{if(e.shiftKey){selecting=true; $curKeypoint.id = getId('transcript_')}}}
 	//  on:mousemove={selection}
 	//  on:mouseup={(e)=>{if(selecting){selection(e);selecting=false; window.getSelection().empty()}}}
-	import { cueData, currentTime } from './stores';
+	import { cueData, currentTime, tags, colors, range} from './stores';
 	import { onMount } from 'svelte';
 	import Toggle from 'svelte-toggle';
 	import { saveFile } from './util.js'
@@ -12,14 +12,23 @@
 	let transcriptContent;
 	let currentCue;
 	let editable = false;
+
 	// the highlighted range
     let start;
     let end;
     let mDown = false;
 	let highlight;
-	let color = "#fff";
-	let colors = ["rgb(255, 255, 131)", "rgb(166, 255, 233)","rgb(255, 199, 186)","rgb(217, 195, 255)",
-				"rgb(184, 238, 255)", "rgb(255, 208, 239)","rgb(255,255,255)"];
+
+	// TODO: Add more colors. Fix overflow bugs. Change colors of labels.
+	// User needs to add labels first. The colors are shown coresponding to the labels.
+	$: show_colors = $colors.slice(0 , 1 + $tags.length);
+	let highlights = Array($cueData.length).fill(0);
+	$: shows = highlights;
+
+	// divider
+	// TODO: Make divider draggable
+	let dividerStart;
+	let dividerEnd;
 
     onMount(() => {
 		$cueData.forEach((cue) => {
@@ -36,11 +45,32 @@
 		});
 	});
 	
+	// set the bounding box of the highlighted area
 	function change_highlightarea(){
-		// do highlight
+		const startElement = document.getElementById("trans" + String(start));
+		const endElement = document.getElementById("trans" + String(end));
+		startElement.before(dividerStart);
+		endElement.after(dividerEnd);
 	}
 
-	$: start, end, change_highlightarea();
+	// Get the range of time of the selected area
+	function change_range(){
+		const startTime = new Date($cueData[start].startTime * 1000).toISOString().substring(11, 19);
+		const endTime = new Date($cueData[end].endTime * 1000).toISOString().substring(11, 19);
+		// Store in the local store
+		// TODO: Add a button, clicked to add the range of time to the editor box.
+		$range = [startTime, endTime];
+	}
+	$: start, end, start && end && change_range();
+
+	// Change the background color of highlighted area
+	function highlight_with_color(color){
+		// change [ start,  end ] to color index
+		for(var i = start; i <= end; i++){
+			highlights[i] = color;
+		}
+	}
+
 
 	const downloadTranscript = async () => {
 		// console.log(transcriptContent.childNodes[0]);
@@ -83,14 +113,42 @@
         if(mDown){
             mDown = false;
 			const endElement = document.getElementById("trans"+String(end));
-			// highlight.style.visibility = "visible";
-			// console.log(highlight);
 			// show tooltip
 			createPopper(endElement, highlight, {
 				placement: 'bottom-end',
 			});
+			change_highlightarea();
+			change_range();
         }
     }
+
+
+	// TODO: Add draggable function
+	// divider drag
+	const dragstart = (e) => {
+		const target = e.target.closest('p');
+		let now;
+		if(target){
+			now = parseInt(target.id.replace("trans",""));
+		}
+		e.dataTransfer.effectAllowed = 'move';
+		e.dataTransfer.dropEffect = 'move';
+		e.dataTransfer.setData('text/plain', now);
+		change_highlightarea();
+	}
+
+	// TODO: Add drop function
+	const drop = (e) => {
+		console.log("dropping");
+		e.dataTransfer.dropEffect = 'move'; 
+		const target = e.target.closest('p');
+		if(target){
+			start = parseInt(target.id.replace("trans",""));
+		}
+		change_highlightarea();
+
+  	}
+
 </script>
 
 <div class="transcript-container" bind:this={transcriptBox}>
@@ -98,18 +156,28 @@
 		<Toggle small label="Edit transcript" bind:toggled={editable} />
 		<button on:click={downloadTranscript} style="margin-bottom: 0em;">Download</button>
 	</div>
-	<div bind:this={highlight} id="tooltip" data-popper-reference-hidden data-popper-arrow >
-		{#each colors as c}
-			<span class="liner-circle" style="background-color:{c}" on:click={()=>{color=c}}>
-			</span>
-		{/each}
+
+	<div bind:this={dividerStart} draggable={true} on:dragstart={dragstart}  class="divider">
 	</div>
+	<div bind:this={dividerEnd} class="divider">
+	</div>
+
+		<div bind:this={highlight} id="tooltip" data-popper-reference-hidden data-popper-arrow >
+			<span class="liner-circle" style="background-color:#000" on:click={() => change_range()}>
+			</span>
+			{#each show_colors as c, index}
+				<span class="liner-circle" style="background-color:{c}" on:click={() => highlight_with_color(index)}>
+				</span>
+			{/each}
+			
+		</div>
 	<div bind:this={transcriptContent} on:mousedown={mouseDown} on:mouseup={mouseUp} on:mousemove={mouseMove}>
 		{#each $cueData as cue, index}
 			<p
 				class:activeLine={index === currentCue}
-				style={(index >= start && index <= end) ? "background-color:" + color + ";" : ""}
+				style={"background-color:" + show_colors[shows[index]] + ";"}
 				on:click ={()=>{if(!editable)$currentTime = cue.startTime}}
+				on:drop|preventDefault={drop}
 				data-startTime={cue.startTime}
 				data-endTime={cue.endTime}
 				data-idx={index}
@@ -184,6 +252,15 @@
 		border-radius: 50%;
 		display: inline-block;
 		cursor: pointer;
+	}
+
+	.divider{
+		height: 6px;
+		width: 100%;
+		border-radius: 25%;
+		background-color:rgb(219, 255, 134);
+		display:inline-block;
+		cursor:pointer;
 	}
 
 </style>

@@ -1,10 +1,10 @@
 <script lang="ts">
-    import { tags } from "./stores";
+    import { tags , colors} from "./stores";
 
     let selected = [];
     let newLabel;
     let tagChecks;
-    // $: console.log($tags);
+    $: tag_colors = $colors.slice(1, 1 + $tags.length);
 
     const addLabel = () => {
         if (newLabel) {
@@ -26,14 +26,16 @@
         </div>
         {#if $tags.length}
             {#each $tags as tag, index}
-                <div class="check-container">
+                <div class="check-container" style="background-color: {tag_colors[index]};">
                     <input
                         type="checkbox"
                         bind:group={selected}
                         value={tag}
                         id={tag}
                     />
-                    <span><label for={tag}>{tag}</label></span>
+                    <span>
+                        <label for={tag}>{tag}</label>
+                    </span>
                 </div>
             {/each}
         {/if}
