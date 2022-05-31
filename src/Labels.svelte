@@ -1,5 +1,6 @@
 <script lang="ts">
     import { tags } from "./stores";
+    import { randomColor } from "./util"
 
     let selected = [];
     let newLabel;
@@ -8,7 +9,7 @@
 
     const addLabel = () => {
         if (newLabel) {
-            $tags = [...$tags, newLabel];
+            $tags = [...$tags, {label: newLabel, color: randomColor()}];
             newLabel = "";
         }
     };
@@ -26,14 +27,14 @@
         </div>
         {#if $tags.length}
             {#each $tags as tag, index}
-                <div class="check-container">
+                <div class="check-container" style="background-color: {tag.color};">
                     <input
                         type="checkbox"
                         bind:group={selected}
-                        value={tag}
-                        id={tag}
+                        value={tag.label}
+                        id={tag.label}
                     />
-                    <span><label for={tag}>{tag}</label></span>
+                    <span><label for={tag.label}>{tag.label}</label></span>
                 </div>
             {/each}
         {/if}
@@ -43,6 +44,8 @@
 <style>
     .check-container {
         padding: 0.5em;
+        border-radius: 15px;
+        margin: 0 7px;
     }
     label {
         display: inline-block;

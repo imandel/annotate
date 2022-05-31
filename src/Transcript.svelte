@@ -2,10 +2,11 @@
 	// 	 on:mousedown={(e)=>{if(e.shiftKey){selecting=true; $curKeypoint.id = getId('transcript_')}}}
 	//  on:mousemove={selection}
 	//  on:mouseup={(e)=>{if(selecting){selection(e);selecting=false; window.getSelection().empty()}}}
-	import { cueData, currentTime } from './stores';
+	import { cueData, currentTime, tags } from './stores';
 	import { onMount } from 'svelte';
 	import Toggle from 'svelte-toggle';
-	import { saveFile } from './util.js'
+	import { ToggleCore } from "svelte-toggle";
+	import { saveFile, randomColor } from './util.js'
 	import { createPopper } from '@popperjs/core';
 
 	let transcriptBox;
@@ -18,8 +19,8 @@
     let mDown = false;
 	let highlight;
 	let color = "#fff";
-	let colors = ["rgb(255, 255, 131)", "rgb(166, 255, 233)","rgb(255, 199, 186)","rgb(217, 195, 255)",
-				"rgb(184, 238, 255)", "rgb(255, 208, 239)","rgb(255,255,255)"];
+	let addTag = false;
+	let newLabel='';
 
     onMount(() => {
 		$cueData.forEach((cue) => {
@@ -91,6 +92,14 @@
 			});
         }
     }
+
+	const addLabel = () => {
+		if(newLabel.length){
+			$tags= [...$tags, {label: newLabel, color: randomColor()}]
+		}
+		newLabel ='';
+		addTag = false;
+	}
 </script>
 
 <div class="transcript-container" bind:this={transcriptBox}>
@@ -99,10 +108,22 @@
 		<button on:click={downloadTranscript} style="margin-bottom: 0em;">Download</button>
 	</div>
 	<div bind:this={highlight} id="tooltip" data-popper-reference-hidden data-popper-arrow >
-		{#each colors as c}
-			<span class="liner-circle" style="background-color:{c}" on:click={()=>{color=c}}>
+		{#each $tags as c}
+			<span class="liner-circle" style="background-color:{c.color}" on:click={()=>{color=c.color}}>
 			</span>
 		{/each}
+		{#if addTag}
+			<input
+			type="text"
+			placeholder="label"
+			bind:value={newLabel}
+			style="width:5em; margin: 0;"
+			/>
+			<button class="new-tag" on:click={addLabel}>+</button>
+			<button class="new-tag" on:click={addLabel}>x</button>
+		{:else}
+		<button class="new-tag" on:click={()=> addTag =!addTag}>+</button>
+		{/if}
 	</div>
 	<div bind:this={transcriptContent} on:mousedown={mouseDown} on:mouseup={mouseUp} on:mousemove={mouseMove}>
 		{#each $cueData as cue, index}
@@ -158,6 +179,12 @@
     .activeLine {
 		font-size: 1.1em;
 	}
+	.new-tag {
+		margin: auto 5px;
+		border-radius: 58%;
+		line-height: 1em;
+
+	}
     :global(.bound){
         height: 1em;
         width: 100%;
@@ -169,7 +196,8 @@
 		padding: 5px 10px;
 		border-radius: 25px;
 		font-size: 13px;
-		display: inline-block;
+		display: flex;
+		align-items: center;
 	}
 	/* Hide the popper when the reference is hidden */
 	#tooltip[data-popper-reference-hidden] {
