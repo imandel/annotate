@@ -30,18 +30,11 @@
         }
     }
 
-
-    // this dumb hack sux
     window.process = { env: { NODE_ENV: "production" } };
-
-    // 	    onMount(async () => {
-    //             console.log(textReplace)
-    //         }
-    // );
 
     const editor = (window.editor = new Editor({
         modules: {
-            placeholder: placeholder("When the video loads try writing @(now) or @(1:23)"),
+            placeholder: placeholder("When the video loads try writing @now or @(1:23)"),
             smartEntry: smartEntry(defaultHandlers),
         },
     }));

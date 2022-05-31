@@ -67,7 +67,7 @@ export const textReplacements: TextReplacement[] = [
 // TODO better regexs and ranges 12:12-13:12
 export const tsReplacements: Replacement[] = [
   [ /(@\()[\d.-]*\).$/s, capture => ({ ts: capture })],
-  [ /@\(now\).$/s, capture =>  ({ts: `@(${get(currentTime).toFixed(1)})`})],
+  [ /@now.$/s, capture =>  ({ts: `@(${get(currentTime).toFixed(1)})`})],
   [ /(@\()[\d.:-]*\).$/s, capture => ({ts: `@(${parseTimes(capture.slice(2,-1))})`})]
 
  ];
