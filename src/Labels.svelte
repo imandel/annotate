@@ -5,10 +5,8 @@
     let selected = [];
     let newLabel;
     let tagChecks;
-    // $: console.log($tags);
 
     // TODO replace randomColor() with nice colorpallete chromajs
-
     const addLabel = () => {
         if (newLabel) {
             $tags = [...$tags, {label: newLabel, color: randomColor()}];
@@ -16,17 +14,21 @@
         }
     };
 </script>
-
 <div style="display:inline-block">
+    <input
+        type="text"
+        placeholder="add label"
+        bind:value={newLabel}
+        style="width:5em"
+        on:keypress={(e) => {
+            if (e.key === "Enter") {
+                e.preventDefault();
+                addLabel();
+            }
+        }}
+    /><button on:click={addLabel}>+</button>
+</div>
     <div class="tagChecks" bind:this={tagChecks}>
-        <div>
-            <input
-                type="text"
-                placeholder="add label"
-                bind:value={newLabel}
-                style="width:5em"
-            /><button on:click={addLabel}>+</button>
-        </div>
         {#if $tags.length}
             {#each $tags as tag, index}
                 <div class="check-container" style="background-color: {tag.color};">
@@ -41,7 +43,6 @@
             {/each}
         {/if}
     </div>
-</div>
 
 <style>
     .check-container {
@@ -54,17 +55,8 @@
         /* width: 200px; */
     }
 
-    /* label input {
-        float: left;
-    }
-
-    label span {
-        display: block;
-        overflow: auto;
-    } */
     .tagChecks {
-        display: flex;
+        display: inline-flex;
         flex-flow: row wrap;
-        /* justify-content: space-evenly; */
     }
 </style>
