@@ -1,5 +1,4 @@
 <script lang="ts">
-    import { onMount } from "svelte";
     import {
         Editor,
         placeholder,
@@ -12,29 +11,37 @@
     import Toolbar from "typewriter-editor/lib/Toolbar.svelte";
     import BubbleMenu from "typewriter-editor/lib/BubbleMenu.svelte";
     import { ts, defaultHandlers } from "./timestampHandler";
-    import { play, pause } from "./Video.svelte";
+    import { play, pause, playUntil } from "./Video.svelte";
     import { currentTime } from "./stores";
-	import { saveFile } from './util.js'
+    import { saveFile } from "./util.js";
     let playingNote = false;
-
 
     const playTs = (ts: string) => {
         // TODO parse ts
-        if(playingNote) {
+        if (playingNote) {
             pause();
             playingNote = false;
         } else {
-        playingNote = true;
-        $currentTime = parseFloat(ts.substring(2, ts.length-1));
-        play()
+            playingNote = true;
+            if (ts.includes("-")) {
+                let [start, end] = ts.split("-");
+
+                $currentTime = parseFloat(start.substring(2));
+                playUntil(parseFloat(end.slice(0, -1))).then(()=>playingNote = false);
+            } else {
+                $currentTime = parseFloat(ts.substring(2, ts.length - 1));
+                play();
+            }
         }
-    }
+    };
 
     window.process = { env: { NODE_ENV: "production" } };
 
     const editor = (window.editor = new Editor({
         modules: {
-            placeholder: placeholder("When the video loads try writing @now or @(1:23)"),
+            placeholder: placeholder(
+                "When the video loads try writing @now or @(1:23)"
+            ),
             smartEntry: smartEntry(defaultHandlers),
         },
     }));
@@ -45,24 +52,24 @@
         editorStores(editor);
     // $: console.log($selection, $focus, $active);
 
-    const  beforeUnload = (event: BeforeUnloadEvent) => {
-    if ($active.undo) {
-        event.preventDefault();
-        event.returnValue = '';
-        return '';
-    }
-  }
+    const beforeUnload = (event: BeforeUnloadEvent) => {
+        if ($active.undo) {
+            event.preventDefault();
+            event.returnValue = "";
+            return "";
+        }
+    };
     const downloadNotes = () => {
-        saveFile(new Blob([editor.getHTML()]), 'Notes.html');
-    }
+        saveFile(new Blob([editor.getHTML()]), "Notes.html");
+    };
 </script>
-<svelte:window on:beforeunload={beforeUnload}/>
+
+<svelte:window on:beforeunload={beforeUnload} />
 
 <h3>Notes</h3>
 <div class="toolbar">
     <!-- TODO make toolbar sticky -->
-<Toolbar {editor} let:active let:commands>
-   
+    <Toolbar {editor} let:active let:commands>
         <button
             class="toolbar-button material-icons"
             class:active={active.header === 2}
@@ -111,11 +118,11 @@
             on:click={commands.redo}>redo</button
         >
         <button
-        class="toolbar-button material-icons right"
-        disabled={!active.undo}
-        on:click={downloadNotes}>file_download</button
-    >
-</Toolbar>
+            class="toolbar-button material-icons right"
+            disabled={!active.undo}
+            on:click={downloadNotes}>file_download</button
+        >
+    </Toolbar>
 </div>
 
 <BubbleMenu {editor} let:active let:commands let:placement let:selection>
@@ -133,21 +140,19 @@
             {#if active.ts}
                 <button
                     class="menu-button material-icons"
-                    on:click={(e) => playTs(active.ts)}>
+                    on:click={(e) => playTs(active.ts)}
+                >
                     {#if playingNote}
                     pause
                     {/if}
                     play_arrow
-                    </button
-                >
+                </button>
             {/if}
         </div>
     {/if}
 </BubbleMenu>
 
-<Root {editor} class="text-content" >
-    
-</Root>
+<Root {editor} class="text-content" />
 
 <style>
     .toolbar {
@@ -289,8 +294,8 @@
             opacity: 1;
         }
     }
-    .right{
-        margin-left: auto; 
+    .right {
+        margin-left: auto;
         margin-right: 0;
     }
 </style>

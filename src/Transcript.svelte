@@ -116,6 +116,7 @@
 			<input
 			type="text"
 			placeholder="label"
+			on:keypress={(e)=>{if(e.key==="Enter"){e.preventDefault();addLabel()}}}
 			bind:value={newLabel}
 			style="width:5em; margin: 0;"
 			/>

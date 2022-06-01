@@ -1,9 +1,32 @@
-<script context="module">
-    let player;
+<script context="module" lang="ts">
+    let player: HTMLVideoElement;
     export function play() {
         if (player && player.readyState) {
             player.play();
         }
+    }
+
+    export async function playUntil(timestamp: Number) {
+        return new Promise((resolve, reject) => {
+            if (player && player.readyState) {
+            player.play();
+            // pause at end timestamp
+            player.ontimeupdate = () => {
+                // TODO cancel if user interacts with video otherwise?
+                // player.onseeking = () => {
+                //     player.ontimeupdate = () => {};
+                //     player.onseeking = () => {};
+                // };
+                if (player.currentTime > timestamp) {
+                    player.pause();
+                    // remove this event handler
+                    player.ontimeupdate = () => {};
+                    resolve(1);
+                }
+            };
+        }
+            
+        })
     }
 
     export function pause() {

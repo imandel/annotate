@@ -7,6 +7,8 @@
     let tagChecks;
     // $: console.log($tags);
 
+    // TODO replace randomColor() with nice colorpallete chromajs
+
     const addLabel = () => {
         if (newLabel) {
             $tags = [...$tags, {label: newLabel, color: randomColor()}];
