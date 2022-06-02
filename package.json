@@ -26,11 +26,12 @@
   },
   "dependencies": {
     "@popperjs/core": "^2.11.4",
+    "@rollup/plugin-replace": "^4.0.0",
+    "@typewriter/document": "^0.7.3",
     "moment": "^2.29.1",
     "sirv-cli": "^2.0.0",
     "svelte-gantt": "^4.0.3-beta",
-    "svelte-tiptap": "^0.4.7",
     "svelte-toggle": "^3.1.0",
-    "typewriter-editor": "^0.7.8"
+    "typewriter-editor": "^0.7.12"
   }
 }
