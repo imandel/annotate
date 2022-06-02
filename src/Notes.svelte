@@ -79,7 +79,6 @@
 
 <h3>Notes</h3>
 <div class="toolbar">
-    <!-- TODO make toolbar sticky -->
     <Toolbar {editor} let:active let:commands>
         <button
             class="toolbar-button material-icons"
@@ -170,6 +169,8 @@
     .toolbar {
         display: flex;
         background: #eee;
+        position: sticky;
+        top: 0;
         padding: 8px;
         margin-bottom: 8px;
         border-radius: 3px;
@@ -222,7 +223,7 @@
         border: 1px solid #ced4da;
         transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
     }
-    
+
     .menu {
         display: flex;
         align-items: baseline;
