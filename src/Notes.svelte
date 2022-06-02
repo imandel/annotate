@@ -1,21 +1,33 @@
+<script context="module" lang="ts">
+    let editor: Editor;
+    export const appendLabel = (timerange:[number, number], label: string, color:string ) => {
+        if(editor){
+            const change = editor.change
+            change.insert(editor.doc.length,'\n')
+            change.insert(editor.doc.length,`@(${timerange[0]}-${timerange[1]})`, {ts:`@(${timerange[0]}-${timerange[1]})`})
+            change.insert(editor.doc.length,{ label, color })
+            change.apply()
+        }
+    }
+</script>
 <script lang="ts">
     import {
         Editor,
         placeholder,
         smartEntry,
-        h,
         editorStores,
-        defaultTypes,
     } from "typewriter-editor";
     import Root from "typewriter-editor/lib/Root.svelte";
     import Toolbar from "typewriter-editor/lib/Toolbar.svelte";
     import BubbleMenu from "typewriter-editor/lib/BubbleMenu.svelte";
-    import { ts, defaultHandlers } from "./timestampHandler";
+    import { ts, tsReplace, label } from "./customFormatting";
     import { play, pause, playUntil } from "./Video.svelte";
     import { currentTime } from "./stores";
     import { saveFile } from "./util.js";
     let playingNote = false;
+    import { defaultHandlers, markReplace } from "typewriter-editor/lib/modules/smartEntry";
 
+    window.process = { env: { NODE_ENV: process.env } };
     const playTs = (ts: string) => {
         // TODO parse ts
         if (playingNote) {
@@ -35,29 +47,28 @@
         }
     };
 
-    window.process = { env: { NODE_ENV: "production" } };
-
-    const editor = (window.editor = new Editor({
+    editor = (window.editor = new Editor({
         modules: {
             placeholder: placeholder(
                 "When the video loads try writing @now or @(1:23)"
             ),
-            smartEntry: smartEntry(defaultHandlers),
+            smartEntry: smartEntry([...defaultHandlers, markReplace, tsReplace]),
         },
     }));
 
     editor.typeset.formats.add(ts);
+    editor.typeset.embeds.add(label);
 
     const { active, doc, selection, focus, root, updateEditor } =
         editorStores(editor);
-    // $: console.log($selection, $focus, $active);
 
     const beforeUnload = (event: BeforeUnloadEvent) => {
+        if(process.env == 'production'){
         if ($active.undo) {
             event.preventDefault();
             event.returnValue = "";
             return "";
-        }
+        }}
     };
     const downloadNotes = () => {
         saveFile(new Blob([editor.getHTML()]), "Notes.html");
@@ -150,6 +161,7 @@
             {/if}
         </div>
     {/if}
+    
 </BubbleMenu>
 
 <Root {editor} class="text-content" />
@@ -210,13 +222,7 @@
         border: 1px solid #ced4da;
         transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
     }
-
-    :global(.timestamp) {
-        color: rgb(131, 131, 255);
-        text-decoration: underline;
-        cursor: pointer;
-    }
-
+    
     .menu {
         display: flex;
         align-items: baseline;
