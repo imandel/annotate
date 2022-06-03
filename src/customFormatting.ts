@@ -10,7 +10,7 @@ export const ts = format({
   name: 'ts',
   selector: 'span.timestamp',
   greedy: false,
-  render: (attributes, children) => h('span', { class: 'timestamp' }, children),
+  render: () => h('span', { class: 'timestamp' }),
 });
 
 
@@ -39,9 +39,9 @@ const tsReplacements: Replacement[] = [
   }]
 
 ];
-
-const parseTimes = (timeString) => {
-  return +(timeString.split(':').reduce((acc, time) => (60 * acc) + +time))
+// TODO ts throws error on string
+const parseTimes = (timeString:any) => {
+  return +(timeString.split(':').reduce((acc: number, time: number) => (60 * acc) + +time))
 }
 
 export const tsReplace = (editor: Editor, index: number, prefix: string) => {

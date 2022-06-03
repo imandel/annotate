@@ -12,4 +12,4 @@ export async function saveFile(data, fileName) {
     await writableStream.close();
 }
 
-export const randomColor = () => '#'+Math.floor(Math.random()*16777215).toString(16);
+export const randomColor = () => '#' + Math.floor(Math.random() * 16777215).toString(16);

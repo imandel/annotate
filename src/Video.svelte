@@ -7,7 +7,7 @@
     }
 
     export async function playUntil(timestamp: Number) {
-        return new Promise((resolve, reject) => {
+        return new Promise((resolve) => {
             if (player && player.readyState) {
             player.play();
             // pause at end timestamp
@@ -37,14 +37,13 @@
 </script>
 
 <script lang="ts">
-    import { onMount } from "svelte";
     import { cueData, duration, currentTime, paused } from "./stores";
-    let files: FileList;
+    // let files: FileList;
     export let videoFile = undefined;
     export let captionsFile = undefined;
 
     let track: HTMLTrackElement;
-    let height;
+    let height: number;
 
     const setupCues = () => {
         console.log("cues loaded");

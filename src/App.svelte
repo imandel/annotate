@@ -6,7 +6,7 @@
 	import Input from "./Input.svelte";
 	import Notes from "./Notes.svelte";
 	import Labels from "./Labels.svelte";
-	import Gantt from "./Gantt.svelte";
+	// import Gantt from "./Gantt.svelte";
 
 	let videoFile;
 	let captionsFile;
