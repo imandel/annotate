@@ -3,11 +3,10 @@
     import LabelInput from "./LabelInput.svelte" 
 
     let selected = [];
-    let tagChecks;
-    
+
 </script>
 <span style="margin:0 0 0.5em 0;"><LabelInput><button slot='add'>+</button></LabelInput></span>
-    <div class="tagChecks" bind:this={tagChecks}>
+    <div class="tagChecks">
         {#if $tags.length}
             {#each $tags as tag}
                 <div class="check-container" style="background-color: {tag.color};">

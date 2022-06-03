@@ -8,8 +8,15 @@
 	import Labels from "./Labels.svelte";
 	// import Gantt from "./Gantt.svelte";
 
-	let videoFile;
-	let captionsFile;
+	let videoFile: string;
+	let captionsFile: string;
+
+	if (process.env.NODE_ENV == "dev") {
+		const files = JSON.parse(process.env.FILES)
+		console.log(files)
+        videoFile = files.find((file: string)=>{return file.endsWith('.mp4')|| file.endsWith('.MP4')})
+		captionsFile = files.find((file: string)=>{return file.endsWith('.vtt')|| file.endsWith('.VTT')})
+    }
 </script>
 
 
