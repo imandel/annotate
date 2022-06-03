@@ -10,7 +10,7 @@ export const ts = format({
   name: 'ts',
   selector: 'span.timestamp',
   greedy: false,
-  render: () => h('span', { class: 'timestamp' }),
+  render: (_, children) => h('span', { class: 'timestamp' }, children),
 });
 
 
