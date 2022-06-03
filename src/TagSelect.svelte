@@ -8,7 +8,6 @@
     // TODO clearHighlight
     const clearHighlight = () => {};
     const selected = (label:string, color: string) => {
-        console.log(label, color)
         callback(label,color)
     }
 

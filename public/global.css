@@ -153,6 +153,7 @@ button:focus {
 	margin: 0 5px;
 	border-radius: 50%;
 	display: inline-block;
+	z-index: -1;
 }
 .tooltip {
 	position:relative; /* making the .tooltip span a container for the tooltip text */

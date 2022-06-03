@@ -179,8 +179,9 @@
                 >
                     {#if playingNote}
                         pause
-                    {/if}
+                    {:else}
                     play_arrow
+                    {/if}
                 </button>
             {/if}
         </div>

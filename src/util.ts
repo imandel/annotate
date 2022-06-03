@@ -1,4 +1,4 @@
-export async function saveFile(data, fileName) {
+export async function saveFile(data: Blob, fileName:string) {
     // create a new handle
     const newHandle = await window.showSaveFilePicker({ suggestedName: fileName });
 

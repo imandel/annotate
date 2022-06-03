@@ -43,7 +43,6 @@
     export let captionsFile = undefined;
 
     let track: HTMLTrackElement;
-    let height: number;
 
     const setupCues = () => {
         console.log("cues loaded");
@@ -54,7 +53,7 @@
 
 {#if videoFile}
     <div id="vid-div">
-        <div id="vid-container" bind:clientHeight={height}>
+        <div id="vid-container">
             <video
                 bind:this={player}
                 controls

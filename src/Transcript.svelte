@@ -2,10 +2,10 @@
 	// 	 on:mousedown={(e)=>{if(e.shiftKey){selecting=true; $curKeypoint.id = getId('transcript_')}}}
 	//  on:mousemove={selection}
 	//  on:mouseup={(e)=>{if(selecting){selection(e);selecting=false; window.getSelection().empty()}}}
-	import { cueData, currentTime, tags } from "./stores";
+	import { cueData, currentTime } from "./stores";
 	import { onMount } from "svelte";
 	import Toggle from "svelte-toggle";
-	import { saveFile, randomColor } from "./util.js";
+	import { saveFile } from "./util.js";
 	import { createPopper } from "@popperjs/core";
 	import { appendLabel } from "./Notes.svelte";
 	import TagSelect from "./TagSelect.svelte";
@@ -24,7 +24,6 @@
 	let highlight: HTMLDivElement;
 	let color = "#fff";
 	// let addTag = false;
-	let newLabel = "";
 
 	onMount(() => {
 		$cueData.forEach((cue) => {
@@ -101,13 +100,6 @@
 		}
 	};
 
-	// const addLabel = () => {
-	// 	if (newLabel.length) {
-	// 		$tags = [...$tags, { label: newLabel, color: randomColor() }];
-	// 	}
-	// 	newLabel = "";
-	// 	addTag = false;
-	// };
 </script>
 
 <!-- <button on:click={()=>appendLabel([4,7], 'red', 'red')}>hihi</button> -->
