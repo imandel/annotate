@@ -1,33 +1,12 @@
 <script lang="ts">
     import { tags } from "./stores";
-    import { randomColor } from "./util"
+    import LabelInput from "./LabelInput.svelte" 
 
     let selected = [];
-    let newLabel;
     let tagChecks;
-
-    // TODO replace randomColor() with nice colorpallete chromajs
-    const addLabel = () => {
-        if (newLabel) {
-            $tags = [...$tags, {label: newLabel, color: randomColor()}];
-            newLabel = "";
-        }
-    };
+    
 </script>
-<div style="display:inline-block">
-    <input
-        type="text"
-        placeholder="add label"
-        bind:value={newLabel}
-        style="width:5em"
-        on:keypress={(e) => {
-            if (e.key === "Enter") {
-                e.preventDefault();
-                addLabel();
-            }
-        }}
-    /><button on:click={addLabel}>+</button>
-</div>
+<span style="margin:0 0 0.5em 0;"><LabelInput><button slot='add'>+</button></LabelInput></span>
     <div class="tagChecks" bind:this={tagChecks}>
         {#if $tags.length}
             {#each $tags as tag, index}

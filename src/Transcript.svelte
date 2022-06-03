@@ -5,26 +5,30 @@
 	import { cueData, currentTime, tags } from "./stores";
 	import { onMount } from "svelte";
 	import Toggle from "svelte-toggle";
-	import { ToggleCore } from "svelte-toggle";
 	import { saveFile, randomColor } from "./util.js";
 	import { createPopper } from "@popperjs/core";
+	import { appendLabel } from "./Notes.svelte";
+	import TagSelect from "./TagSelect.svelte";
 
-	let transcriptBox;
-	let transcriptContent;
-	let currentCue;
+	// hack to keep popper running
+	window.process = { env: { NODE_ENV: process.env } };
+
+	let transcriptBox: HTMLDivElement;
+	let transcriptContent: HTMLDivElement;
+	let currentCue = 0;
 	let editable = false;
 	// the highlighted range
-	let start;
-	let end;
+	let start = 0;
+	let end = 0;
 	let mDown = false;
-	let highlight;
+	let highlight: HTMLDivElement;
 	let color = "#fff";
-	let addTag = false;
+	// let addTag = false;
 	let newLabel = "";
 
 	onMount(() => {
 		$cueData.forEach((cue) => {
-			const activeNode = transcriptContent.childNodes[cue.id - 1];
+			const activeNode = <HTMLElement>transcriptContent.childNodes[cue.id - 1];
 			cue.onenter = () => {
 				currentCue = cue.id - 1;
 				const middleOffset =
@@ -45,10 +49,9 @@
 	$: start, end, change_highlightarea();
 
 	const downloadTranscript = async () => {
-		// console.log(transcriptContent.childNodes[0]);
 		let content = "WEBVTT\n";
 		$cueData.forEach((cue) => {
-			const activeNode = transcriptContent.childNodes[cue.id - 1];
+			const activeNode = <HTMLElement>transcriptContent.childNodes[cue.id - 1];
 			content += `\n${cue.id}\n${new Date(cue.startTime * 1000)
 				.toISOString()
 				.slice(11, -1)} --> ${new Date(cue.endTime * 1000)
@@ -60,51 +63,54 @@
 		saveFile(new Blob([content]), "transcript.vtt");
 	};
 
-	const mouseDown = (e) => {
+	const mouseDown = (e: MouseEvent) => {
 		mDown = true;
 		// e.preventDefault()
-		const target = e.target.closest("p");
+		const target = <HTMLElement>e.target;
+		const closestP = target.closest("p")
 		// highlight.style.visibility='hidden';
-		if (target) {
+		if (closestP) {
 			// set the highlight area : [start, end]
-			start = parseInt(target.id.replace("trans", ""));
+			start = parseInt(closestP.id.replace("trans", ""));
 			// if only one section is selected, set end to start;
 			end = start;
 		}
 	};
 
-	const mouseMove = (e) => {
+	const mouseMove = (e: MouseEvent) => {
 		if (mDown) {
-			const target = e.target.closest("p");
-			if (target) {
-				end = parseInt(target.id.replace("trans", ""));
+			const target = <HTMLElement>e.target;
+			const closestP = target.closest("p")
+			if (closestP) {
+				end = parseInt(closestP.id.replace("trans", ""));
 			}
 		}
 	};
 
-	const mouseUp = (e) => {
-		console.log("up");
+	const mouseUp = (e: MouseEvent) => {
 		if (mDown) {
 			mDown = false;
 			const endElement = document.getElementById("trans" + String(end));
 			// highlight.style.visibility = "visible";
 			// console.log(highlight);
 			// show tooltip
+			// TODO popper destroy?
 			createPopper(endElement, highlight, {
 				placement: "bottom-end",
 			});
 		}
 	};
 
-	const addLabel = () => {
-		if (newLabel.length) {
-			$tags = [...$tags, { label: newLabel, color: randomColor() }];
-		}
-		newLabel = "";
-		addTag = false;
-	};
+	// const addLabel = () => {
+	// 	if (newLabel.length) {
+	// 		$tags = [...$tags, { label: newLabel, color: randomColor() }];
+	// 	}
+	// 	newLabel = "";
+	// 	addTag = false;
+	// };
 </script>
 
+<!-- <button on:click={()=>appendLabel([4,7], 'red', 'red')}>hihi</button> -->
 <div class="transcript-container" bind:this={transcriptBox}>
 	<div class="settings">
 		<Toggle small label="Edit transcript" bind:toggled={editable} />
@@ -114,45 +120,11 @@
 	</div>
 	<div
 		bind:this={highlight}
-		id="tooltip"
+		class="tooltip"
 		data-popper-reference-hidden
 		data-popper-arrow
 	>
-		{#each $tags as c}
-			<span
-				class="liner-circle"
-				style="background-color:{c.color}"
-				on:click={() => {
-					color = c.color;
-				}}
-			/>
-		{/each}
-		<div>
-			<div class="container">
-				<div class="line" />
-				<div class="circle" />
-			</div>
-		</div>
-		{#if addTag}
-			<input
-				type="text"
-				placeholder="label"
-				on:keypress={(e) => {
-					if (e.key === "Enter") {
-						e.preventDefault();
-						addLabel();
-					}
-				}}
-				bind:value={newLabel}
-				style="width:5em; margin: 0;"
-			/>
-			<button class="new-tag" on:click={addLabel}>+</button>
-			<button class="new-tag" on:click={addLabel}>x</button>
-		{:else}
-			<button class="new-tag" on:click={() => (addTag = !addTag)}
-				>+</button
-			>
-		{/if}
+		<TagSelect />
 	</div>
 	<div
 		bind:this={transcriptContent}
@@ -217,17 +189,12 @@
 	.activeLine {
 		font-size: 1.1em;
 	}
-	.new-tag {
-		margin: auto 5px;
-		border-radius: 58%;
-		line-height: 0.7em;
-	}
 	:global(.bound) {
 		height: 1em;
 		width: 100%;
 		background-color: red;
 	}
-	#tooltip {
+	.tooltip {
 		background-color: rgb(216, 216, 216);
 		color: white;
 		padding: 5px 10px;
@@ -237,42 +204,9 @@
 		align-items: center;
 	}
 	/* Hide the popper when the reference is hidden */
-	#tooltip[data-popper-reference-hidden] {
+	.tooltip[data-popper-reference-hidden] {
 		visibility: hidden;
 		pointer-events: none;
 	}
 
-	.liner-circle {
-		height: 18px;
-		width: 18px;
-		margin: 0 5px;
-		border-radius: 50%;
-		display: inline-block;
-		cursor: pointer;
-	}
-
-	.container {
-		display: relative;
-		width: 18px;
-		height: 18px;
-		margin: 0 5px
-	}
-	.circle {
-		position: absolute;
-		/* top: 50%; */
-		/* left: 50%; */
-		/* transform: translate(-50%, -50%); */
-		width: 18px;
-		height: 18px;
-		background-color: whitesmoke;
-		border-radius: 100%;
-	}
-	.line {
-		position: absolute;
-		transform: rotate(-45deg) translate(-7px, 4px);
-		width: 22px;
-		height: 2.5px;
-		background-color: grey;
-		z-index: 100;
-	}
 </style>

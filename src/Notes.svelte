@@ -1,15 +1,24 @@
 <script context="module" lang="ts">
     let editor: Editor;
-    export const appendLabel = (timerange:[number, number], label: string, color:string ) => {
-        if(editor){
-            const change = editor.change
-            change.insert(editor.doc.length,'\n')
-            change.insert(editor.doc.length,`@(${timerange[0]}-${timerange[1]})`, {ts:`@(${timerange[0]}-${timerange[1]})`})
-            change.insert(editor.doc.length,{ label, color })
-            change.apply()
+    export const appendLabel = (
+        timerange: [number, number],
+        label: string,
+        color: string
+    ) => {
+        if (editor) {
+            const change = editor.change;
+            change.insert(editor.doc.length, "\n");
+            change.insert(
+                editor.doc.length,
+                `@(${timerange[0]}-${timerange[1]})`,
+                { ts: `@(${timerange[0]}-${timerange[1]})` }
+            );
+            change.insert(editor.doc.length, { label, color });
+            change.apply();
         }
-    }
+    };
 </script>
+
 <script lang="ts">
     import {
         Editor,
@@ -22,14 +31,17 @@
     import BubbleMenu from "typewriter-editor/lib/BubbleMenu.svelte";
     import { ts, tsReplace, label } from "./customFormatting";
     import { play, pause, playUntil } from "./Video.svelte";
-    import { currentTime } from "./stores";
+    import { currentTime, tags } from "./stores";
     import { saveFile } from "./util.js";
+    import TagSelect from "./TagSelect.svelte";
     let playingNote = false;
-    import { defaultHandlers, markReplace } from "typewriter-editor/lib/modules/smartEntry";
+    import {
+        defaultHandlers,
+        markReplace,
+    } from "typewriter-editor/lib/modules/smartEntry";
 
     window.process = { env: { NODE_ENV: process.env } };
     const playTs = (ts: string) => {
-        // TODO parse ts
         if (playingNote) {
             pause();
             playingNote = false;
@@ -39,7 +51,9 @@
                 let [start, end] = ts.split("-");
 
                 $currentTime = parseFloat(start.substring(2));
-                playUntil(parseFloat(end.slice(0, -1))).then(()=>playingNote = false);
+                playUntil(parseFloat(end.slice(0, -1))).then(
+                    () => (playingNote = false)
+                );
             } else {
                 $currentTime = parseFloat(ts.substring(2, ts.length - 1));
                 play();
@@ -47,14 +61,18 @@
         }
     };
 
-    editor = (window.editor = new Editor({
+    editor = window.editor = new Editor({
         modules: {
             placeholder: placeholder(
                 "When the video loads try writing @now or @(1:23)"
             ),
-            smartEntry: smartEntry([...defaultHandlers, markReplace, tsReplace]),
+            smartEntry: smartEntry([
+                ...defaultHandlers,
+                markReplace,
+                tsReplace,
+            ]),
         },
-    }));
+    });
 
     editor.typeset.formats.add(ts);
     editor.typeset.embeds.add(label);
@@ -62,13 +80,20 @@
     const { active, doc, selection, focus, root, updateEditor } =
         editorStores(editor);
 
+    if (process.env == "dev") {
+        $tags = [
+            { label: "cat", color: "teal" },
+            { label: "bat", color: "lavender" },
+        ];
+    }
     const beforeUnload = (event: BeforeUnloadEvent) => {
-        if(process.env == 'production'){
-        if ($active.undo) {
-            event.preventDefault();
-            event.returnValue = "";
-            return "";
-        }}
+        if (process.env == "production") {
+            if ($active.undo) {
+                event.preventDefault();
+                event.returnValue = "";
+                return "";
+            }
+        }
     };
     const downloadNotes = () => {
         saveFile(new Blob([editor.getHTML()]), "Notes.html");
@@ -150,17 +175,28 @@
             {#if active.ts}
                 <button
                     class="menu-button material-icons"
-                    on:click={(e) => playTs(active.ts)}
+                    on:click={() => playTs(active.ts)}
                 >
                     {#if playingNote}
-                    pause
+                        pause
                     {/if}
                     play_arrow
                 </button>
             {/if}
         </div>
+    {:else}
+        <div class="tag-select">
+            <TagSelect
+                callback={(_label, _color) => {
+                    editor.insert(
+                        { label: _label, color: _color },
+                        [],
+                        [editor.doc.selection[0], editor.doc.selection[0]]
+                    );
+                }}
+            />
+        </div>
     {/if}
-    
 </BubbleMenu>
 
 <Root {editor} class="text-content" />
@@ -304,5 +340,14 @@
     .right {
         margin-left: auto;
         margin-right: 0;
+    }
+    .tag-select {
+        background-color: rgb(216, 216, 216);
+        color: white;
+        padding: 5px 10px;
+        border-radius: 25px;
+        font-size: 13px;
+        display: flex;
+        align-items: center;
     }
 </style>
