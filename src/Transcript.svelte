@@ -2,7 +2,7 @@
 	import { cueData, currentTime } from "./stores";
 	import { onMount } from "svelte";
 	import Toggle from "svelte-toggle";
-	import { saveFile } from "./util.js";
+	import { saveFile, getSelectionElements } from "./util.js";
 	import { createPopper } from "@popperjs/core";
 	import { appendLabel } from "./Notes.svelte";
 	import TagSelect from "./TagSelect.svelte";
@@ -24,7 +24,9 @@
 
 	onMount(() => {
 		$cueData.forEach((cue) => {
-			const activeNode = <HTMLElement>transcriptContent.childNodes[cue.id - 1];
+			const activeNode = <HTMLElement>(
+				transcriptContent.childNodes[cue.id - 1]
+			);
 			cue.onenter = () => {
 				currentCue = cue.id - 1;
 				const middleOffset =
@@ -47,7 +49,9 @@
 	const downloadTranscript = async () => {
 		let content = "WEBVTT\n";
 		$cueData.forEach((cue) => {
-			const activeNode = <HTMLElement>transcriptContent.childNodes[cue.id - 1];
+			const activeNode = <HTMLElement>(
+				transcriptContent.childNodes[cue.id - 1]
+			);
 			content += `\n${cue.id}\n${new Date(cue.startTime * 1000)
 				.toISOString()
 				.slice(11, -1)} --> ${new Date(cue.endTime * 1000)
@@ -63,7 +67,7 @@
 		mDown = true;
 		// e.preventDefault()
 		const target = <HTMLElement>e.target;
-		const closestP = target.closest("p")
+		const closestP = target.closest("p");
 		// highlight.style.visibility='hidden';
 		if (closestP) {
 			// set the highlight area : [start, end]
@@ -76,7 +80,7 @@
 	const mouseMove = (e: MouseEvent) => {
 		if (mDown) {
 			const target = <HTMLElement>e.target;
-			const closestP = target.closest("p")
+			const closestP = target.closest("p");
 			if (closestP) {
 				end = parseInt(closestP.id.replace("trans", ""));
 			}
@@ -86,29 +90,17 @@
 	const mouseUp = (e: MouseEvent) => {
 		if (mDown) {
 			mDown = false;
-			const selected = window.getSelection();
-			const nodes = [selected.anchorNode, 
-						   selected.focusNode].map((n) => {
-							   const m = <Element>n;
-								console.log(m)
-							   return m.closest('p')
-							})
-			console.log(nodes)
-
-			const endElement = document.getElementById("trans" + String(end));
-			// highlight.style.visibility = "visible";
-			// console.log(highlight);
+			const elements = getSelectionElements(window.getSelection());
 			// show tooltip
 			// TODO popper destroy?
-			createPopper(endElement, highlight, {
+			console.log(<Element>elements[elements.length - 1]);
+			createPopper(<Element>elements[elements.length - 1], highlight, {
 				placement: "bottom-end",
 			});
 		}
 	};
-
 </script>
 
-<!-- <button on:click={()=>appendLabel([4,7], 'red', 'red')}>hihi</button> -->
 <div class="transcript-container" bind:this={transcriptBox}>
 	<div class="settings">
 		<Toggle small label="Edit transcript" bind:toggled={editable} />
@@ -206,5 +198,4 @@
 		visibility: hidden;
 		pointer-events: none;
 	}
-
 </style>
