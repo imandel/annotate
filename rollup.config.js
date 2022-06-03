@@ -7,9 +7,11 @@ import sveltePreprocess from 'svelte-preprocess';
 import typescript from '@rollup/plugin-typescript';
 import css from 'rollup-plugin-css-only';
 import replace from '@rollup/plugin-replace'
-
+import { readdirSync } from 'fs';
 const production = !process.env.ROLLUP_WATCH;
 
+const files = JSON.stringify(readdirSync('./public/example_files').map(path => './example_files/'+path))
+console.log(files)
 function serve() {
 	let server;
 
@@ -41,7 +43,8 @@ export default {
 	},
 	plugins: [
 		replace({
-			'process.env': production ? '"production"' : '"dev"',
+			'process.env.NODE_ENV': production ? '"production"' : '"dev"',
+			'process.env.FILES': production? '"hi"': `'${files}'`
 		  }),
 		svelte({
 			preprocess: sveltePreprocess({ sourceMap: !production }),

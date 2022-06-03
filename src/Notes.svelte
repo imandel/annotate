@@ -40,7 +40,13 @@
         markReplace,
     } from "typewriter-editor/lib/modules/smartEntry";
 
-    window.process = { env: { NODE_ENV: process.env } };
+    window.process = { env: { NODE_ENV: process.env.NODE_ENV } };
+    if (process.env.NODE_ENV == "dev") {
+        $tags = [
+            { label: "cat", color: "teal" },
+            { label: "bat", color: "lavender" },
+        ];
+    }
     const playTs = (ts: string) => {
         if (playingNote) {
             pause();
@@ -80,14 +86,8 @@
     const { active, doc, selection, focus, root, updateEditor } =
         editorStores(editor);
 
-    if (process.env == "dev") {
-        $tags = [
-            { label: "cat", color: "teal" },
-            { label: "bat", color: "lavender" },
-        ];
-    }
     const beforeUnload = (event: BeforeUnloadEvent) => {
-        if (process.env == "production") {
+        if (process.env.NODE_ENV == "production") {
             if ($active.undo) {
                 event.preventDefault();
                 event.returnValue = "";

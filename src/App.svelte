@@ -10,6 +10,13 @@
 
 	let videoFile;
 	let captionsFile;
+
+	if (process.env.NODE_ENV == "dev") {
+		const files = JSON.parse(process.env.FILES)
+		console.log(files)
+        videoFile = files.find((file)=>{return file.endsWith('.mp4')|| file.endsWith('.MP4')})
+		captionsFile = files.find((file)=>{return file.endsWith('.vtt')|| file.endsWith('.VTT')})
+    }
 </script>
 
 

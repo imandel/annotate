@@ -1,7 +1,4 @@
 <script lang="ts">
-	// 	 on:mousedown={(e)=>{if(e.shiftKey){selecting=true; $curKeypoint.id = getId('transcript_')}}}
-	//  on:mousemove={selection}
-	//  on:mouseup={(e)=>{if(selecting){selection(e);selecting=false; window.getSelection().empty()}}}
 	import { cueData, currentTime } from "./stores";
 	import { onMount } from "svelte";
 	import Toggle from "svelte-toggle";
@@ -11,7 +8,7 @@
 	import TagSelect from "./TagSelect.svelte";
 
 	// hack to keep popper running
-	window.process = { env: { NODE_ENV: process.env } };
+	window.process = { env: { NODE_ENV: process.env.NODE_ENV } };
 
 	let transcriptBox: HTMLDivElement;
 	let transcriptContent: HTMLDivElement;
@@ -89,6 +86,15 @@
 	const mouseUp = (e: MouseEvent) => {
 		if (mDown) {
 			mDown = false;
+			const selected = window.getSelection();
+			const nodes = [selected.anchorNode, 
+						   selected.focusNode].map((n) => {
+							   const m = <Element>n;
+								console.log(m)
+							   return m.closest('p')
+							})
+			console.log(nodes)
+
 			const endElement = document.getElementById("trans" + String(end));
 			// highlight.style.visibility = "visible";
 			// console.log(highlight);
@@ -112,7 +118,7 @@
 	</div>
 	<div
 		bind:this={highlight}
-		class="tooltip"
+		class="transcript-tooltip"
 		data-popper-reference-hidden
 		data-popper-arrow
 	>
@@ -186,7 +192,7 @@
 		width: 100%;
 		background-color: red;
 	}
-	.tooltip {
+	.transcript-tooltip {
 		background-color: rgb(216, 216, 216);
 		color: white;
 		padding: 5px 10px;
@@ -196,7 +202,7 @@
 		align-items: center;
 	}
 	/* Hide the popper when the reference is hidden */
-	.tooltip[data-popper-reference-hidden] {
+	.transcript-tooltip[data-popper-reference-hidden] {
 		visibility: hidden;
 		pointer-events: none;
 	}
