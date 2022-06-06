@@ -39,7 +39,7 @@
 		<Transcript />
 	{/if}
 </div>
-<button on:click={clip}>clip</button>
+<!-- <button on:click={clip}>clip</button> -->
 <Notes />
 
 <style>

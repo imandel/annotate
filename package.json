@@ -28,8 +28,9 @@
     "@typewriter/delta": "^1.0.2",
     "@typewriter/document": "^0.7.3",
     "moment": "^2.29.1",
+    "rollup": ">=1.20.0 <2.0.0 || >=2.0.0 <3.0.0",
     "svelte-gantt": "^4.0.3-beta",
     "svelte-toggle": "^3.1.0",
-    "typewriter-editor": "link:/Users/ilanmandel/Downloads/temp/typewriter"
+    "typewriter-editor": "github:imandel/typewriter"
   }
 }
