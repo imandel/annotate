@@ -8,7 +8,7 @@
 	import TagSelect from "./TagSelect.svelte";
 
 	// hack to keep popper running
-	window.process = { env: { NODE_ENV: process.env.NODE_ENV } };
+	window.process = { env: { NODE_ENV: import.meta.env.MODE } };
 
 	let transcriptBox: HTMLDivElement;
 	let transcriptContent: HTMLDivElement;
