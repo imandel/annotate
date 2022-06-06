@@ -1,7 +1,6 @@
 <script lang="ts">
-
+	import {  videoFile } from "./stores";
 	let files: FileList;
-	export let videoFile: string = undefined;
 	export let captionsFile: string = undefined;
 	let fileSpan = [];
 
@@ -11,8 +10,8 @@
 		for (const file of files) {
 			// console.log(`${file.name}: ${file.size} bytes`);
 			if (file.type == 'video/mp4') {
-				videoFile = URL.createObjectURL(file);
-				console.log(videoFile);
+				$videoFile = URL.createObjectURL(file);
+				console.log($videoFile);
 			}
 			if (file.type == 'text/vtt' || file.name.endsWith('.vtt')) {
 				captionsFile = URL.createObjectURL(file);

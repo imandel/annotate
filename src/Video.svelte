@@ -37,9 +37,9 @@
 </script>
 
 <script lang="ts">
-    import { cueData, duration, currentTime, paused } from "./stores";
+    import { cueData, duration, currentTime, paused, videoFile } from "./stores";
     // let files: FileList;
-    export let videoFile = undefined;
+    // export let $videoFile = undefined;
     export let captionsFile = undefined;
 
     let track: HTMLTrackElement;
@@ -51,7 +51,7 @@
     };
 </script>
 
-{#if videoFile}
+{#if $videoFile}
     <div id="vid-div">
         <div id="vid-container">
             <video
@@ -61,7 +61,7 @@
                 bind:duration={$duration}
                 bind:paused={$paused}
             >
-                <source src={videoFile} type="video/mp4" />
+                <source src={$videoFile} type="video/mp4" />
                 <track
                     default
                     bind:this={track}
