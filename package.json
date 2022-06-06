@@ -2,36 +2,35 @@
   "name": "svelte-app",
   "version": "1.0.0",
   "private": true,
+  "type": "module",
   "scripts": {
-    "build": "rollup -c",
-    "dev": "rollup -c -w",
-    "start": "sirv public --no-clear",
+    "build": "vite build",
+    "dev": "vite",
+    "start": "vite preview",
     "check": "svelte-check --tsconfig ./tsconfig.json"
   },
   "devDependencies": {
-    "@rollup/plugin-commonjs": "^17.0.0",
-    "@rollup/plugin-node-resolve": "^11.0.0",
-    "@rollup/plugin-typescript": "^8.0.0",
+    "@sveltejs/vite-plugin-svelte": "1.0.0-next.47",
     "@tsconfig/svelte": "^2.0.1",
-    "rollup": "^2.3.4",
-    "rollup-plugin-css-only": "^3.1.0",
-    "rollup-plugin-livereload": "^2.0.0",
-    "rollup-plugin-svelte": "^7.0.0",
-    "rollup-plugin-terser": "^7.0.0",
     "svelte": "^3.0.0",
     "svelte-check": "^2.0.0",
     "svelte-preprocess": "^4.0.0",
     "tslib": "^2.0.0",
-    "typescript": "^4.0.0"
+    "typescript": "^4.0.0",
+    "vite": "^2.9.9",
+    "vite-plugin-cross-origin-isolation": "^0.1.6"
   },
   "dependencies": {
+    "@ffmpeg/core": "^0.10.0",
+    "@ffmpeg/ffmpeg": "^0.10.1",
     "@popperjs/core": "^2.11.4",
     "@rollup/plugin-replace": "^4.0.0",
+    "@typewriter/delta": "^1.0.2",
     "@typewriter/document": "^0.7.3",
     "moment": "^2.29.1",
-    "sirv-cli": "^2.0.0",
+    "rollup": ">=1.20.0 <2.0.0 || >=2.0.0 <3.0.0",
     "svelte-gantt": "^4.0.3-beta",
     "svelte-toggle": "^3.1.0",
-    "typewriter-editor": "^0.7.12"
+    "typewriter-editor": "github:imandel/typewriter"
   }
 }
