@@ -13,6 +13,15 @@ export const ts = format({
   render: (_, children) => h('span', { class: 'timestamp' }, children),
 });
 
+export const parseRangeString = (timeString: string) => {
+  if (timeString.includes('-')) {
+    const [start, end] = timeString.substring(2, timeString.length - 1).split('-')
+    return { start: parseFloat(start), end: parseFloat(end) }
+  } else {
+    return {start: parseFloat(timeString.substring(2, timeString.length - 1)), end: undefined}
+  }
+}
+
 
 // TODO popperjs instead of css tooltip?
 export const label = embed({
@@ -21,7 +30,7 @@ export const label = embed({
   commands: editor => (label: string, color: string) => editor.insert({ label, color }),
   render: (tag: AttributeMap) => {
     const { label, color } = tag;
-    return h('span', {class:'text-circle tooltip', "data-text":label, style:`background-color: ${color}`}, )
+    return h('span', { class: 'text-circle tooltip', "data-text": label, style: `background-color: ${color}` },)
     // ]);
   },
 });
@@ -40,7 +49,7 @@ const tsReplacements: Replacement[] = [
 
 ];
 // TODO ts throws error on string
-const parseTimes = (timeString:any) => {
+const parseTimes = (timeString: any) => {
   return +(timeString.split(':').reduce((acc: number, time: number) => (60 * acc) + +time))
 }
 
