@@ -8,6 +8,8 @@ import typescript from '@rollup/plugin-typescript';
 import css from 'rollup-plugin-css-only';
 import replace from '@rollup/plugin-replace'
 import { readdirSync } from 'fs';
+import json from '@rollup/plugin-json';
+// import crossOriginIsolation from 'vite-plugin-cross-origin-isolation'
 const production = !process.env.ROLLUP_WATCH;
 
 const files = JSON.stringify(readdirSync('./public/example_files').map(path => './example_files/'+path))
@@ -42,6 +44,8 @@ export default {
 		file: 'public/build/bundle.js'
 	},
 	plugins: [
+		// crossOriginIsolation(),
+		json(),
 		replace({
 			'process.env.NODE_ENV': production ? '"production"' : '"dev"',
 			'process.env.FILES': production? '"hi"': `'${files}'`

@@ -14,10 +14,11 @@
 	let transcriptContent: HTMLDivElement;
 	let currentCue = 0;
 	let editable = false;
+	let popper;
+	let mousedown = false;
 	// the highlighted range
-	let start = 0;
-	let end = 0;
-	let mDown = false;
+	// let start = 0;
+	// let end = 0;
 	let highlight: HTMLDivElement;
 	let color = "#fff";
 	// let addTag = false;
@@ -40,11 +41,11 @@
 		});
 	});
 
-	function change_highlightarea() {
-		// do highlight
-	}
+	// function change_highlightarea() {
+	// 	// do highlight
+	// }
 
-	$: start, end, change_highlightarea();
+	// $: start, end, change_highlightarea();
 
 	const downloadTranscript = async () => {
 		let content = "WEBVTT\n";
@@ -63,40 +64,17 @@
 		saveFile(new Blob([content]), "transcript.vtt");
 	};
 
-	const mouseDown = (e: MouseEvent) => {
-		mDown = true;
-		// e.preventDefault()
-		const target = <HTMLElement>e.target;
-		const closestP = target.closest("p");
-		// highlight.style.visibility='hidden';
-		if (closestP) {
-			// set the highlight area : [start, end]
-			start = parseInt(closestP.id.replace("trans", ""));
-			// if only one section is selected, set end to start;
-			end = start;
-		}
-	};
-
-	const mouseMove = (e: MouseEvent) => {
-		if (mDown) {
-			const target = <HTMLElement>e.target;
-			const closestP = target.closest("p");
-			if (closestP) {
-				end = parseInt(closestP.id.replace("trans", ""));
-			}
-		}
-	};
-
 	const mouseUp = (e: MouseEvent) => {
-		if (mDown) {
-			mDown = false;
-			const elements = getSelectionElements(window.getSelection());
+		const elements = getSelectionElements(window.getSelection());
+		if (mousedown && !editable) {
 			// show tooltip
 			// TODO popper destroy?
 			console.log(<Element>elements[elements.length - 1]);
-			createPopper(<Element>elements[elements.length - 1], highlight, {
+			popper = createPopper(<Element>elements[elements.length - 1], highlight, {
 				placement: "bottom-end",
 			});
+			mousedown = false;
+			highlight.style.display=''
 		}
 	};
 </script>
@@ -114,20 +92,19 @@
 		data-popper-reference-hidden
 		data-popper-arrow
 	>
-		<TagSelect />
+		<TagSelect callback={(_label, _color) => {
+			appendLabel([10,11], _label, _color)
+			if(popper) {highlight.style.display='none'}
+			}}/>
 	</div>
 	<div
 		bind:this={transcriptContent}
-		on:mousedown={mouseDown}
 		on:mouseup={mouseUp}
-		on:mousemove={mouseMove}
+		on:mousedown={()=>{mousedown=true}}
 	>
 		{#each $cueData as cue, index}
 			<p
 				class:activeLine={index === currentCue}
-				style={index >= start && index <= end
-					? "background-color:" + color + ";"
-					: ""}
 				on:click={() => {
 					if (!editable) $currentTime = cue.startTime;
 				}}

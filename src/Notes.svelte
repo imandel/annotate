@@ -26,6 +26,7 @@
         smartEntry,
         editorStores,
     } from "typewriter-editor";
+    import { onMount } from "svelte";
     import Root from "typewriter-editor/lib/Root.svelte";
     import Toolbar from "typewriter-editor/lib/Toolbar.svelte";
     import BubbleMenu from "typewriter-editor/lib/BubbleMenu.svelte";
@@ -39,9 +40,9 @@
         defaultHandlers,
         markReplace,
     } from "typewriter-editor/lib/modules/smartEntry";
-
+    
     window.process = { env: { NODE_ENV: process.env.NODE_ENV } };
-    if (process.env.NODE_ENV == "dev") {
+    if (process.env.NODE_ENV == "development") {
         $tags = [
             { label: "cat", color: "teal" },
             { label: "bat", color: "lavender" },
