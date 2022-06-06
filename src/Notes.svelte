@@ -26,7 +26,7 @@
         smartEntry,
         editorStores,
     } from "typewriter-editor";
-    import { onMount } from "svelte";
+    import { onMount, onDestroy } from "svelte";
     import Root from "typewriter-editor/lib/Root.svelte";
     import Toolbar from "typewriter-editor/lib/Toolbar.svelte";
     import BubbleMenu from "typewriter-editor/lib/BubbleMenu.svelte";
@@ -40,7 +40,7 @@
         defaultHandlers,
         markReplace,
     } from "typewriter-editor/lib/modules/smartEntry";
-    import { Jumper } from 'svelte-loading-spinners'
+    import { Jumper } from "svelte-loading-spinners";
     import { createFFmpeg, fetchFile } from "@ffmpeg/ffmpeg";
 
     let playingNote = false;
@@ -49,6 +49,9 @@
     const ffmpeg = createFFmpeg({ log: true });
     onMount(async () => {
         await ffmpeg.load();
+    });
+    onDestroy(async () => {
+        ffmpeg.exit();
     });
 
     const clip = async (timeString: string) => {
@@ -220,12 +223,17 @@
                 </button>
                 {#if active.ts.includes("-")}
                     {#if downloadingVid}
-                    <Jumper size="34" color="#e6e4fe" unit="px" duration="1s"></Jumper>
+                        <Jumper
+                            size="34"
+                            color="#e6e4fe"
+                            unit="px"
+                            duration="1s"
+                        />
                     {:else}
                         <button
                             class="menu-button material-icons"
-                            on:click={() =>
-                                clip(active.ts)}>file_download</button
+                            on:click={() => clip(active.ts)}
+                            >file_download</button
                         >
                     {/if}
                 {/if}
@@ -302,6 +310,7 @@
         padding: 8px 16px;
         border-radius: 3px;
         min-height: 100px;
+        max-height: 30vh;
         overflow-y: auto;
         border: 1px solid #ced4da;
         transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
