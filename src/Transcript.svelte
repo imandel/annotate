@@ -15,6 +15,7 @@
 	let currentCue = 0;
 	let editable = false;
 	let popper;
+	let elements: HTMLElement[];
 	let mousedown = false;
 	// the highlighted range
 	// let start = 0;
@@ -65,16 +66,31 @@
 	};
 
 	const mouseUp = (e: MouseEvent) => {
-		const elements = getSelectionElements(window.getSelection());
+		elements = <HTMLElement[]>getSelectionElements(window.getSelection());
 		if (mousedown && !editable) {
 			// show tooltip
 			// TODO popper destroy?
-			console.log(<Element>elements[elements.length - 1]);
-			popper = createPopper(<Element>elements[elements.length - 1], highlight, {
+			console.log(elements[elements.length - 1]);
+			popper = createPopper(elements[elements.length - 1], highlight, {
 				placement: "bottom-end",
 			});
 			mousedown = false;
-			highlight.style.display=''
+			highlight.style.display = "";
+		}
+	};
+
+	const tagSelectCallback = (_label: string, _color: string) => {
+		appendLabel(
+			[
+				parseFloat(elements[0].dataset.starttime),
+				parseFloat(elements[elements.length - 1].dataset.endtime),
+			],
+			_label,
+			_color
+		);
+		elements = [];
+		if (popper) {
+			highlight.style.display = "none";
 		}
 	};
 </script>
@@ -92,15 +108,14 @@
 		data-popper-reference-hidden
 		data-popper-arrow
 	>
-		<TagSelect callback={(_label, _color) => {
-			appendLabel([10,11], _label, _color)
-			if(popper) {highlight.style.display='none'}
-			}}/>
+		<TagSelect callback={tagSelectCallback} />
 	</div>
 	<div
 		bind:this={transcriptContent}
 		on:mouseup={mouseUp}
-		on:mousedown={()=>{mousedown=true}}
+		on:mousedown={() => {
+			mousedown = true;
+		}}
 	>
 		{#each $cueData as cue, index}
 			<p

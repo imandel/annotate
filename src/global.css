@@ -153,7 +153,7 @@ button:focus {
 	margin: 0 5px;
 	border-radius: 50%;
 	display: inline-block;
-	z-index: -1;
+	z-index: 1;
 }
 .tooltip {
 	position:relative; /* making the .tooltip span a container for the tooltip text */
@@ -183,7 +183,8 @@ button:focus {
   
 	display:none; /*hide by default */
   }
-
+/* TODO hover breaks sometimes? */
   .tooltip:hover:before {
 	display:block;
+	z-index: 1;
   }

@@ -358,6 +358,7 @@
     }
     :global(.bubble-menu.active) {
         transition: all 75ms ease-out;
+        z-index: 2;
     }
     .arrow {
         display: block;
