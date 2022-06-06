@@ -10,10 +10,12 @@ specifiers:
   '@typewriter/delta': ^1.0.2
   '@typewriter/document': ^0.7.3
   moment: ^2.29.1
+  path-browserify: ^1.0.1
   rollup: '>=1.20.0 <2.0.0 || >=2.0.0 <3.0.0'
   svelte: ^3.0.0
   svelte-check: ^2.0.0
   svelte-gantt: ^4.0.3-beta
+  svelte-loading-spinners: ^0.1.7
   svelte-preprocess: ^4.0.0
   svelte-toggle: ^3.1.0
   tslib: ^2.0.0
@@ -30,6 +32,7 @@ dependencies:
   '@typewriter/delta': 1.0.2
   '@typewriter/document': 0.7.3
   moment: 2.29.3
+  path-browserify: 1.0.1
   rollup: 2.75.5
   svelte-gantt: 4.0.3-beta_moment@2.29.3
   svelte-toggle: 3.1.0
@@ -40,6 +43,7 @@ devDependencies:
   '@tsconfig/svelte': 2.0.1
   svelte: 3.48.0
   svelte-check: 2.7.1_svelte@3.48.0
+  svelte-loading-spinners: 0.1.7
   svelte-preprocess: 4.10.6_rxzurg3hjloskwsrdpptpplucy
   tslib: 2.4.0
   typescript: 4.7.2
@@ -751,6 +755,10 @@ packages:
       callsites: 3.1.0
     dev: true
 
+  /path-browserify/1.0.1:
+    resolution: {integrity: sha512-b7uo2UCUOYZcnF/3ID0lulOJi/bafxa1xPe7ZPsammBSpjSWQkjNxlt635YGS2MiR9GjvuXCtz2emr3jbsz98g==}
+    dev: false
+
   /path-is-absolute/1.0.1:
     resolution: {integrity: sha512-AVbw3UJ2e9bq64vSaS9Am0fje1Pa8pbGqTTsmXfaIiMpnr5DlDhfJOuLj9Sf95ZPVDAUerDfEk88MPmPe7UCQg==}
     engines: {node: '>=0.10.0'}
@@ -954,6 +962,10 @@ packages:
       svelte: '>=3.19.0'
     dependencies:
       svelte: 3.48.0
+    dev: true
+
+  /svelte-loading-spinners/0.1.7:
+    resolution: {integrity: sha512-EKCId1DjVL2RSUVJJsvtNcqQHox03XIgh4xh/4p7r6ST7d8mut6INY9/LqK4A17PFU64+3quZmqiSfOlf480CA==}
     dev: true
 
   /svelte-preprocess/4.10.6_rxzurg3hjloskwsrdpptpplucy:

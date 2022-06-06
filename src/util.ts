@@ -15,7 +15,6 @@ export async function saveFile(data: Blob, fileName: string) {
 export const randomColor = () => '#' + Math.floor(Math.random() * 16777215).toString(16);
 
 
-
 export const getSelectionElements = (selection: Selection) => {
     const { anchorNode, focusNode } = selection;
     const anchorP = getPTag(anchorNode)

@@ -6,10 +6,7 @@
 	import Input from "./Input.svelte";
 	import Notes from "./Notes.svelte";
 	import Labels from "./Labels.svelte";
-	// import { onMount } from "svelte";
-	// import Gantt from "./Gantt.svelte";
 
-	// let videoFile: string;
 	let captionsFile: string;
 
 	if (import.meta.env.MODE == "development") {
@@ -17,17 +14,6 @@
 		captionsFile = import.meta.env.VITE_TRANSCRIPT_FILE
     }
 
-	// import { createFFmpeg, fetchFile } from '@ffmpeg/ffmpeg'
-    // const ffmpeg = createFFmpeg({ log: true, progress: p => console.log(p),  corePath: "https://unpkg.com/@ffmpeg/core@0.10.0/dist/ffmpeg-core.js", });
-    // onMount(async ()=>{
-    //     await ffmpeg.load();
-    // })
-
-
-    const clip = async () => {
-		// const data = await fetchFile(videoFile);
-		// console.log(data);
-    }
 </script>
 
 
@@ -39,7 +25,6 @@
 		<Transcript />
 	{/if}
 </div>
-<!-- <button on:click={clip}>clip</button> -->
 <Notes />
 
 <style>
@@ -48,7 +33,4 @@
 		display: flex;
 		height: 40vh;
 	}
-	/* 
- bind:videoFile
-    bind:captionsFile */
 </style>

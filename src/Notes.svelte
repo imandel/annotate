@@ -30,17 +30,54 @@
     import Root from "typewriter-editor/lib/Root.svelte";
     import Toolbar from "typewriter-editor/lib/Toolbar.svelte";
     import BubbleMenu from "typewriter-editor/lib/BubbleMenu.svelte";
-    import { ts, tsReplace, label } from "./customFormatting";
+    import { ts, tsReplace, label, parseRangeString } from "./customFormatting";
     import { play, pause, playUntil } from "./Video.svelte";
-    import { currentTime, tags } from "./stores";
+    import { currentTime, tags, videoFile } from "./stores";
     import { saveFile } from "./util.js";
     import TagSelect from "./TagSelect.svelte";
-    let playingNote = false;
+    import path from "path";
     import {
         defaultHandlers,
         markReplace,
     } from "typewriter-editor/lib/modules/smartEntry";
-    
+    import { Jumper } from 'svelte-loading-spinners'
+    import { createFFmpeg, fetchFile } from "@ffmpeg/ffmpeg";
+
+    let playingNote = false;
+    let downloadingVid = false;
+
+    const ffmpeg = createFFmpeg({ log: true });
+    onMount(async () => {
+        await ffmpeg.load();
+    });
+
+    const clip = async (timeString: string) => {
+        downloadingVid = true;
+        const { start, end } = parseRangeString(timeString);
+        const data = await fetchFile($videoFile);
+        console.log(data);
+        ffmpeg.FS("writeFile", "srcfile.mp4", data);
+        await ffmpeg.run(
+            "-i",
+            "srcfile.mp4",
+            "-ss",
+            start.toString(),
+            "-to",
+            end.toString(),
+            "-c",
+            "copy",
+            "clip.mp4"
+        );
+        const outData = ffmpeg.FS("readFile", "clip.mp4");
+        downloadingVid = false;
+        await saveFile(
+            new Blob([outData.buffer]),
+            `${path.parse($videoFile).name}_${start}_${end}`.replace(".", "m") +
+                ".mp4"
+        );
+        return;
+    };
+
     window.process = { env: { NODE_ENV: import.meta.env.MODE } };
     if (import.meta.env.MODE == "development") {
         $tags = [
@@ -54,15 +91,12 @@
             playingNote = false;
         } else {
             playingNote = true;
-            if (ts.includes("-")) {
-                let [start, end] = ts.split("-");
-
-                $currentTime = parseFloat(start.substring(2));
-                playUntil(parseFloat(end.slice(0, -1))).then(
-                    () => (playingNote = false)
-                );
+            const { start, end } = parseRangeString(ts);
+            if (end) {
+                $currentTime = start;
+                playUntil(end).then(() => (playingNote = false));
             } else {
-                $currentTime = parseFloat(ts.substring(2, ts.length - 1));
+                $currentTime = start;
                 play();
             }
         }
@@ -71,7 +105,7 @@
     editor = window.editor = new Editor({
         modules: {
             placeholder: placeholder(
-                "When the video loads try writing @now or @(1:23)"
+                "When the video loads try writing @now, @(1:23), or @(10.5-20.23)"
             ),
             smartEntry: smartEntry([
                 ...defaultHandlers,
@@ -181,9 +215,20 @@
                     {#if playingNote}
                         pause
                     {:else}
-                    play_arrow
+                        play_arrow
                     {/if}
                 </button>
+                {#if active.ts.includes("-")}
+                    {#if downloadingVid}
+                    <Jumper size="34" color="#e6e4fe" unit="px" duration="1s"></Jumper>
+                    {:else}
+                        <button
+                            class="menu-button material-icons"
+                            on:click={() =>
+                                clip(active.ts)}>file_download</button
+                        >
+                    {/if}
+                {/if}
             {/if}
         </div>
     {:else}

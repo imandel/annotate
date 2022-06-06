@@ -20,7 +20,7 @@
 	// let start = 0;
 	// let end = 0;
 	let highlight: HTMLDivElement;
-	let color = "#fff";
+	// let color = "#fff";
 	// let addTag = false;
 
 	onMount(() => {
