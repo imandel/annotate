@@ -6,7 +6,7 @@
     // TODO replace randomColor() with nice colorpallete chromajs
     const addLabel = () => {
         if (newLabel) {
-            $tags = [...$tags, { label: newLabel, color: randomColor() }];
+            $tags[newLabel] = { label: newLabel, color: randomColor(), idxs: new Set([]) };
             newLabel = "";
         }
     };

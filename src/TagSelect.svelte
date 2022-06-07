@@ -18,7 +18,7 @@
     //     }
 </script>
 
-{#each $tags as tag}
+{#each Object.values($tags) as tag}
     <span
         class="liner-circle"
         style="background-color:{tag.color}"

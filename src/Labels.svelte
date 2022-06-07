@@ -7,8 +7,8 @@
 </script>
 <span style="margin:0 0 0.5em 0;"><LabelInput><button slot='add'>+</button></LabelInput></span>
     <div class="tagChecks">
-        {#if $tags.length}
-            {#each $tags as tag}
+        {#if Object.keys($tags).length}
+            {#each Object.values($tags) as tag}
                 <div class="check-container" style="background-color: {tag.color};">
                     <input
                         type="checkbox"

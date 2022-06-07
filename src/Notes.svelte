@@ -46,7 +46,7 @@
     let playingNote = false;
     let downloadingVid = false;
 
-    const ffmpeg = createFFmpeg({ log: true });
+    const ffmpeg = createFFmpeg({ log: false });
     onMount(async () => {
         await ffmpeg.load();
     });
@@ -83,10 +83,11 @@
 
     window.process = { env: { NODE_ENV: import.meta.env.MODE } };
     if (import.meta.env.MODE == "development") {
-        $tags = [
-            { label: "cat", color: "teal" },
-            { label: "bat", color: "lavender" },
-        ];
+        $tags = {
+            "cat": { label: "cat", color: "teal", idxs: new Set() },
+            "bat":{ label: "bat", color: "lavender", idxs: new Set() },
+
+        };
     }
     const playTs = (ts: string) => {
         if (playingNote) {
