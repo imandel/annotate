@@ -13,6 +13,7 @@ specifiers:
   path-browserify: ^1.0.1
   rollup: '>=1.20.0 <2.0.0 || >=2.0.0 <3.0.0'
   svelte: ^3.0.0
+  svelte-actions: ^0.2.2
   svelte-check: ^2.0.0
   svelte-gantt: ^4.0.3-beta
   svelte-loading-spinners: ^0.1.7
@@ -34,6 +35,7 @@ dependencies:
   moment: 2.29.3
   path-browserify: 1.0.1
   rollup: 2.75.5
+  svelte-actions: 0.2.2
   svelte-gantt: 4.0.3-beta_moment@2.29.3
   svelte-toggle: 3.1.0
   typewriter-editor: github.com/imandel/typewriter/0a1dfa5669fb4de3c719e65dbab7c49d37630dd1_svelte@3.48.0
@@ -917,6 +919,10 @@ packages:
     resolution: {integrity: sha512-ot0WnXS9fgdkgIcePe6RHNk1WA8+muPa6cSjeR3V8K27q9BB1rTE3R1p7Hv0z1ZyAc8s6Vvv8DIyWf681MAt0w==}
     engines: {node: '>= 0.4'}
     dev: true
+
+  /svelte-actions/0.2.2:
+    resolution: {integrity: sha512-RxaonmXnY/LC8WwWVK+qYKZ0W8gTi2EQ6Nu+NtvEPVuYSpFWr1oa3lNtvn9hGmevFpmk1HiMfayLtLzAgbmugQ==}
+    dev: false
 
   /svelte-check/2.7.1_svelte@3.48.0:
     resolution: {integrity: sha512-vHVu2+SQ6ibt77iTQaq2oiOjBgGL48qqcg0ZdEOsP5pPOjgeyR9QbnaEdzdBs9nsVYBc/42haKtzb2uFqS8GVw==}

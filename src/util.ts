@@ -37,13 +37,26 @@ const getPTag = (node: Node) => {
         return node.parentElement.closest('p')
     }
 }
-const getNodeRange = (start: Node, end: Node) => {
+export const getNodeRange = (start: Node, end: Node) => {
     if (start && end) {
         let nodes = [start];
         let cur = start.nextSibling;
         while (cur !== end.nextSibling) {
             nodes.push(cur)
             cur = cur.nextSibling;
+        }
+        return nodes
+    }
+}
+
+// TODO sort so you can select either direction
+export const getElementRange = (start: HTMLElement, end: HTMLElement) => {
+    if (start && end) {
+        let nodes = [start];
+        let cur = start.nextElementSibling;
+        while (cur !== end.nextElementSibling) {
+            nodes.push(<HTMLElement>cur)
+            cur = cur.nextElementSibling;
         }
         return nodes
     }

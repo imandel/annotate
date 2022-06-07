@@ -1,8 +1,8 @@
 <script lang="ts">
-	import { cueData, currentTime } from "./stores";
+	import { cueData, currentTime, selectedTags } from "./stores";
 	import { onMount } from "svelte";
 	import Toggle from "svelte-toggle";
-	import { saveFile, getSelectionElements } from "./util.js";
+	import { saveFile, getElementRange } from "./util.js";
 	import { createPopper } from "@popperjs/core";
 	import { appendLabel } from "./Notes.svelte";
 	import TagSelect from "./TagSelect.svelte";
@@ -14,10 +14,14 @@
 	let transcriptContent: HTMLDivElement;
 	let currentCue = 0;
 	let editable = false;
-	let popper;
-	let elements: HTMLElement[];
+	let elements: HTMLElement[] = [];
 	let mousedown = false;
 	let highlight: HTMLDivElement;
+	let start: HTMLElement;
+	let end: HTMLElement;
+	$: elements.forEach((element) => {
+		element.querySelector("td.content").classList.add("active-highlight");
+	});
 
 	onMount(() => {
 		$cueData.forEach((cue) => {
@@ -37,11 +41,28 @@
 		});
 	});
 
-	// function change_highlightarea() {
-	// 	// do highlight
-	// }
+	const onMouseDown = (e: MouseEvent) => {
+		// if(e.shiftKey)
+		start = (<HTMLElement>e.target).closest("tr");
+		mousedown = true;
+	};
+	const onMouseUp = (e: MouseEvent) => {
+		if (mousedown && !editable) {
+			end = (<HTMLElement>e.target).closest("tr");
+			createPopper(elements[elements.length - 1], highlight, {
+				placement: "bottom-end",
+			});
+			highlight.style.display = "";
+			mousedown = false;
+		}
+	};
 
-	// $: start, end, change_highlightarea();
+	const onMouseMove = (e: MouseEvent) => {
+		if (mousedown) {
+			end = (<HTMLElement>e.target).closest("tr");
+			elements = getElementRange(start, end);
+		}
+	};
 
 	const downloadTranscript = async () => {
 		let content = "WEBVTT\n";
@@ -60,19 +81,6 @@
 		saveFile(new Blob([content]), "transcript.vtt");
 	};
 
-	const mouseUp = (e: MouseEvent) => {
-		elements = <HTMLElement[]>getSelectionElements(window.getSelection());
-		if (mousedown && !editable) {
-			// show tooltip
-			// TODO popper destroy?
-			popper = createPopper(elements[elements.length - 1], highlight, {
-				placement: "bottom-end",
-			});
-			mousedown = false;
-			highlight.style.display = "";
-		}
-	};
-
 	const tagSelectCallback = (_label: string, _color: string) => {
 		appendLabel(
 			[
@@ -82,10 +90,13 @@
 			_label,
 			_color
 		);
+		elements.forEach((element) => {
+			element
+				.querySelector("td.content")
+				.classList.remove("active-highlight");
+		});
 		elements = [];
-		if (popper) {
-			highlight.style.display = "none";
-		}
+		highlight.style.display = "none";
 	};
 </script>
 
@@ -96,6 +107,7 @@
 			>Download</button
 		>
 	</div>
+
 	<div
 		bind:this={highlight}
 		class="transcript-tooltip"
@@ -104,42 +116,64 @@
 	>
 		<TagSelect callback={tagSelectCallback} />
 	</div>
-	<div>
-		<div
+	<div
+		tabindex="0"
+		on:focusin={() => {}}
+		on:blur={() => {
+			document
+				.querySelectorAll(".active-highlight")
+				.forEach((element) =>
+					element.classList.remove("active-highlight")
+				);
+			highlight.style.display = "none";
+			window.getSelection()?.removeAllRanges();
+			// elements = [];
+		}}
+	>
+		<table
 			bind:this={transcriptContent}
-			on:mouseup={mouseUp}
-			on:mousedown={() => {
-				mousedown = true;
-			}}
+			on:mouseup={onMouseUp}
+			on:mousedown={onMouseDown}
+			on:mousemove={onMouseMove}
 		>
 			{#each $cueData as cue, index}
-				<p
-					class:activeLine={index === currentCue}
-					on:click={() => {
-						if (!editable) $currentTime = cue.startTime;
-					}}
+				<tr
 					data-startTime={cue.startTime}
 					data-endTime={cue.endTime}
 					data-idx={index}
-					id={"trans" + index}
 				>
-					<span class="bold"
-						>{new Date(cue.startTime * 1000)
-							.toISOString()
-							.substring(11, 19)}-{new Date(cue.endTime * 1000)
-							.toISOString()
-							.substring(11, 19)}</span
-					>:
-					<span
-						class={editable ? "edit-mode" : "read-mode"}
-						class:editing={editable}
-						contenteditable={editable}
-					>
-						{cue.text}</span
-					>
-				</p>
+					{#each $selectedTags as tag}
+						<td class="marker" style="--tag-color: {tag.color}" />
+					{/each}
+
+					<td class="content">
+						<p
+							class:activeLine={index === currentCue}
+							on:click={() => {
+								if (!editable) $currentTime = cue.startTime;
+							}}
+						>
+							<span class="bold"
+								>{new Date(cue.startTime * 1000)
+									.toISOString()
+									.substring(11, 19)}-{new Date(
+									cue.endTime * 1000
+								)
+									.toISOString()
+									.substring(11, 19)}</span
+							>:
+							<span
+								class={editable ? "edit-mode" : "read-mode"}
+								class:editing={editable}
+								contenteditable={editable}
+							>
+								{cue.text}</span
+							>
+						</p>
+					</td>
+				</tr>
 			{/each}
-		</div>
+		</table>
 	</div>
 </div>
 
@@ -149,6 +183,7 @@
 		padding: 0 0.5em 0.5em 0.5em;
 		display: block;
 		overflow: auto;
+		/* user-select: none; */
 	}
 	.editing {
 		color: #3f2e65;
@@ -183,7 +218,29 @@
 	}
 	/* Hide the popper when the reference is hidden */
 	.transcript-tooltip[data-popper-reference-hidden] {
-		visibility: hidden;
+		/* visibility: hidden; */
 		pointer-events: none;
+		display: none;
+	}
+	.marker {
+		width: 9px;
+		background-color: var(--tag-color);
+		padding: 0px;
+	}
+	table {
+		border: 0;
+		border-spacing: 0px;
+	}
+	td.content {
+		padding-left: 4px;
+	}
+	p {
+		margin: 0.5em 0em 0.5em 0em;
+	}
+	:global(.active-highlight) {
+		background-color: #e6e4fe;
+	}
+	:global(.active-highlight::selection) {
+		background-color: transparent;
 	}
 </style>

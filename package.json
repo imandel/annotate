@@ -31,6 +31,7 @@
     "moment": "^2.29.1",
     "path-browserify": "^1.0.1",
     "rollup": ">=1.20.0 <2.0.0 || >=2.0.0 <3.0.0",
+    "svelte-actions": "^0.2.2",
     "svelte-gantt": "^4.0.3-beta",
     "svelte-toggle": "^3.1.0",
     "typewriter-editor": "github:imandel/typewriter"
