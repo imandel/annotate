@@ -33,6 +33,7 @@
     import { ts, tsReplace, label, parseRangeString } from "./customFormatting";
     import { play, pause, playUntil } from "./Video.svelte";
     import { currentTime, tags, videoFile } from "./stores";
+    import type { Tags } from "./stores";
     import { saveFile } from "./util.js";
     import TagSelect from "./TagSelect.svelte";
     import path from "path";
@@ -84,8 +85,8 @@
     window.process = { env: { NODE_ENV: import.meta.env.MODE } };
     if (import.meta.env.MODE == "development") {
         $tags = {
-            "cat": { label: "cat", color: "teal", idxs: new Set() },
-            "bat":{ label: "bat", color: "lavender", idxs: new Set() },
+            'cat': { label: "cat", color: "teal", idxs: new Set() },
+            'bat':{ label: "bat", color: "lavender", idxs: new Set() },
 
         };
     }
