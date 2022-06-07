@@ -1,8 +1,8 @@
 <script lang="ts">
-    import { tags } from "./stores";
+    import { tags, selectedTags } from "./stores";
     import LabelInput from "./LabelInput.svelte" 
-
-    let selected = [];
+    $: console.log($selectedTags)
+    // let selected = [];
 
 </script>
 <span style="margin:0 0 0.5em 0;"><LabelInput><button slot='add'>+</button></LabelInput></span>
@@ -12,8 +12,8 @@
                 <div class="check-container" style="background-color: {tag.color};">
                     <input
                         type="checkbox"
-                        bind:group={selected}
-                        value={tag.label}
+                        bind:group={$selectedTags}
+                        value={tag}
                         id={tag.label}
                     />
                     <span><label for={tag.label}>{tag.label}</label></span>
