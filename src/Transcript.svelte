@@ -1,5 +1,6 @@
 <script lang="ts">
-	import { cueData, currentTime, selectedTags, tags } from "./stores";
+	import { cueData, currentTime, tags } from "./stores";
+	import type {Tags} from './stores'
 	import { onMount, tick } from "svelte";
 	import Toggle from "svelte-toggle";
 	import { saveFile, getElementRange } from "./util.js";
@@ -7,10 +8,10 @@
 	import { appendLabel } from "./Notes.svelte";
 	import TagSelect from "./TagSelect.svelte";
 	$: updateMarkers($tags);
-	$: updateMarkers($selectedTags);
 
-	// TODO ts errrors
-	const updateMarkers = async (trigger) => {
+	// TODO make cell unactive on click
+	// TODO sticky headers https://css-tricks.com/position-sticky-and-table-headers/
+	const updateMarkers = async (trigger: Tags) => {
 		tick().then(() => {
 			Object.values(trigger).forEach((tag) => {
 				[...tag.idxs].forEach((idx) => {
@@ -107,7 +108,7 @@
 			_color
 		);
 		elements.forEach((element) => {
-			$tags[_label].idxs.add(element.dataset.idx);
+			$tags[_label].idxs.add(parseInt(element.dataset.idx));
 		});
 		$tags = $tags;
 		elements = [];
@@ -159,7 +160,7 @@
 					data-endTime={cue.endTime}
 					data-idx={index}
 				>
-					{#each $selectedTags as tag}
+					{#each Object.values($tags) as tag}
 						<td
 							class="marker {tag.label}"
 							style="--tag-color: {tag.color}"

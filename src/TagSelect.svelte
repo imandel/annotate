@@ -4,18 +4,13 @@
     import LabelInput from "./LabelInput.svelte";
     export let callback = (_label:string, _color:string) => {}
     let addTag = false;
-
+    
     // TODO clearHighlight
     const clearHighlight = () => {};
     const selected = (label:string, color: string) => {
         callback(label,color)
     }
 
-    // () => {
-    //         // color = c.color;
-    //         console.log(c.color);
-    //         // appendLabel([4, 7], "red", c.color);
-    //     }
 </script>
 
 {#each Object.values($tags) as tag}
