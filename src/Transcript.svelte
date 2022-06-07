@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { cueData, currentTime, tags } from "./stores";
-	import type {Tags} from './stores'
+	import type { Tags } from "./stores";
 	import { onMount, tick } from "svelte";
 	import Toggle from "svelte-toggle";
 	import { saveFile, getElementRange } from "./util.js";
@@ -16,7 +16,7 @@
 			Object.values(trigger).forEach((tag) => {
 				[...tag.idxs].forEach((idx) => {
 					const rowMarker = transcriptContent.querySelector(
-						`tr[data-idx="${idx}"]>td.${tag.label}`
+						`.marker[data-idx="${idx}"].${tag.label}`
 					);
 					rowMarker?.classList.add("marked");
 				});
@@ -33,17 +33,19 @@
 	let elements: HTMLElement[] = [];
 	let mousedown = false;
 	let highlight: HTMLDivElement;
-	let start: HTMLElement;
-	let end: HTMLElement;
+	let start: HTMLDivElement;
+	let end: HTMLDivElement;
 
-	$: elements.forEach((element) => {
-		element.querySelector("td.content").classList.add("active-highlight");
+	$: elements?.forEach((element) => {
+		element.classList.add("active-highlight");
 	});
 
 	onMount(() => {
 		$cueData.forEach((cue) => {
 			const activeNode = <HTMLElement>(
-				transcriptContent.childNodes[cue.id - 1]
+				transcriptContent.querySelector(
+					`div.content[data-idx="${cue.id - 1}"]`
+				)
 			);
 			cue.onenter = () => {
 				currentCue = cue.id - 1;
@@ -59,13 +61,13 @@
 	});
 
 	const onMouseDown = (e: MouseEvent) => {
-		// if(e.shiftKey)
-		start = (<HTMLElement>e.target).closest("tr");
+		start = (<HTMLDivElement>e.target).closest("div.content");
 		mousedown = true;
 	};
 	const onMouseUp = (e: MouseEvent) => {
 		if (mousedown && !editable) {
-			end = (<HTMLElement>e.target).closest("tr");
+			end = (<HTMLDivElement>e.target).closest("div.content");
+			elements = getElementRange(start, end);
 			createPopper(elements[elements.length - 1], highlight, {
 				placement: "bottom-end",
 			});
@@ -76,7 +78,7 @@
 
 	const onMouseMove = (e: MouseEvent) => {
 		if (mousedown) {
-			end = (<HTMLElement>e.target).closest("tr");
+			end = (<HTMLDivElement>e.target).closest("div.content");
 			elements = getElementRange(start, end);
 		}
 	};
@@ -85,7 +87,9 @@
 		let content = "WEBVTT\n";
 		$cueData.forEach((cue) => {
 			const activeNode = <HTMLElement>(
-				transcriptContent.childNodes[cue.id - 1]
+				transcriptContent.querySelector(
+					`div.content[data-idx="${cue.id - 1}"]`
+				)
 			);
 			content += `\n${cue.id}\n${new Date(cue.startTime * 1000)
 				.toISOString()
@@ -115,7 +119,6 @@
 		highlight.style.display = "none";
 	};
 
-	// const updateMarkers = () => {};
 </script>
 
 <div class="transcript-container" bind:this={transcriptBox}>
@@ -148,53 +151,62 @@
 			// elements = [];
 		}}
 	>
-		<table
+		<div
 			bind:this={transcriptContent}
+			class="transcript-content"
+			style="grid-template-columns: repeat({Object.values($tags)
+				.length}, minmax(6px, auto)) 95%;"
 			on:mouseup={onMouseUp}
 			on:mousedown={onMouseDown}
 			on:mousemove={onMouseMove}
 		>
 			{#each $cueData as cue, index}
-				<tr
+				<!-- <tr
 					data-startTime={cue.startTime}
 					data-endTime={cue.endTime}
 					data-idx={index}
-				>
-					{#each Object.values($tags) as tag}
-						<td
-							class="marker {tag.label}"
-							style="--tag-color: {tag.color}"
-						/>
-					{/each}
+				> -->
+				{#each Object.values($tags) as tag}
+					<div
+						class="marker {tag.label}"
+						style="--tag-color: {tag.color}"
+						data-idx={index}
+					/>
+				{/each}
 
-					<td class="content">
-						<p
-							class:activeLine={index === currentCue}
-							on:click={() => {
-								if (!editable) $currentTime = cue.startTime;
-							}}
+				<div
+					class="content"
+					data-starttime={cue.startTime}
+					data-endtime={cue.endTime}
+					data-idx={index}
+				>
+					<p
+						class:activeLine={index === currentCue}
+						on:click={() => {
+							if (!editable) $currentTime = cue.startTime;
+						}}
+					>
+						<span class="bold"
+							>{new Date(cue.startTime * 1000)
+								.toISOString()
+								.substring(11, 19)}-{new Date(
+								cue.endTime * 1000
+							)
+								.toISOString()
+								.substring(11, 19)}</span
+						>:
+						<span
+							class={editable ? "edit-mode" : "read-mode"}
+							class:editing={editable}
+							contenteditable={editable}
 						>
-							<span class="bold"
-								>{new Date(cue.startTime * 1000)
-									.toISOString()
-									.substring(11, 19)}-{new Date(
-									cue.endTime * 1000
-								)
-									.toISOString()
-									.substring(11, 19)}</span
-							>:
-							<span
-								class={editable ? "edit-mode" : "read-mode"}
-								class:editing={editable}
-								contenteditable={editable}
-							>
-								{cue.text}</span
-							>
-						</p>
-					</td>
-				</tr>
+							{cue.text}</span
+						>
+					</p>
+				</div>
+				<!-- </tr> -->
 			{/each}
-		</table>
+		</div>
 	</div>
 </div>
 
@@ -249,16 +261,16 @@
 		/* padding: 0px; */
 	}
 	.marker {
-		width: 9px;
+		/* width: 9px; */
 		/* background-color: var(--tag-color); */
 		padding: 0px;
 	}
-	table {
-		border: 0;
-		border-spacing: 0px;
+	.transcript-content {
+		display: grid;
 	}
-	td.content {
-		padding-left: 4px;
+
+	.content {
+		padding-left: 8px;
 	}
 	p {
 		margin: 0.5em 0em 0.5em 0em;

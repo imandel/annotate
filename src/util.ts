@@ -1,3 +1,4 @@
+
 export async function saveFile(data: Blob, fileName: string) {
     // create a new handle
     const newHandle = await window.showSaveFilePicker({ suggestedName: fileName });
@@ -49,15 +50,18 @@ export const getNodeRange = (start: Node, end: Node) => {
     }
 }
 
-// TODO sort so you can select either direction
-export const getElementRange = (start: HTMLElement, end: HTMLElement) => {
-    if (start && end) {
+export const getElementRange = (start: HTMLDivElement, end: HTMLDivElement) => {
+
+    if (start?.dataset?.starttime && end?.dataset?.starttime) {
+        if(parseFloat(start.dataset.starttime)> parseFloat(end.dataset.starttime)){
+            [start, end] = [end,start]
+        }
         let nodes = [start];
         let cur = start.nextElementSibling;
         while (cur !== end.nextElementSibling) {
-            nodes.push(<HTMLElement>cur)
+            nodes.push(<HTMLDivElement>cur)
             cur = cur.nextElementSibling;
         }
-        return nodes
+        return nodes.filter(node=>node.classList.contains('content'))
     }
 }
