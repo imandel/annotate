@@ -14,11 +14,12 @@ export const ts = format({
 });
 
 export const parseRangeString = (timeString: string) => {
+  const parser = timeString.includes(':') ? parseTimes : parseFloat
   if (timeString.includes('-')) {
     const [start, end] = timeString.substring(2, timeString.length - 1).split('-')
-    return { start: parseFloat(start), end: parseFloat(end) }
+    return { start: parser(start), end: parser(end) }
   } else {
-    return {start: parseFloat(timeString.substring(2, timeString.length - 1)), end: undefined}
+    return { start: parser(timeString.substring(2, timeString.length - 1)), end: undefined }
   }
 }
 
@@ -41,14 +42,13 @@ const tsReplacements: Replacement[] = [
   [/(@\()[\d.-]*\).$/s, capture => ({ ts: capture })],
   [/@now.$/s, _ => ({ ts: `@(${get(currentTime).toFixed(1)})` })],
   [/(@\()[\d.:-]*\).$/s, (capture) => {
-    if (capture.includes('-')) {
-      const [start, end] = capture.split("-");
-      return { ts: `@(${parseTimes(start.slice(2))}-${parseTimes(end.slice(0, -1))})` }
-    } else return { ts: `@(${parseTimes(capture.slice(2, -1))})` }
+    const { start, end } = parseRangeString(capture)
+    return capture.includes('-') ? { ts: `@(${start}-${end})` } : { ts: `@(${parseTimes(capture.slice(2, -1))})` };
   }]
 
 ];
-// TODO ts throws error on string
+
+
 const parseTimes = (timeString: any) => {
   return +(timeString.split(':').reduce((acc: number, time: number) => (60 * acc) + +time))
 }
@@ -57,9 +57,7 @@ export const tsReplace = (editor: Editor, index: number, prefix: string) => {
   return tsReplacements.some(([regexp, getAttributes]) => {
     const match = prefix.match(regexp);
     if (match) {
-      // console.log(match)
       let text = match[0].slice(0, -1);
-      // console.log(text)
       const end = index - (match[0].length - text.length);
       const attributes = getAttributes(text);
       if (!editor.typeset.formats.findByAttributes(attributes)) {

@@ -33,7 +33,6 @@
     import { ts, tsReplace, label, parseRangeString } from "./customFormatting";
     import { play, pause, playUntil } from "./Video.svelte";
     import { currentTime, tags, videoFile } from "./stores";
-    import type { Tags } from "./stores";
     import { saveFile } from "./util.js";
     import TagSelect from "./TagSelect.svelte";
     import path from "path";
@@ -55,6 +54,7 @@
         ffmpeg.exit();
     });
 
+    // TODO move fn to util and await promise on interface
     const clip = async (timeString: string) => {
         downloadingVid = true;
         const { start, end } = parseRangeString(timeString);
@@ -86,7 +86,7 @@
     if (import.meta.env.MODE == "development") {
         $tags = {
             'cat': { label: "cat", color: "teal", idxs: new Set() },
-            'bat':{ label: "bat", color: "lavender", idxs: new Set() },
+            'bat':{ label: "bat", color: "#9d9dff", idxs: new Set() },
 
         };
     }
@@ -135,6 +135,7 @@
             }
         }
     };
+    // TODO download as structured
     const downloadNotes = () => {
         saveFile(new Blob([editor.getHTML()]), "Notes.html");
     };
