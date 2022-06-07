@@ -17,12 +17,7 @@
 	let popper;
 	let elements: HTMLElement[];
 	let mousedown = false;
-	// the highlighted range
-	// let start = 0;
-	// let end = 0;
 	let highlight: HTMLDivElement;
-	// let color = "#fff";
-	// let addTag = false;
 
 	onMount(() => {
 		$cueData.forEach((cue) => {
@@ -70,7 +65,6 @@
 		if (mousedown && !editable) {
 			// show tooltip
 			// TODO popper destroy?
-			console.log(elements[elements.length - 1]);
 			popper = createPopper(elements[elements.length - 1], highlight, {
 				placement: "bottom-end",
 			});
@@ -110,40 +104,42 @@
 	>
 		<TagSelect callback={tagSelectCallback} />
 	</div>
-	<div
-		bind:this={transcriptContent}
-		on:mouseup={mouseUp}
-		on:mousedown={() => {
-			mousedown = true;
-		}}
-	>
-		{#each $cueData as cue, index}
-			<p
-				class:activeLine={index === currentCue}
-				on:click={() => {
-					if (!editable) $currentTime = cue.startTime;
-				}}
-				data-startTime={cue.startTime}
-				data-endTime={cue.endTime}
-				data-idx={index}
-				id={"trans" + index}
-			>
-				<span class="bold"
-					>{new Date(cue.startTime * 1000)
-						.toISOString()
-						.substring(11, 19)}-{new Date(cue.endTime * 1000)
-						.toISOString()
-						.substring(11, 19)}</span
-				>:
-				<span
-					class={editable ? "edit-mode" : "read-mode"}
-					class:editing={editable}
-					contenteditable={editable}
+	<div>
+		<div
+			bind:this={transcriptContent}
+			on:mouseup={mouseUp}
+			on:mousedown={() => {
+				mousedown = true;
+			}}
+		>
+			{#each $cueData as cue, index}
+				<p
+					class:activeLine={index === currentCue}
+					on:click={() => {
+						if (!editable) $currentTime = cue.startTime;
+					}}
+					data-startTime={cue.startTime}
+					data-endTime={cue.endTime}
+					data-idx={index}
+					id={"trans" + index}
 				>
-					{cue.text}</span
-				>
-			</p>
-		{/each}
+					<span class="bold"
+						>{new Date(cue.startTime * 1000)
+							.toISOString()
+							.substring(11, 19)}-{new Date(cue.endTime * 1000)
+							.toISOString()
+							.substring(11, 19)}</span
+					>:
+					<span
+						class={editable ? "edit-mode" : "read-mode"}
+						class:editing={editable}
+						contenteditable={editable}
+					>
+						{cue.text}</span
+					>
+				</p>
+			{/each}
+		</div>
 	</div>
 </div>
 

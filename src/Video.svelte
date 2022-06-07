@@ -9,24 +9,23 @@
     export async function playUntil(timestamp: Number) {
         return new Promise((resolve) => {
             if (player && player.readyState) {
-            player.play();
-            // pause at end timestamp
-            player.ontimeupdate = () => {
-                // TODO cancel if user interacts with video otherwise?
-                // player.onseeking = () => {
-                //     player.ontimeupdate = () => {};
-                //     player.onseeking = () => {};
-                // };
-                if (player.currentTime > timestamp) {
-                    player.pause();
-                    // remove this event handler
-                    player.ontimeupdate = () => {};
-                    resolve(1);
-                }
-            };
-        }
-            
-        })
+                player.play();
+                // pause at end timestamp
+                player.ontimeupdate = () => {
+                    // TODO cancel if user interacts with video otherwise?
+                    // player.onseeking = () => {
+                    //     player.ontimeupdate = () => {};
+                    //     player.onseeking = () => {};
+                    // };
+                    if (player.currentTime > timestamp) {
+                        player.pause();
+                        // remove this event handler
+                        player.ontimeupdate = () => {};
+                        resolve(1);
+                    }
+                };
+            }
+        });
     }
 
     export function pause() {
@@ -37,7 +36,13 @@
 </script>
 
 <script lang="ts">
-    import { cueData, duration, currentTime, paused, videoFile } from "./stores";
+    import {
+        cueData,
+        duration,
+        currentTime,
+        paused,
+        videoFile,
+    } from "./stores";
     // let files: FileList;
     // export let $videoFile = undefined;
     export let captionsFile = undefined;

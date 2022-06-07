@@ -123,7 +123,7 @@
 
     const { active, doc, selection, focus, root, updateEditor } =
         editorStores(editor);
-
+    // $: console.log($active, $doc, $selection, $focus, $root )
     const beforeUnload = (event: BeforeUnloadEvent) => {
         if (import.meta.env.MODE == "production") {
             if ($active.undo) {
