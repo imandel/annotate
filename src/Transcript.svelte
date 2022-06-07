@@ -1,15 +1,30 @@
 <script lang="ts">
-	import { cueData, currentTime, selectedTags } from "./stores";
-	import { onMount } from "svelte";
+	import { cueData, currentTime, selectedTags, tags } from "./stores";
+	import { onMount, tick } from "svelte";
 	import Toggle from "svelte-toggle";
 	import { saveFile, getElementRange } from "./util.js";
 	import { createPopper } from "@popperjs/core";
 	import { appendLabel } from "./Notes.svelte";
 	import TagSelect from "./TagSelect.svelte";
+	$: updateMarkers($tags);
+	$: updateMarkers($selectedTags);
+
+	// TODO ts errrors
+	const updateMarkers = async (trigger) => {
+		tick().then(() => {
+			Object.values(trigger).forEach((tag) => {
+				[...tag.idxs].forEach((idx) => {
+					const rowMarker = transcriptContent.querySelector(
+						`tr[data-idx="${idx}"]>td.${tag.label}`
+					);
+					rowMarker?.classList.add("marked");
+				});
+			});
+		});
+	};
 
 	// hack to keep popper running
 	window.process = { env: { NODE_ENV: import.meta.env.MODE } };
-
 	let transcriptBox: HTMLDivElement;
 	let transcriptContent: HTMLDivElement;
 	let currentCue = 0;
@@ -19,6 +34,7 @@
 	let highlight: HTMLDivElement;
 	let start: HTMLElement;
 	let end: HTMLElement;
+
 	$: elements.forEach((element) => {
 		element.querySelector("td.content").classList.add("active-highlight");
 	});
@@ -91,13 +107,14 @@
 			_color
 		);
 		elements.forEach((element) => {
-			element
-				.querySelector("td.content")
-				.classList.remove("active-highlight");
+			$tags[_label].idxs.add(element.dataset.idx);
 		});
+		$tags = $tags;
 		elements = [];
 		highlight.style.display = "none";
 	};
+
+	// const updateMarkers = () => {};
 </script>
 
 <div class="transcript-container" bind:this={transcriptBox}>
@@ -143,7 +160,10 @@
 					data-idx={index}
 				>
 					{#each $selectedTags as tag}
-						<td class="marker" style="--tag-color: {tag.color}" />
+						<td
+							class="marker {tag.label}"
+							style="--tag-color: {tag.color}"
+						/>
 					{/each}
 
 					<td class="content">
@@ -222,9 +242,14 @@
 		pointer-events: none;
 		display: none;
 	}
+	.marked {
+		/* width: 9px; */
+		background-color: var(--tag-color);
+		/* padding: 0px; */
+	}
 	.marker {
 		width: 9px;
-		background-color: var(--tag-color);
+		/* background-color: var(--tag-color); */
 		padding: 0px;
 	}
 	table {
