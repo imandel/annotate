@@ -57,7 +57,13 @@
 </script>
 
 {#if $videoFile}
-    <div id="vid-div">
+    <div
+        id="vid-div"
+        on:wheel={(e) => {
+            e.preventDefault();
+            $currentTime -= e.deltaY / 10;
+        }}
+    >
         <div id="vid-container">
             <video
                 bind:this={player}
