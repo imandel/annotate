@@ -1,4 +1,5 @@
-
+import { get } from 'svelte/store'
+import { cueData } from './stores';
 export async function saveFile(data: Blob, fileName: string) {
     // create a new handle
     const newHandle = await window.showSaveFilePicker({ suggestedName: fileName });
@@ -53,8 +54,8 @@ export const getNodeRange = (start: Node, end: Node) => {
 export const getElementRange = (start: HTMLDivElement, end: HTMLDivElement) => {
 
     if (start?.dataset?.starttime && end?.dataset?.starttime) {
-        if(parseFloat(start.dataset.starttime)> parseFloat(end.dataset.starttime)){
-            [start, end] = [end,start]
+        if (parseFloat(start.dataset.starttime) > parseFloat(end.dataset.starttime)) {
+            [start, end] = [end, start]
         }
         let nodes = [start];
         let cur = start.nextElementSibling;
@@ -62,6 +63,19 @@ export const getElementRange = (start: HTMLDivElement, end: HTMLDivElement) => {
             nodes.push(<HTMLDivElement>cur)
             cur = cur.nextElementSibling;
         }
-        return nodes.filter(node=>node.classList.contains('content'))
+        return nodes.filter(node => node.classList.contains('content'))
     }
 }
+
+export const getTranscriptIdx = (timestamp: number) => {
+    const cues = [...get(cueData)].map((cue) => { return { startTime: cue.startTime, endTime: cue.endTime, idx: cue.id - 1 } })
+    for (const cue of cues) {
+        if (timestamp >= cue.startTime && timestamp <= cue.endTime) {
+            return cue.idx
+        }
+    }
+    return false;
+}
+
+export const range = (start: number, stop: number, step = 1) =>
+    Array.from({ length: (stop - start) / step + 1 }, (_, i) => start + (i * step))

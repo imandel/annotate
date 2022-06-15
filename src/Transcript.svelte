@@ -118,7 +118,6 @@
 		elements = [];
 		highlight.style.display = "none";
 	};
-
 </script>
 
 <div class="transcript-container" bind:this={transcriptBox}>

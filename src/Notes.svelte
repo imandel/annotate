@@ -33,8 +33,7 @@
     import { ts, tsReplace, parseRangeString } from "./customFormatting";
     import { play, pause, playUntil } from "./Video.svelte";
     import { currentTime, tags, videoFile } from "./stores";
-    import { saveFile } from "./util.js";
-    import TagSelect from "./TagSelect.svelte";
+    import { saveFile, getTranscriptIdx, range } from "./util.js";
     import path from "path";
     import {
         defaultHandlers,
@@ -42,6 +41,7 @@
     } from "typewriter-editor/lib/modules/smartEntry";
     import { Jumper } from "svelte-loading-spinners";
     import { createFFmpeg, fetchFile } from "@ffmpeg/ffmpeg";
+    import { start } from "@popperjs/core";
 
     let playingNote = false;
     let downloadingVid = false;
@@ -158,6 +158,15 @@
 <svelte:window on:beforeunload={beforeUnload} />
 
 <h3>Notes</h3>
+<button
+    on:click={() => {
+        const idx = getTranscriptIdx($currentTime);
+        if (idx) {
+            $tags.cat.idxs.add(idx);
+        }
+        $tags = $tags;
+    }}>get</button
+>
 <div class="toolbar">
     <Toolbar {editor} let:active let:commands>
         <button
@@ -242,7 +251,23 @@
                     <button
                         class="menu-button material-icons label"
                         style="--tag-color: {tag.color}"
-                        on:click={commands.bold}>circle</button
+                        on:click={() => {
+                            editor.toggleTextFormat({
+                                color: tag.color,
+                                label: tag.label,
+                            });
+                            const { start, end } = parseRangeString(active.ts);
+                            const startIdx = getTranscriptIdx(start);
+                            const endIdx = getTranscriptIdx(end);
+                            if (startIdx && endIdx) {
+                                range(startIdx, endIdx).forEach((idx) =>
+                                    $tags[tag.label].idxs.add(idx)
+                                );
+                            } else {
+                                $tags[tag.label].idxs.add(start);
+                            }
+                            $tags = $tags;
+                        }}>circle</button
                     >
                 {/each}
                 {#if active.ts.includes("-")}

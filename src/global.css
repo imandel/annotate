@@ -142,9 +142,14 @@ button:focus {
 
   /* typewriter global css */
   .timestamp {
-	color: rgb(131, 131, 255);
+	color: rgb(0, 0, 172);
 	text-decoration: underline;
 	cursor: pointer;
+}
+.timestamp.label{
+	background-color: var(--tag-color);
+	border-radius: 10px;
+    padding: 1px 3px 1px 3px;
 }
 
   .text-circle {

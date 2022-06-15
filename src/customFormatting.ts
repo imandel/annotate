@@ -10,8 +10,28 @@ export const ts = format({
   name: 'ts',
   selector: 'span.timestamp',
   greedy: false,
-  render: (_, children) => h('span', { class: 'timestamp' }, children),
+  commands: editor => (label:string, color:string) => editor.toggleTextFormat({color, label}),
+  render: (timeSpan: AttributeMap, children) => {
+    const {ts, color, label}= timeSpan
+    return h('span', { class: `timestamp ${label? 'label':''}`, style: label? `--tag-color: ${color}`: '' }, children)},
 });
+
+// TODO popperjs instead of css tooltip?
+// TODO getting weird spacing bug make minimal example
+// TODO fromdom for copy and paste?
+// export const label = embed({
+//   name: 'label',
+//   selector: 'span.text-circle',
+//   fromDom: (node: HTMLSpanElement) => ({label: node.dataset.text, color: node.style.backgroundColor, attributes:{label:true}}),
+//   // noFill: true,
+//   commands: editor => (label: string, props: object) => editor.insert({ label, ...props }, {label:true} ),
+//   render: (tag: AttributeMap) => {
+
+//     const { label, color } = tag;
+//     return h('span', { class: 'text-circle tooltip', "data-text": label, style: `background-color: ${color}` })
+//   }
+// });
+
 
 export const parseRangeString = (timeString: string) => {
   const parser = timeString.includes(':') ? parseTimes : parseFloat
@@ -23,31 +43,16 @@ export const parseRangeString = (timeString: string) => {
   }
 }
 
-
-// TODO popperjs instead of css tooltip?
-export const label = embed({
-  name: 'label',
-  selector: 'span.text-circle',
-  commands: editor => (label: string, color: string) => editor.insert({ label, color }),
-  render: (tag: AttributeMap) => {
-    const { label, color } = tag;
-    return h('span', { class: 'text-circle tooltip', "data-text": label, style: `background-color: ${color}` },)
-    // ]);
-  },
-});
-
-
 // TODO match format start,duration
 const tsReplacements: Replacement[] = [
-  [/(@\()[\d.-]*\).$/s, capture => ({ ts: capture })],
+  [/@\(\d+(\.\d+)?\).$/s, capture => ({ ts: capture })],
   [/@now.$/s, _ => ({ ts: `@(${get(currentTime).toFixed(1)})` })],
-  [/(@\()[\d.:-]*\).$/s, (capture) => {
+  [/@\(\d+((:\d+){1,2})?(\.\d+)?(-\d+((:\d+){1,2})?(\.\d+)?)\).$/s, (capture) => {
     const { start, end } = parseRangeString(capture)
     return capture.includes('-') ? { ts: `@(${start}-${end})` } : { ts: `@(${parseTimes(capture.slice(2, -1))})` };
   }]
 
 ];
-
 
 const parseTimes = (timeString: any) => {
   return +(timeString.split(':').reduce((acc: number, time: number) => (60 * acc) + +time))
