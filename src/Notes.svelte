@@ -158,15 +158,6 @@
 <svelte:window on:beforeunload={beforeUnload} />
 
 <h3>Notes</h3>
-<button
-    on:click={() => {
-        const idx = getTranscriptIdx($currentTime);
-        if (idx) {
-            $tags.cat.idxs.add(idx);
-        }
-        $tags = $tags;
-    }}>get</button
->
 <div class="toolbar">
     <Toolbar {editor} let:active let:commands>
         <button
