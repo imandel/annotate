@@ -9,11 +9,10 @@
             const change = editor.change;
             change.insert(editor.doc.length, "\n");
             change.insert(
-                editor.doc.length,
+                editor.doc.length + 1,
                 `@(${timerange[0]}-${timerange[1]})`,
-                { ts: `@(${timerange[0]}-${timerange[1]})` }
+                { ts: `@(${timerange[0]}-${timerange[1]})`, label, color }
             );
-            change.insert(editor.doc.length, { label, color });
             change.apply();
         }
     };
@@ -25,12 +24,13 @@
         placeholder,
         smartEntry,
         editorStores,
+        EditorChangeEvent,
     } from "typewriter-editor";
     import { onMount, onDestroy } from "svelte";
     import Root from "typewriter-editor/lib/Root.svelte";
     import Toolbar from "typewriter-editor/lib/Toolbar.svelte";
     import BubbleMenu from "typewriter-editor/lib/BubbleMenu.svelte";
-    import { ts, tsReplace, label, parseRangeString } from "./customFormatting";
+    import { ts, tsReplace, parseRangeString } from "./customFormatting";
     import { play, pause, playUntil } from "./Video.svelte";
     import { currentTime, tags, videoFile } from "./stores";
     import { saveFile } from "./util.js";
@@ -46,6 +46,7 @@
     let playingNote = false;
     let downloadingVid = false;
 
+    // TODO move ffmpeg code to util?
     const ffmpeg = createFFmpeg({ log: false });
     onMount(async () => {
         await ffmpeg.load();
@@ -85,9 +86,8 @@
     window.process = { env: { NODE_ENV: import.meta.env.MODE } };
     if (import.meta.env.MODE == "development") {
         $tags = {
-            'cat': { label: "cat", color: "teal", idxs: new Set() },
-            'bat':{ label: "bat", color: "#9d9dff", idxs: new Set() },
-
+            cat: { label: "cat", color: "teal", idxs: new Set() },
+            bat: { label: "bat", color: "#9d9dff", idxs: new Set() },
         };
     }
     const playTs = (ts: string) => {
@@ -121,10 +121,24 @@
     });
 
     editor.typeset.formats.add(ts);
-    editor.typeset.embeds.add(label);
+    editor.on("change", (e: EditorChangeEvent) => {
+        e.changedLines.forEach((line) => {});
+    });
+    $: if ($active?.ts) {
+        const text = editor.getText($selection);
+        const rangeStart = Math.min(...$selection);
+        const rangeEnd = Math.max(...$selection);
+
+        if (text.length) {
+            const offset = $active.ts.indexOf(text);
+            const remainder = $active.ts.substring(offset + text.length).length;
+            editor.select([rangeStart - offset, rangeEnd + remainder]);
+        }
+    }
 
     const { active, doc, selection, focus, root, updateEditor } =
         editorStores(editor);
+    // $: console.log($doc);
     // $: console.log($active, $doc, $selection, $focus, $root )
     const beforeUnload = (event: BeforeUnloadEvent) => {
         if (import.meta.env.MODE == "production") {
@@ -224,6 +238,13 @@
                         play_arrow
                     {/if}
                 </button>
+                {#each Object.values($tags) as tag}
+                    <button
+                        class="menu-button material-icons label"
+                        style="--tag-color: {tag.color}"
+                        on:click={commands.bold}>circle</button
+                    >
+                {/each}
                 {#if active.ts.includes("-")}
                     {#if downloadingVid}
                         <Jumper
@@ -241,18 +262,6 @@
                     {/if}
                 {/if}
             {/if}
-        </div>
-    {:else}
-        <div class="tag-select">
-            <TagSelect
-                callback={(_label, _color) => {
-                    editor.insert(
-                        { label: _label, color: _color },
-                        [],
-                        [editor.doc.selection[0], editor.doc.selection[0]]
-                    );
-                }}
-            />
         </div>
     {/if}
 </BubbleMenu>
@@ -343,6 +352,9 @@
         background: none;
         outline: none;
         cursor: pointer;
+    }
+    .menu-button.label {
+        color: var(--tag-color);
     }
     .menu-button:first-child {
         padding-left: 14px;
