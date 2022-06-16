@@ -1,24 +1,44 @@
 <script lang="ts">
-	import { cueData, currentTime, tags } from "./stores";
+	import { Annotation, cueData, currentTime, tags } from "./stores";
 	import type { Tags } from "./stores";
 	import { onMount, tick } from "svelte";
 	import Toggle from "svelte-toggle";
-	import { saveFile, getElementRange } from "./util.js";
+	import {
+		saveFile,
+		getElementRange,
+		createId,
+		range,
+		getTranscriptIdx,
+	} from "./util.js";
 	import { createPopper } from "@popperjs/core";
 	import { appendLabel } from "./Notes.svelte";
 	import TagSelect from "./TagSelect.svelte";
 	$: updateMarkers($tags);
+	$: console.log($tags);
 
 	// TODO make cell unactive on click
 	// TODO sticky headers https://css-tricks.com/position-sticky-and-table-headers/
 	const updateMarkers = async (trigger: Tags) => {
 		tick().then(() => {
 			Object.values(trigger).forEach((tag) => {
-				[...tag.idxs].forEach((idx) => {
-					const rowMarker = transcriptContent.querySelector(
-						`.marker[data-idx="${idx}"].${tag.label}`
-					);
-					rowMarker?.classList.add("marked");
+				tag.annotations.forEach(({ start, end }: Annotation, _) => {
+					let idxs = <number[]>[];
+					if (start == end) {
+						const startIdx = getTranscriptIdx(start);
+						if (startIdx) idxs.push(startIdx);
+					} else {
+						const startIdx = getTranscriptIdx(start);
+						const endIdx = getTranscriptIdx(end);
+						if ((startIdx || endIdx) !== undefined) {
+							idxs = range(startIdx, endIdx);
+						}
+					}
+					idxs.forEach((idx) => {
+						const rowMarker = transcriptContent.querySelector(
+							`.marker[data-idx="${idx}"].${tag.label}`
+						);
+						rowMarker?.classList.add("marked");
+					});
 				});
 			});
 		});
@@ -103,19 +123,16 @@
 	};
 
 	const tagSelectCallback = (_label: string, _color: string) => {
-		appendLabel(
-			[
-				parseFloat(elements[0].dataset.starttime),
-				parseFloat(elements[elements.length - 1].dataset.endtime),
-			],
-			_label,
-			_color
-		);
-		elements.forEach((element) => {
-			$tags[_label].idxs.add(parseInt(element.dataset.idx));
+		const start = parseFloat(elements[0].dataset.starttime);
+		const end = parseFloat(elements[elements.length - 1].dataset.endtime);
+		const id = createId($tags[_label].annotations);
+		const line = appendLabel(start, end, _label, _color, id);
+		$tags[_label].annotations.set(id, {
+			start,
+			end,
+			line,
 		});
 		$tags = $tags;
-		elements = [];
 		highlight.style.display = "none";
 	};
 </script>

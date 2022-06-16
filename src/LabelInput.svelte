@@ -6,7 +6,11 @@
     // TODO replace randomColor() with nice colorpallete chromajs
     const addLabel = () => {
         if (newLabel) {
-            $tags[newLabel] = { label: newLabel, color: randomColor(), idxs: new Set([]) };
+            $tags[newLabel] = {
+                label: newLabel,
+                color: randomColor(),
+                annotations: new Map(),
+            };
             newLabel = "";
         }
     };
@@ -26,13 +30,14 @@
         }}
     />
     <span on:click={addLabel}><slot name="add"><button>+</button></slot></span>
-    <span on:click={addLabel}><slot name="cancel"></slot></span>
+    <span on:click={addLabel}><slot name="cancel" /></span>
 
     <!-- <slot name="remove"></slot>
     <button on:click={addLabel}>+</button> -->
 </div>
+
 <style>
-    input[type=text]{
-        margin:0;
+    input[type="text"] {
+        margin: 0;
     }
 </style>

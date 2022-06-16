@@ -1,5 +1,5 @@
 import { get } from 'svelte/store'
-import { cueData } from './stores';
+import { Annotation, cueData } from './stores';
 export async function saveFile(data: Blob, fileName: string) {
     // create a new handle
     const newHandle = await window.showSaveFilePicker({ suggestedName: fileName });
@@ -74,8 +74,14 @@ export const getTranscriptIdx = (timestamp: number) => {
             return cue.idx
         }
     }
-    return false;
+    return undefined;
 }
 
 export const range = (start: number, stop: number, step = 1) =>
     Array.from({ length: (stop - start) / step + 1 }, (_, i) => start + (i * step))
+
+export const createId = (existing: Map<string, Annotation>) => {
+    let id: string;
+    while (existing[(id = Math.random().toString(36).slice(2))]);
+    return id;
+}
