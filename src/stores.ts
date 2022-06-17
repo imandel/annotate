@@ -15,7 +15,7 @@ export type Tags = {
     }
 }
 export const cueData = writable([]);
-export const tags = writable(<Tags>{ note: { label: "note", color: "clear", annotations: new Map() } });
+export const tags = writable(<Tags>{ note: { label: "note", color: "#ebebff", annotations: new Map() } });
 export const currentTime = writable(0);
 export const duration = writable(0);
 export const paused = writable(true);

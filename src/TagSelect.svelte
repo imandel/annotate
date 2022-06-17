@@ -6,7 +6,6 @@
     let addTag = false;
     
     // TODO clearHighlight
-    const clearHighlight = () => {};
     const selected = (label:string, color: string) => {
         callback(label,color)
     }
@@ -20,12 +19,6 @@
         on:mousedown={()=>selected(tag.label, tag.color)}
     />
 {/each}
-<div>
-    <div class="container" on:click={clearHighlight}>
-        <div class="line" />
-        <div class="circle" />
-    </div>
-</div>
 {#if addTag}
     <span transition:slide>
         <LabelInput>

@@ -1,5 +1,12 @@
 import { get } from 'svelte/store'
-import { Annotation, cueData } from './stores';
+import type { Editor, EditorRange } from 'typewriter-editor';
+import { Annotation, cueData, currentTime, videoFile, paused } from './stores';
+// @ts-ignore https://github.com/sveltejs/svelte-preprocess/issues/91
+import { play, pause, playUntil } from "./Video.svelte";
+import { parseRangeString } from './customFormatting';
+import { fetchFile, FFmpeg } from "@ffmpeg/ffmpeg";
+import path from "path";
+
 export async function saveFile(data: Blob, fileName: string) {
     // create a new handle
     const newHandle = await window.showSaveFilePicker({ suggestedName: fileName });
@@ -85,3 +92,59 @@ export const createId = (existing: Map<string, Annotation>) => {
     while (existing[(id = Math.random().toString(36).slice(2))]);
     return id;
 }
+
+export const expandTsSelection = (editor: Editor, ts: string, selection: EditorRange) => {
+    const text = editor.getText(selection);
+    const rangeStart = Math.min(...selection);
+    const rangeEnd = Math.max(...selection);
+
+    if (text.length) {
+        const offset = ts.indexOf(text);
+        const remainder = ts.substring(offset + text.length).length;
+        const newRange = <EditorRange>[rangeStart - offset, rangeEnd + remainder]
+        editor.select(newRange);
+        return newRange
+    }
+}
+
+// TODO proper async function for this
+export const playTs = (ts: string) => {
+    if (get(paused)) {
+        const { start, end } = parseRangeString(ts);
+        if (end) {
+            currentTime.set(start);
+            playUntil(end).then(() => (paused.set(true)));
+        } else {
+            currentTime.set(start);
+            play();
+        }
+    } else {
+        pause();
+    }
+};
+
+// TODO error handling
+export const clip = async (timeString: string, ffmpeg: FFmpeg) => {
+    const { start, end } = parseRangeString(timeString);
+    const data = await fetchFile(get(videoFile));
+    console.log(data);
+    ffmpeg.FS("writeFile", "srcfile.mp4", data);
+    await ffmpeg.run(
+        "-i",
+        "srcfile.mp4",
+        "-ss",
+        start.toString(),
+        "-to",
+        end.toString(),
+        "-c",
+        "copy",
+        "clip.mp4"
+    );
+    const outData = ffmpeg.FS("readFile", "clip.mp4");
+    await saveFile(
+        new Blob([outData.buffer]),
+        `${path.parse(get(videoFile)).name}_${start}_${end}`.replace(".", "m") +
+        ".mp4"
+    );
+    return true;
+};

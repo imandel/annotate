@@ -12,7 +12,7 @@ export const ts = format({
   greedy: false,
   commands: editor => (label:string, color:string) => editor.toggleTextFormat({color, label}),
   render: (timeSpan: AttributeMap, children) => {
-    const {ts, color, label}= timeSpan
+    const {ts, color, label, id}= timeSpan
     return h('span', { class: `timestamp ${label? 'label':''}`, style: label? `--tag-color: ${color}`: '' }, children)},
 });
 
@@ -45,7 +45,7 @@ export const parseRangeString = (timeString: string) => {
 
 // TODO match format start,duration
 const tsReplacements: Replacement[] = [
-  [/@\(\d+(\.\d+)?\).$/s, capture => ({ ts: capture })],
+  [/@\(\d+(\.\d+)?\).$/s, capture => ({ ts: capture  })],
   [/@now.$/s, _ => ({ ts: `@(${get(currentTime).toFixed(1)})` })],
   [/@\(\d+((:\d+){1,2})?(\.\d+)?(-\d+((:\d+){1,2})?(\.\d+)?)\).$/s, (capture) => {
     const { start, end } = parseRangeString(capture)
@@ -60,13 +60,14 @@ const parseTimes = (timeString: any) => {
 
 export const tsReplace = (editor: Editor, index: number, prefix: string) => {
   return tsReplacements.some(([regexp, getAttributes]) => {
+    const baseNote = {}
     const match = prefix.match(regexp);
     if (match) {
       let text = match[0].slice(0, -1);
       const end = index - (match[0].length - text.length);
       const attributes = getAttributes(text);
       if (!editor.typeset.formats.findByAttributes(attributes)) {
-        return false;
+        return undefined;
       }
       if (attributes.ts !== text) { editor.insert(attributes.ts, attributes, [end - text.length, end]) }
       else {

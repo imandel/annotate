@@ -1,19 +1,25 @@
 <script context="module" lang="ts">
     let editor: Editor;
     export const appendLabel = (
-        timerange: [number, number],
+        start: number,
+        end: number,
         label: string,
-        color: string
+        color: string,
+        id: string
     ) => {
         if (editor) {
             const change = editor.change;
             change.insert(editor.doc.length, "\n");
-            change.insert(
-                editor.doc.length + 1,
-                `@(${timerange[0]}-${timerange[1]})`,
-                { ts: `@(${timerange[0]}-${timerange[1]})`, label, color }
-            );
+            change.insert(editor.doc.length + 1, `@(${start}-${end})`, {
+                ts: `@(${start}-${end})`,
+                label,
+                color,
+                id,
+            });
             change.apply();
+            // TODO: typewriter change event? this is hacky
+            const keys = [...editor.doc.byId.keys()];
+            return keys[keys.length - 2];
         }
     };
 </script>
@@ -31,19 +37,22 @@
     import Toolbar from "typewriter-editor/lib/Toolbar.svelte";
     import BubbleMenu from "typewriter-editor/lib/BubbleMenu.svelte";
     import { ts, tsReplace, parseRangeString } from "./customFormatting";
-    import { play, pause, playUntil } from "./Video.svelte";
-    import { currentTime, tags, videoFile } from "./stores";
-    import { saveFile, getTranscriptIdx, range } from "./util.js";
-    import path from "path";
+    import { tags, paused } from "./stores";
+    import {
+        saveFile,
+        getTranscriptIdx,
+        expandTsSelection,
+        playTs,
+        clip,
+    } from "./util.js";
     import {
         defaultHandlers,
         markReplace,
     } from "typewriter-editor/lib/modules/smartEntry";
     import { Jumper } from "svelte-loading-spinners";
-    import { createFFmpeg, fetchFile } from "@ffmpeg/ffmpeg";
-    import { start } from "@popperjs/core";
+    import { createFFmpeg } from "@ffmpeg/ffmpeg";
 
-    let playingNote = false;
+    // TODO: idea capature shift up or down to add/reduce time on tag?
     let downloadingVid = false;
 
     // TODO move ffmpeg code to util?
@@ -56,56 +65,15 @@
     });
 
     // TODO move fn to util and await promise on interface
-    const clip = async (timeString: string) => {
-        downloadingVid = true;
-        const { start, end } = parseRangeString(timeString);
-        const data = await fetchFile($videoFile);
-        console.log(data);
-        ffmpeg.FS("writeFile", "srcfile.mp4", data);
-        await ffmpeg.run(
-            "-i",
-            "srcfile.mp4",
-            "-ss",
-            start.toString(),
-            "-to",
-            end.toString(),
-            "-c",
-            "copy",
-            "clip.mp4"
-        );
-        const outData = ffmpeg.FS("readFile", "clip.mp4");
-        downloadingVid = false;
-        await saveFile(
-            new Blob([outData.buffer]),
-            `${path.parse($videoFile).name}_${start}_${end}`.replace(".", "m") +
-                ".mp4"
-        );
-        return;
-    };
 
     window.process = { env: { NODE_ENV: import.meta.env.MODE } };
     if (import.meta.env.MODE == "development") {
         $tags = {
-            cat: { label: "cat", color: "teal", idxs: new Set() },
-            bat: { label: "bat", color: "#9d9dff", idxs: new Set() },
+            cat: { label: "cat", color: "teal", annotations: new Map() },
+            bat: { label: "bat", color: "#9d9dff", annotations: new Map() },
+            ...$tags,
         };
     }
-    const playTs = (ts: string) => {
-        if (playingNote) {
-            pause();
-            playingNote = false;
-        } else {
-            playingNote = true;
-            const { start, end } = parseRangeString(ts);
-            if (end) {
-                $currentTime = start;
-                playUntil(end).then(() => (playingNote = false));
-            } else {
-                $currentTime = start;
-                play();
-            }
-        }
-    };
 
     editor = window.editor = new Editor({
         modules: {
@@ -122,19 +90,10 @@
 
     editor.typeset.formats.add(ts);
     editor.on("change", (e: EditorChangeEvent) => {
-        e.changedLines.forEach((line) => {});
+        // e.changedLines.forEach((line) => {});
     });
-    $: if ($active?.ts) {
-        const text = editor.getText($selection);
-        const rangeStart = Math.min(...$selection);
-        const rangeEnd = Math.max(...$selection);
 
-        if (text.length) {
-            const offset = $active.ts.indexOf(text);
-            const remainder = $active.ts.substring(offset + text.length).length;
-            editor.select([rangeStart - offset, rangeEnd + remainder]);
-        }
-    }
+    $: if ($active?.ts) expandTsSelection(editor, $active.ts, $selection);
 
     const { active, doc, selection, focus, root, updateEditor } =
         editorStores(editor);
@@ -232,10 +191,10 @@
                     class="menu-button material-icons"
                     on:click={() => playTs(active.ts)}
                 >
-                    {#if playingNote}
-                        pause
-                    {:else}
+                    {#if $paused}
                         play_arrow
+                    {:else}
+                        pause
                     {/if}
                 </button>
                 {#each Object.values($tags) as tag}
@@ -243,6 +202,7 @@
                         class="menu-button material-icons label"
                         style="--tag-color: {tag.color}"
                         on:click={() => {
+                            console.log(active);
                             editor.toggleTextFormat({
                                 color: tag.color,
                                 label: tag.label,
@@ -250,13 +210,13 @@
                             const { start, end } = parseRangeString(active.ts);
                             const startIdx = getTranscriptIdx(start);
                             const endIdx = getTranscriptIdx(end);
-                            if (startIdx && endIdx) {
-                                range(startIdx, endIdx).forEach((idx) =>
-                                    $tags[tag.label].idxs.add(idx)
-                                );
-                            } else {
-                                $tags[tag.label].idxs.add(start);
-                            }
+                            // if (startIdx && endIdx) {
+                            //     range(startIdx, endIdx).forEach((idx) =>
+                            //         $tags[tag.label].idxs.add(idx)
+                            //     );
+                            // } else {
+                            //     $tags[tag.label].idxs.add(start);
+                            // }
                             $tags = $tags;
                         }}>circle</button
                     >
@@ -272,8 +232,12 @@
                     {:else}
                         <button
                             class="menu-button material-icons"
-                            on:click={() => clip(active.ts)}
-                            >file_download</button
+                            on:click={() => {
+                                downloadingVid = true;
+                                clip(active.ts, ffmpeg).then(
+                                    () => (downloadingVid = false)
+                                );
+                            }}>file_download</button
                         >
                     {/if}
                 {/if}
