@@ -44,6 +44,7 @@
         expandTsSelection,
         playTs,
         clip,
+        swapLabel,
     } from "./util.js";
     import {
         defaultHandlers,
@@ -203,21 +204,11 @@
                         style="--tag-color: {tag.color}"
                         on:click={() => {
                             console.log(active);
-                            editor.toggleTextFormat({
+                            editor.formatText({
                                 color: tag.color,
                                 label: tag.label,
                             });
-                            const { start, end } = parseRangeString(active.ts);
-                            const startIdx = getTranscriptIdx(start);
-                            const endIdx = getTranscriptIdx(end);
-                            // if (startIdx && endIdx) {
-                            //     range(startIdx, endIdx).forEach((idx) =>
-                            //         $tags[tag.label].idxs.add(idx)
-                            //     );
-                            // } else {
-                            //     $tags[tag.label].idxs.add(start);
-                            // }
-                            $tags = $tags;
+                            swapLabel(active.id, active.label, tag.label);
                         }}>circle</button
                     >
                 {/each}

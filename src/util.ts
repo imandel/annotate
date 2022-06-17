@@ -1,6 +1,6 @@
 import { get } from 'svelte/store'
 import type { Editor, EditorRange } from 'typewriter-editor';
-import { Annotation, cueData, currentTime, videoFile, paused } from './stores';
+import { Annotation, cueData, currentTime, videoFile, paused, tags } from './stores';
 // @ts-ignore https://github.com/sveltejs/svelte-preprocess/issues/91
 import { play, pause, playUntil } from "./Video.svelte";
 import { parseRangeString } from './customFormatting';
@@ -148,3 +148,10 @@ export const clip = async (timeString: string, ffmpeg: FFmpeg) => {
     );
     return true;
 };
+
+export const swapLabel = (id: string, currentLabel: string, newLabel: string) => {
+    let tempTags = get(tags)
+    tempTags[newLabel].annotations.set(id, tempTags[currentLabel].annotations.get(id))
+    tempTags[currentLabel].annotations.delete(id)
+    tags.set(tempTags)
+}
