@@ -39,24 +39,6 @@
 {/if}
 
 <style>
-    .circle {
-        position: absolute;
-        /* top: 50%; */
-        /* left: 50%; */
-        /* transform: translate(-50%, -50%); */
-        width: 18px;
-        height: 18px;
-        background-color: whitesmoke;
-        border-radius: 100%;
-    }
-    .line {
-        position: absolute;
-        transform: rotate(-45deg) translate(-7px, 4px);
-        width: 22px;
-        height: 2.5px;
-        background-color: grey;
-        z-index: 100;
-    }
     .liner-circle {
         height: 18px;
         width: 18px;
@@ -64,12 +46,6 @@
         border-radius: 50%;
         display: inline-block;
         cursor: pointer;
-    }
-    .container {
-        display: relative;
-        width: 18px;
-        height: 18px;
-        margin: 0 5px;
     }
     .new-tag {
 		margin: 0px 0px 0px  5px;

@@ -1,37 +1,25 @@
-import type { Editor } from 'typewriter-editor';
 import { get } from 'svelte/store';
 import { format, h, embed } from 'typewriter-editor';
-import { currentTime } from "./stores";
+import { currentTime, tags } from "./stores";
+import { createId } from './util';
 import type { Replacement } from "typewriter-editor/lib/modules/smartEntry"
 import type { AttributeMap } from '@typewriter/document';
+import type { Editor } from 'typewriter-editor';
+
+// TODO set default label from store?
 
 // Typewritter css stored in public/global.css
 export const ts = format({
   name: 'ts',
   selector: 'span.timestamp',
   greedy: false,
-  commands: editor => (label:string, color:string) => editor.toggleTextFormat({color, label}),
+  // commands: editor => (label: string, color: string) => editor.toggleTextFormat({ color, label }),
   render: (timeSpan: AttributeMap, children) => {
-    const {ts, color, label, id}= timeSpan
-    return h('span', { class: `timestamp ${label? 'label':''}`, style: label? `--tag-color: ${color}`: '' }, children)},
+    console.log(timeSpan)
+    const { ts, color, label, id } = timeSpan
+    return h('span', { class: `timestamp ${label ? 'label' : ''}`, style: label ? `--tag-color: ${color}` : '' }, children)
+  },
 });
-
-// TODO popperjs instead of css tooltip?
-// TODO getting weird spacing bug make minimal example
-// TODO fromdom for copy and paste?
-// export const label = embed({
-//   name: 'label',
-//   selector: 'span.text-circle',
-//   fromDom: (node: HTMLSpanElement) => ({label: node.dataset.text, color: node.style.backgroundColor, attributes:{label:true}}),
-//   // noFill: true,
-//   commands: editor => (label: string, props: object) => editor.insert({ label, ...props }, {label:true} ),
-//   render: (tag: AttributeMap) => {
-
-//     const { label, color } = tag;
-//     return h('span', { class: 'text-circle tooltip', "data-text": label, style: `background-color: ${color}` })
-//   }
-// });
-
 
 export const parseRangeString = (timeString: string) => {
   const parser = timeString.includes(':') ? parseTimes : parseFloat
@@ -45,9 +33,9 @@ export const parseRangeString = (timeString: string) => {
 
 // TODO match format start,duration
 const tsReplacements: Replacement[] = [
-  [/@\(\d+(\.\d+)?\).$/s, capture => ({ ts: capture  })],
+  [/@\(\d+(\.\d+)?\).$/s, capture => ({ ts: capture })],
   [/@now.$/s, _ => ({ ts: `@(${get(currentTime).toFixed(1)})` })],
-  [/@\(\d+((:\d+){1,2})?(\.\d+)?(-\d+((:\d+){1,2})?(\.\d+)?)\).$/s, (capture) => {
+  [/@\(\d+((:\d+){1,2})?(\.\d+)?(-?\d+((:\d+){1,2})?(\.\d+)?)\).$/s, (capture) => {
     const { start, end } = parseRangeString(capture)
     return capture.includes('-') ? { ts: `@(${start}-${end})` } : { ts: `@(${parseTimes(capture.slice(2, -1))})` };
   }]
@@ -60,20 +48,49 @@ const parseTimes = (timeString: any) => {
 
 export const tsReplace = (editor: Editor, index: number, prefix: string) => {
   return tsReplacements.some(([regexp, getAttributes]) => {
-    const baseNote = {}
     const match = prefix.match(regexp);
     if (match) {
       let text = match[0].slice(0, -1);
-      const end = index - (match[0].length - text.length);
-      const attributes = getAttributes(text);
+      const endIdx = index - (match[0].length - text.length);
+      let attributes = getAttributes(text);
+      let tempTags = get(tags)
+
       if (!editor.typeset.formats.findByAttributes(attributes)) {
         return undefined;
       }
-      if (attributes.ts !== text) { editor.insert(attributes.ts, attributes, [end - text.length, end]) }
-      else {
-        editor.formatText(attributes, [end - text.length, end]);
-      }
+      if (attributes.ts !== text) {
+        const label = 'note';
+        const color = tempTags['note'].color
+        const id = createId(tempTags['note'].annotations)
+        const { start, end } = parseRangeString(attributes.ts)
+        const line = editor.doc.getLineAt(endIdx).id
+        attributes = { ...attributes, label, color, id }
 
+        tempTags['note'].annotations.set(id, {
+          start,
+          end,
+          line,
+        });
+        editor.insert(attributes.ts, attributes, [endIdx - text.length, endIdx])
+      }
+      else {
+        const { label = 'note', id = createId(tempTags['note'].annotations), color = tempTags['note'].color } = editor.doc.getTextFormat([endIdx - text.length, endIdx])
+        if (tempTags[label].annotations.has(id)) {
+          // do nothing? this case should be handled in editor onchange event
+          return true
+        } else {
+          const { start, end } = parseRangeString(attributes.ts)
+          attributes = { ...attributes, label, id, color }
+          const line = editor.doc.getLineAt(endIdx).id
+          editor.formatText(attributes, [endIdx - text.length, endIdx]);
+          tempTags[label].annotations.set(id, {
+            start,
+            end,
+            line,
+          });
+        }
+      }
+      tags.set(tempTags);
       return true;
     } else {
       return false;
