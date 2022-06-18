@@ -1,5 +1,5 @@
 import { get } from 'svelte/store';
-import { format, h, embed } from 'typewriter-editor';
+import { format, h} from 'typewriter-editor';
 import { currentTime, tags } from "./stores";
 import { createId } from './util';
 import type { Replacement } from "typewriter-editor/lib/modules/smartEntry"
@@ -26,7 +26,8 @@ export const parseRangeString = (timeString: string) => {
     const [start, end] = timeString.substring(2, timeString.length - 1).split('-')
     return { start: parser(start), end: parser(end) }
   } else {
-    return { start: parser(timeString.substring(2, timeString.length - 1)), end: undefined }
+    const start = parser(timeString.substring(2, timeString.length - 1))
+    return { start, end: start }
   }
 }
 

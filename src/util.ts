@@ -1,5 +1,5 @@
 import { get } from 'svelte/store'
-import type { Editor, EditorRange } from 'typewriter-editor';
+import type { EditorRange } from 'typewriter-editor';
 import { Annotation, cueData, currentTime, videoFile, paused, tags } from './stores';
 // @ts-ignore https://github.com/sveltejs/svelte-preprocess/issues/91
 import { play, pause, playUntil } from "./Video.svelte";
@@ -76,12 +76,21 @@ export const getElementRange = (start: HTMLDivElement, end: HTMLDivElement) => {
 
 export const getTranscriptIdx = (timestamp: number) => {
     const cues = [...get(cueData)].map((cue) => { return { startTime: cue.startTime, endTime: cue.endTime, idx: cue.id - 1 } })
+    // console.log(timestamp)
     for (const cue of cues) {
+        // console.log(timestamp, cue.startTime, cue.endTime)
         if (timestamp >= cue.startTime && timestamp <= cue.endTime) {
             return cue.idx
         }
     }
     return undefined;
+}
+export const getTranscriptIdxs = (start: number, end: number) => {
+    const cues = [...get(cueData)].map((cue) => { return { startTime: cue.startTime, endTime: cue.endTime, idx: cue.id - 1 } })
+    let startIdx: number;
+    let endIdx: number;
+    return cues.filter(cue => cue.endTime > start && cue.startTime < end).map(cue => cue.idx)
+
 }
 
 export const range = (start: number, stop: number, step = 1) =>
@@ -109,7 +118,7 @@ export const expandTsSelection = (text: string, ts: string, selection: EditorRan
 export const playTs = (ts: string) => {
     if (get(paused)) {
         const { start, end } = parseRangeString(ts);
-        if (end) {
+        if (start !== end) {
             currentTime.set(start);
             playUntil(end).then(() => (paused.set(true)));
         } else {

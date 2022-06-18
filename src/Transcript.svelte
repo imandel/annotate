@@ -7,32 +7,24 @@
 		saveFile,
 		getElementRange,
 		createId,
-		range,
-		getTranscriptIdx,
+		getTranscriptIdxs,
 	} from "./util.js";
 	import { createPopper } from "@popperjs/core";
 	import { appendLabel } from "./Notes.svelte";
 	import TagSelect from "./TagSelect.svelte";
 	$: updateMarkers($tags);
-	$: console.log($tags);
 
 	// TODO make cell unactive on click
 	// TODO sticky headers https://css-tricks.com/position-sticky-and-table-headers/
 	const updateMarkers = async (trigger: Tags) => {
 		tick().then(() => {
+			transcriptContent
+				.querySelectorAll(".marker")
+				.forEach((rowMarker) => rowMarker.classList.remove("marked"));
 			Object.values(trigger).forEach((tag) => {
 				tag.annotations.forEach(({ start, end }: Annotation, _) => {
-					let idxs = <number[]>[];
-					if (start == end) {
-						const startIdx = getTranscriptIdx(start);
-						if (startIdx) idxs.push(startIdx);
-					} else {
-						const startIdx = getTranscriptIdx(start);
-						const endIdx = getTranscriptIdx(end);
-						if ((startIdx || endIdx) !== undefined) {
-							idxs = range(startIdx, endIdx);
-						}
-					}
+					let idxs = getTranscriptIdxs(start, end);
+
 					idxs.forEach((idx) => {
 						const rowMarker = transcriptContent.querySelector(
 							`.marker[data-idx="${idx}"].${tag.label}`
