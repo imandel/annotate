@@ -15,9 +15,8 @@ export const ts = format({
   greedy: false,
   // commands: editor => (label: string, color: string) => editor.toggleTextFormat({ color, label }),
   render: (timeSpan: AttributeMap, children) => {
-    console.log(timeSpan)
-    const { ts, color, label, id } = timeSpan
-    return h('span', { class: `timestamp ${label ? 'label' : ''}`, style: label ? `--tag-color: ${color}` : '' }, children)
+    const { color } = timeSpan
+    return h('span', { class: `timestamp label`, style: `--tag-color: ${color}` }, children)
   },
 });
 
@@ -32,6 +31,7 @@ export const parseRangeString = (timeString: string) => {
 }
 
 // TODO match format start,duration
+//  TODO ordering start and end?
 const tsReplacements: Replacement[] = [
   [/@\(\d+(\.\d+)?\).$/s, capture => ({ ts: capture })],
   [/@now.$/s, _ => ({ ts: `@(${get(currentTime).toFixed(1)})` })],

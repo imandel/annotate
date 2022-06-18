@@ -93,8 +93,7 @@ export const createId = (existing: Map<string, Annotation>) => {
     return id;
 }
 
-export const expandTsSelection = (editor: Editor, ts: string, selection: EditorRange) => {
-    const text = editor.getText(selection);
+export const expandTsSelection = (text: string, ts: string, selection: EditorRange) => {
     const rangeStart = Math.min(...selection);
     const rangeEnd = Math.max(...selection);
 
@@ -102,7 +101,6 @@ export const expandTsSelection = (editor: Editor, ts: string, selection: EditorR
         const offset = ts.indexOf(text);
         const remainder = ts.substring(offset + text.length).length;
         const newRange = <EditorRange>[rangeStart - offset, rangeEnd + remainder]
-        editor.select(newRange);
         return newRange
     }
 }

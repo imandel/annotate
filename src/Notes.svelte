@@ -31,6 +31,8 @@
         smartEntry,
         editorStores,
         EditorChangeEvent,
+        deltaToText,
+        EditorRange,
     } from "typewriter-editor";
     import { onMount, onDestroy } from "svelte";
     import Root from "typewriter-editor/lib/Root.svelte";
@@ -55,7 +57,7 @@
 
     // TODO: idea capature shift up or down to add/reduce time on tag?
     let downloadingVid = false;
-
+    const regEx = /@\(\d+((:\d+){1,2})?(\.\d+)?(-?\d+((:\d+){1,2})?(\.\d+)?)\)/;
     // TODO move ffmpeg code to util?
     const ffmpeg = createFFmpeg({ log: false });
     onMount(async () => {
@@ -90,11 +92,52 @@
     });
 
     editor.typeset.formats.add(ts);
-    editor.on("change", (e: EditorChangeEvent) => {
-        // e.changedLines.forEach((line) => {});
+    // TODO show errors/mistyped ts
+    // TODO this only works when editing one character at a time (e.g. may break on highlight and delete)
+    editor.on("changed", ({ change, changedLines }: EditorChangeEvent) => {
+        // TODO this only works with one tag per line this should be done better in general
+        if (changedLines.length && change.activeFormats.ts) {
+            changedLines.forEach(({ content, id: line }) => {
+                const text = deltaToText(content);
+                const match = text.match(regEx);
+                if (match) {
+                    const lineStart = editor.doc.getLineRanges(
+                        change.selection[0]
+                    )[0][0];
+                    const startIdx = text.indexOf(match[0]) + lineStart;
+                    const endIdx = startIdx + match[0].length;
+                    const allFormats = editor.doc.getFormats(
+                        [startIdx, endIdx],
+                        {
+                            allFormats: true,
+                        }
+                    );
+                    allFormats.ts = text;
+                    const { start, end } = parseRangeString(text);
+                    const { id, label } = allFormats;
+                    editor.formatText(allFormats, <EditorRange>[
+                        startIdx,
+                        endIdx,
+                    ]);
+                    $tags[allFormats.label].annotations.set(id, {
+                        start,
+                        end,
+                        line,
+                    });
+                    $tags = $tags;
+                }
+            });
+        }
     });
 
-    $: if ($active?.ts) expandTsSelection(editor, $active.ts, $selection);
+    $: if ($active?.ts)
+        editor.select(
+            expandTsSelection(
+                editor.getText($selection),
+                $active.ts,
+                $selection
+            )
+        );
 
     const { active, doc, selection, focus, root, updateEditor } =
         editorStores(editor);
