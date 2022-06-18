@@ -57,15 +57,16 @@
 
     // TODO: idea capature shift up or down to add/reduce time on tag?
     let downloadingVid = false;
-    const regEx = /@\(\d+((:\d+){1,2})?(\.\d+)?(-?\d+((:\d+){1,2})?(\.\d+)?)\)/;
+    const regEx =
+        /@\(\d+((:\d+){1,2})?(\.\d+)?(-?\d+((:\d+){1,2})?(\.\d+)?)\)/g;
     // TODO move ffmpeg code to util?
     const ffmpeg = createFFmpeg({ log: false });
     onMount(async () => {
         await ffmpeg.load();
     });
-    onDestroy(async () => {
-        ffmpeg.exit();
-    });
+    // onDestroy(async () => {
+    //     ffmpeg.exit();
+    // });
 
     // TODO move fn to util and await promise on interface
 
@@ -92,43 +93,52 @@
     });
 
     editor.typeset.formats.add(ts);
-    // TODO show errors/mistyped ts
-    // TODO this only works when editing one character at a time (e.g. may break on highlight and delete)
-    editor.on("changed", ({ change, changedLines }: EditorChangeEvent) => {
-        // TODO this only works with one tag per line this should be done better in general
+
+    const onTextChanged = ({ change, changedLines }: EditorChangeEvent) => {
         if (changedLines.length && change.activeFormats.ts) {
             changedLines.forEach(({ content, id: line }) => {
                 const text = deltaToText(content);
-                const match = text.match(regEx);
-                if (match) {
-                    const lineStart = editor.doc.getLineRanges(
-                        change.selection[0]
-                    )[0][0];
-                    const startIdx = text.indexOf(match[0]) + lineStart;
-                    const endIdx = startIdx + match[0].length;
-                    const allFormats = editor.doc.getFormats(
-                        [startIdx, endIdx],
-                        {
-                            allFormats: true,
-                        }
-                    );
-                    allFormats.ts = text;
-                    const { start, end } = parseRangeString(text);
-                    const { id, label } = allFormats;
-                    editor.formatText(allFormats, <EditorRange>[
-                        startIdx,
-                        endIdx,
-                    ]);
-                    $tags[allFormats.label].annotations.set(id, {
-                        start,
-                        end,
-                        line,
-                    });
-                    $tags = $tags;
+                const lineStart = editor.doc.getLineRanges(
+                    change.selection[0]
+                )[0][0];
+                const matches = text.matchAll(regEx);
+                for (const m of matches) {
+                    const match = m[0];
+                    const startIdx = m.index + lineStart;
+                    const endIdx = m.index + lineStart + match.length;
+                    if (
+                        change.selection[0] <= endIdx &&
+                        change.selection[0] >= startIdx
+                    ) {
+                        console.log(match, startIdx, endIdx);
+                        const allFormats = editor.doc.getFormats(
+                            [startIdx, endIdx],
+                            { allFormats: true }
+                        );
+
+                        allFormats.ts = match;
+                        console.log(allFormats);
+                        const { start, end } = parseRangeString(match);
+                        const { id, label } = allFormats;
+                        console.log(startIdx, endIdx);
+                        editor.formatText(allFormats, <EditorRange>[
+                            startIdx,
+                            endIdx,
+                        ]);
+
+                        $tags[label].annotations.set(id, {
+                            start,
+                            end,
+                            line,
+                        });
+                        $tags = $tags;
+                    }
                 }
             });
         }
-    });
+    };
+
+    editor.on("changed", onTextChanged);
 
     $: if ($active?.ts)
         editor.select(
