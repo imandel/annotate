@@ -59,7 +59,6 @@
     } from "typewriter-editor/lib/modules/smartEntry";
     import { Jumper } from "svelte-loading-spinners";
     import { createFFmpeg } from "@ffmpeg/ffmpeg";
-
     // TODO: idea capature shift up or down to add/reduce time on tag?
     let downloadingVid = false;
     // TODO fix regex to treat @(10-) as @(10)
@@ -74,8 +73,8 @@
     //     ffmpeg.exit();
     // });
 
-    // TODO move fn to util and await promise on interface
-
+    // TODO move fn to util and await promise on interface  
+    // $: console.log($tags)
     window.process = { env: { NODE_ENV: import.meta.env.MODE } };
     if (import.meta.env.MODE == "development") {
         $tags = {

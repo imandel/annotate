@@ -1,6 +1,8 @@
 <script lang="ts">
-	import { videoFile } from "./stores";
+	import { tags, videoFile } from "./stores";
+	import { get } from "svelte/store";
 	import { setData } from "./Notes.svelte";
+	import { parseRangeString } from "./customFormatting";
 	import type { Delta } from "@typewriter/document";
 	let files: FileList;
 	export let captionsFile: string = undefined;
@@ -14,10 +16,9 @@
 			fileReader.readAsText(file);
 		});
 	}
-
+	let loadedNotes: Delta;
 	$: if (files) {
 		console.log(files);
-
 		for (const file of files) {
 			// console.log(`${file.name}: ${file.size} bytes`);
 			if (file.type == "video/mp4") {
@@ -29,9 +30,29 @@
 				console.log(captionsFile);
 				console.log(file);
 			}
-			if (file.type == "application/json") {
-				fileToJSON(file).then((data) => {
-					console.log(data);
+			if (file.type == "application/json" && !loadedNotes) {
+				fileToJSON(file).then((data: Delta) => {
+					loadedNotes = data;
+					const tempTags = get(tags);
+					data.ops
+						.filter((op) => op.attributes?.ts)
+						.forEach(({ attributes }) => {
+							const { ts, label, color, id } = attributes;
+							const { start, end } = parseRangeString(ts);
+							if (label in tempTags == false) {
+								tempTags[label] = {
+									label,
+									color,
+									annotations: new Map(),
+								};
+							}
+
+							tempTags[label].annotations.set(id, {
+								start: start,
+								end: end,
+							});
+							tags.set(tempTags);
+						});
 					setData(data as Delta);
 				});
 			} else {
