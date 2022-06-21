@@ -1,5 +1,8 @@
 <script context="module" lang="ts">
     let editor: Editor;
+    export const setData = (data: Delta) => {
+        editor.set(new Delta(data));
+    };
     export const appendLabel = (
         start: number,
         end: number,
@@ -47,8 +50,8 @@
         playTs,
         clip,
         swapLabel,
-        noTs, 
-        startIdx
+        noTs,
+        startIdx,
     } from "./util.js";
     import {
         defaultHandlers,
@@ -81,7 +84,6 @@
             ...$tags,
         };
     }
-
     editor = window.editor = new Editor({
         modules: {
             placeholder: placeholder(
@@ -96,7 +98,7 @@
     });
 
     editor.typeset.formats.add(ts);
-// TODO move to the onchanging event?
+    // TODO move to the onchanging event?
     const onTextChanged = ({ change, changedLines }: EditorChangeEvent) => {
         if (changedLines.length && change.activeFormats.ts) {
             changedLines.forEach(({ content, id: line }) => {
@@ -148,17 +150,20 @@
             else if (typeof op.insert === "string") pos += op.insert.length;
             else if (op.delete) {
                 // TODO drag, highlight delete not handeled. will stay in $tags
-                // TODO undo will not re-add tag 
-                const {ts, id, label} = change.doc.getTextFormat([pos, pos + op.delete]);
+                // TODO undo will not re-add tag
+                const { ts, id, label } = change.doc.getTextFormat([
+                    pos,
+                    pos + op.delete,
+                ]);
                 const deleted = change.doc.getText([pos, pos + op.delete]);
                 if (ts && /@|\(|\)/.test(deleted)) {
                     let start = startIdx[deleted](ts);
                     convert
                         .retain(pos - start)
                         .retain(pos - start + ts.length, noTs);
-                    
-                    $tags[label].annotations.delete(id)
-                    $tags = $tags
+
+                    $tags[label].annotations.delete(id);
+                    $tags = $tags;
                     event.modify(convert);
                 }
             }
@@ -189,7 +194,7 @@
     };
     // TODO download as structured
     const downloadNotes = () => {
-        saveFile(new Blob([editor.getHTML()]), "Notes.html");
+        saveFile(new Blob([JSON.stringify(editor.getDelta())]), "Notes.json");
     };
 </script>
 
