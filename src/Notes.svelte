@@ -73,7 +73,7 @@
     //     ffmpeg.exit();
     // });
 
-    // TODO move fn to util and await promise on interface  
+    // TODO move fn to util and await promise on interface
     // $: console.log($tags)
     window.process = { env: { NODE_ENV: import.meta.env.MODE } };
     if (import.meta.env.MODE == "development") {
@@ -195,6 +195,7 @@
     const downloadNotes = () => {
         saveFile(new Blob([JSON.stringify(editor.getDelta())]), "Notes.json");
     };
+    const downloadCsv = () => {};
 </script>
 
 <svelte:window on:beforeunload={beforeUnload} />
@@ -243,17 +244,29 @@
             disabled={!active.undo}
             on:click={commands.undo}>undo</button
         >
-
         <button
             class="toolbar-button material-icons"
             disabled={!active.redo}
             on:click={commands.redo}>redo</button
         >
-        <button
-            class="toolbar-button material-icons right"
-            disabled={!active.undo}
-            on:click={downloadNotes}>file_download</button
-        >
+        <div class="dropdown">
+            <button
+                class="toolbar-button material-icons "
+                disabled={!active.undo}>file_download</button
+            >
+            <div class="dropdown-content">
+                <button
+                    class="drop-btn"
+                    on:click={downloadNotes}
+                    disabled={!active.undo}>Notes</button
+                >
+                <button
+                    class="drop-btn"
+                    on:click={downloadCsv}
+                    disabled={!active.undo}>CSV</button
+                >
+            </div>
+        </div>
     </Toolbar>
 </div>
 
@@ -474,5 +487,32 @@
         font-size: 13px;
         display: flex;
         align-items: center;
+    }
+    .dropdown {
+        position: relative;
+        display: inline-block;
+    }
+    .dropdown-content {
+        display: none;
+        position: absolute;
+        z-index: 10000;
+
+        /* background-color: #f1f1f1;
+        min-width: 160px;
+        box-shadow: 0px 8px 16px 0px rgba(0, 0, 0, 0.2);
+        z-index: 1; */
+    }
+    /* Show the dropdown menu on hover */
+    .dropdown:hover .dropdown-content {
+        display: block;
+    }
+    .drop-btn {
+        width: 100%;
+        margin: 0px;
+    }
+    .drop-btn:hover {
+        outline: none;
+        border-color: #80bdff;
+        box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
     }
 </style>
