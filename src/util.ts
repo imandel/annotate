@@ -162,3 +162,11 @@ export const swapLabel = (id: string, currentLabel: string, newLabel: string) =>
     tempTags[currentLabel].annotations.delete(id)
     tags.set(tempTags)
 }
+
+export const noTs = { ts: null, label: null, id: null, color: null };
+export const startIdx = {
+    '@': _ => 0,
+    '(': _ => 1,
+    ')': ts => ts.length
+
+}

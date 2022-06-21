@@ -34,6 +34,7 @@
         deltaToText,
         EditorRange,
     } from "typewriter-editor";
+    import { Delta } from "@typewriter/delta";
     import { onMount, onDestroy } from "svelte";
     import Root from "typewriter-editor/lib/Root.svelte";
     import Toolbar from "typewriter-editor/lib/Toolbar.svelte";
@@ -42,11 +43,12 @@
     import { tags, paused } from "./stores";
     import {
         saveFile,
-        getTranscriptIdx,
         expandTsSelection,
         playTs,
         clip,
         swapLabel,
+        noTs, 
+        startIdx
     } from "./util.js";
     import {
         defaultHandlers,
@@ -57,6 +59,7 @@
 
     // TODO: idea capature shift up or down to add/reduce time on tag?
     let downloadingVid = false;
+    // TODO fix regex to treat @(10-) as @(10)
     const regEx =
         /@\(\d+((:\d+){1,2})?(\.\d+)?(-?\d+((:\d+){1,2})?(\.\d+)?)\)/g;
     // TODO move ffmpeg code to util?
@@ -93,7 +96,7 @@
     });
 
     editor.typeset.formats.add(ts);
-
+// TODO move to the onchanging event?
     const onTextChanged = ({ change, changedLines }: EditorChangeEvent) => {
         if (changedLines.length && change.activeFormats.ts) {
             changedLines.forEach(({ content, id: line }) => {
@@ -110,22 +113,18 @@
                         change.selection[0] <= endIdx &&
                         change.selection[0] >= startIdx
                     ) {
-                        console.log(match, startIdx, endIdx);
                         const allFormats = editor.doc.getFormats(
                             [startIdx, endIdx],
                             { allFormats: true }
                         );
 
                         allFormats.ts = match;
-                        console.log(allFormats);
                         const { start, end } = parseRangeString(match);
                         const { id, label } = allFormats;
-                        console.log(startIdx, endIdx);
                         editor.formatText(allFormats, <EditorRange>[
                             startIdx,
                             endIdx,
                         ]);
-
                         $tags[label].annotations.set(id, {
                             start,
                             end,
@@ -139,6 +138,32 @@
     };
 
     editor.on("changed", onTextChanged);
+    editor.on("changing", (event: EditorChangeEvent) => {
+        const { change } = event;
+        const ops = change.delta.ops;
+        const convert = new Delta();
+        let pos = 0;
+        ops.forEach((op) => {
+            if (op.retain) pos += op.retain;
+            else if (typeof op.insert === "string") pos += op.insert.length;
+            else if (op.delete) {
+                // TODO drag, highlight delete not handeled. will stay in $tags
+                // TODO undo will not re-add tag 
+                const {ts, id, label} = change.doc.getTextFormat([pos, pos + op.delete]);
+                const deleted = change.doc.getText([pos, pos + op.delete]);
+                if (ts && /@|\(|\)/.test(deleted)) {
+                    let start = startIdx[deleted](ts);
+                    convert
+                        .retain(pos - start)
+                        .retain(pos - start + ts.length, noTs);
+                    
+                    $tags[label].annotations.delete(id)
+                    $tags = $tags
+                    event.modify(convert);
+                }
+            }
+        });
+    });
 
     $: if ($active?.ts)
         editor.select(
