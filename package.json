@@ -30,6 +30,7 @@
     "@typewriter/delta": "^1.0.2",
     "@typewriter/document": "^0.7.3",
     "moment": "^2.29.1",
+    "papaparse": "^5.3.2",
     "path-browserify": "^1.0.1",
     "rollup": ">=1.20.0 <2.0.0 || >=2.0.0 <3.0.0",
     "svelte-actions": "^0.2.2",

@@ -44,6 +44,7 @@
     import BubbleMenu from "typewriter-editor/lib/BubbleMenu.svelte";
     import { ts, tsReplace, parseRangeString } from "./customFormatting";
     import { tags, paused } from "./stores";
+    import { unparse } from "papaparse";
     import {
         saveFile,
         expandTsSelection,
@@ -191,11 +192,33 @@
             }
         }
     };
-    // TODO download as structured
+    // TODO re-parse notes in case there are errors in $tags
     const downloadNotes = () => {
         saveFile(new Blob([JSON.stringify(editor.getDelta())]), "Notes.json");
     };
-    const downloadCsv = () => {};
+
+    const downloadTxt = () => {
+        saveFile(new Blob([editor.getText()]), "Notes.txt");
+    };
+
+    const downloadCsv = () => {
+        const tsLines = editor.doc.lines
+            .filter((line) => line.content.ops.some((op) => op?.attributes?.ts))
+            .flatMap((line) => {
+                const noteContent = line.content.ops
+                    .map((op) => op.insert)
+                    .join();
+                const rows = line.content.ops
+                    .filter((op) => op?.attributes?.ts)
+                    .map((op) => {
+                        const { ts, label, color, id } = op.attributes;
+                        const { start, end } = parseRangeString(ts);
+                        return { start, end, label, color, id, noteContent };
+                    });
+                return rows;
+            });
+        saveFile(new Blob([unparse(tsLines)]), "Notes.csv");
+    };
 </script>
 
 <svelte:window on:beforeunload={beforeUnload} />
@@ -264,6 +287,11 @@
                     class="drop-btn"
                     on:click={downloadCsv}
                     disabled={!active.undo}>CSV</button
+                >
+                <button
+                    class="drop-btn"
+                    on:click={downloadTxt}
+                    disabled={!active.undo}>Text</button
                 >
             </div>
         </div>
@@ -374,6 +402,7 @@
 
     :global(.placeholder) {
         position: relative;
+        z-index: 1;
     }
     :global(.placeholder::before) {
         content: attr(data-placeholder);
@@ -381,6 +410,7 @@
         left: 0;
         right: 0;
         opacity: 0.5;
+        z-index: 1;
     }
 
     :global(.text-content) {
