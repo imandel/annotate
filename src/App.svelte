@@ -6,6 +6,7 @@
 	import Input from "./Input.svelte";
 	import Notes from "./Notes.svelte";
 	import Labels from "./Labels.svelte";
+	import Timeline from "./Timeline.svelte";
 
 	let captionsFile: string;
 
@@ -25,6 +26,7 @@
 		<Transcript />
 	{/if}
 </div>
+<Timeline />
 <Notes />
 
 <style>
