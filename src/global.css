@@ -139,3 +139,58 @@ button:focus {
   .text-content .selection-menu {
 	background: var(--selection-color);
   }
+
+  /* typewriter global css */
+  .timestamp {
+	color: rgb(0, 0, 172);
+	text-decoration: underline;
+	cursor: pointer;
+}
+.timestamp.label{
+	background-color: var(--tag-color);
+	border-radius: 10px;
+    padding: 1px 3px 1px 3px;
+}
+
+  .text-circle {
+	height: 1em;
+	width: 1em;
+	margin: 0 5px;
+	border-radius: 50%;
+	display: inline-block;
+	z-index: 0;
+}
+.tooltip {
+	position:relative; /* making the .tooltip span a container for the tooltip text */
+  }
+
+  .tooltip:before {
+	content: attr(data-text); /* here's the magic */
+	position:absolute;
+	
+	/* vertically center */
+	top:50%;
+	transform:translateY(-50%);
+	
+	/* move to right */
+	left:50%;
+	margin-left:15px; /* and add a small left margin */
+	
+	/* basic styles */
+	/* width:200px; */
+	padding:0.3em 0.5em;
+	border-radius:10px;
+	background:rgb(143, 143, 143);
+	color: #fff;
+	text-align:center;
+	border-color: transparent black transparent transparent;
+	z-index: 300;
+
+  
+	display:none; /*hide by default */
+  }
+/* TODO hover breaks sometimes? */
+  .tooltip:hover:before {
+	display:block;
+	z-index: 3;
+  }

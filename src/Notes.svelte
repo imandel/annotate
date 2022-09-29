@@ -1,75 +1,231 @@
+<script context="module" lang="ts">
+    let editor: Editor;
+    export const setData = (data: Delta) => {
+        editor.set(new Delta(data));
+    };
+    export const appendLabel = (
+        start: number,
+        end: number,
+        label: string,
+        color: string,
+        id: string
+    ) => {
+        if (editor) {
+            const change = editor.change;
+            change.insert(editor.doc.length, "\n");
+            change.insert(editor.doc.length + 1, `@(${start}-${end})`, {
+                ts: `@(${start}-${end})`,
+                label,
+                color,
+                id,
+            });
+            change.apply();
+            // TODO: typewriter change event? this is hacky
+            const keys = [...editor.doc.byId.keys()];
+            return keys[keys.length - 2];
+        }
+    };
+</script>
+
 <script lang="ts">
-    import { onMount } from "svelte";
     import {
         Editor,
         placeholder,
         smartEntry,
-        h,
         editorStores,
-        defaultTypes,
+        EditorChangeEvent,
+        deltaToText,
+        EditorRange,
     } from "typewriter-editor";
+    import { Delta } from "@typewriter/delta";
+    import { onMount, onDestroy } from "svelte";
     import Root from "typewriter-editor/lib/Root.svelte";
     import Toolbar from "typewriter-editor/lib/Toolbar.svelte";
     import BubbleMenu from "typewriter-editor/lib/BubbleMenu.svelte";
-    import { ts, defaultHandlers } from "./timestampHandler";
-    import { play, pause } from "./Video.svelte";
-    import { currentTime } from "./stores";
-	import { saveFile } from './util.js'
-    let playingNote = false;
+    import { ts, tsReplace, parseRangeString } from "./customFormatting";
+    import { tags, paused } from "./stores";
+    import { unparse } from "papaparse";
+    import {
+        saveFile,
+        expandTsSelection,
+        playTs,
+        clip,
+        swapLabel,
+        noTs,
+        startIdx,
+    } from "./util.js";
+    import {
+        defaultHandlers,
+        markReplace,
+    } from "typewriter-editor/lib/modules/smartEntry";
+    import { Jumper } from "svelte-loading-spinners";
+    import { createFFmpeg } from "@ffmpeg/ffmpeg";
+    // TODO: idea capature shift up or down to add/reduce time on tag?
+    let downloadingVid = false;
+    // TODO fix regex to treat @(10-) as @(10)
+    const regEx =
+        /@\(\d+((:\d+){1,2})?(\.\d+)?(-?\d+((:\d+){1,2})?(\.\d+)?)\)/g;
+    // TODO move ffmpeg code to util?
+    const ffmpeg = createFFmpeg({ log: false });
+    onMount(async () => {
+        await ffmpeg.load();
+    });
+    // onDestroy(async () => {
+    //     ffmpeg.exit();
+    // });
 
-
-    const playTs = (ts: string) => {
-        // TODO parse ts
-        if(playingNote) {
-            pause();
-            playingNote = false;
-        } else {
-        playingNote = true;
-        $currentTime = parseFloat(ts.substring(2, ts.length-1));
-        play()
-        }
+    // TODO move fn to util and await promise on interface
+    // $: console.log($tags)
+    window.process = { env: { NODE_ENV: import.meta.env.MODE } };
+    if (import.meta.env.MODE == "development") {
+        $tags = {
+            cat: { label: "cat", color: "teal", annotations: new Map() },
+            bat: { label: "bat", color: "#9d9dff", annotations: new Map() },
+            ...$tags,
+        };
     }
-
-
-    // this dumb hack sux
-    window.process = { env: { NODE_ENV: "production" } };
-
-    // 	    onMount(async () => {
-    //             console.log(textReplace)
-    //         }
-    // );
-
-    const editor = (window.editor = new Editor({
+    editor = window.editor = new Editor({
         modules: {
-            placeholder: placeholder("When the video loads try writing @(now) or @(1:23)"),
-            smartEntry: smartEntry(defaultHandlers),
+            placeholder: placeholder(
+                "When the video loads try writing @now, @(1:23), or @(10.5-20.23)"
+            ),
+            smartEntry: smartEntry([
+                ...defaultHandlers,
+                markReplace,
+                tsReplace,
+            ]),
         },
-    }));
+    });
 
     editor.typeset.formats.add(ts);
+    // TODO move to the onchanging event?
+    const onTextChanged = ({ change, changedLines }: EditorChangeEvent) => {
+        if (changedLines.length && change.activeFormats.ts) {
+            changedLines.forEach(({ content, id: line }) => {
+                const text = deltaToText(content);
+                const lineStart = editor.doc.getLineRanges(
+                    change.selection[0]
+                )[0][0];
+                const matches = text.matchAll(regEx);
+                for (const m of matches) {
+                    const match = m[0];
+                    const startIdx = m.index + lineStart;
+                    const endIdx = m.index + lineStart + match.length;
+                    if (
+                        change.selection[0] <= endIdx &&
+                        change.selection[0] >= startIdx
+                    ) {
+                        const allFormats = editor.doc.getFormats(
+                            [startIdx, endIdx],
+                            { allFormats: true }
+                        );
+
+                        allFormats.ts = match;
+                        const { start, end } = parseRangeString(match);
+                        const { id, label } = allFormats;
+                        editor.formatText(allFormats, <EditorRange>[
+                            startIdx,
+                            endIdx,
+                        ]);
+                        $tags[label].annotations.set(id, {
+                            start,
+                            end,
+                            line,
+                        });
+                        $tags = $tags;
+                    }
+                }
+            });
+        }
+    };
+
+    editor.on("changed", onTextChanged);
+    editor.on("changing", (event: EditorChangeEvent) => {
+        const { change } = event;
+        const ops = change.delta.ops;
+        const convert = new Delta();
+        let pos = 0;
+        ops.forEach((op) => {
+            if (op.retain) pos += op.retain;
+            else if (typeof op.insert === "string") pos += op.insert.length;
+            else if (op.delete) {
+                // TODO drag, highlight delete not handeled. will stay in $tags
+                // TODO undo will not re-add tag
+                const { ts, id, label } = change.doc.getTextFormat([
+                    pos,
+                    pos + op.delete,
+                ]);
+                const deleted = change.doc.getText([pos, pos + op.delete]);
+                if (ts && /@|\(|\)/.test(deleted)) {
+                    let start = startIdx[deleted](ts);
+                    convert
+                        .retain(pos - start)
+                        .retain(pos - start + ts.length, noTs);
+
+                    $tags[label].annotations.delete(id);
+                    $tags = $tags;
+                    event.modify(convert);
+                }
+            }
+        });
+    });
+
+    $: if ($active?.ts)
+        editor.select(
+            expandTsSelection(
+                editor.getText($selection),
+                $active.ts,
+                $selection
+            )
+        );
 
     const { active, doc, selection, focus, root, updateEditor } =
         editorStores(editor);
-    // $: console.log($selection, $focus, $active);
-
-    const  beforeUnload = (event: BeforeUnloadEvent) => {
-    if ($active.undo) {
-        event.preventDefault();
-        event.returnValue = '';
-        return '';
-    }
-  }
+    // $: console.log($doc);
+    // $: console.log($active, $doc, $selection, $focus, $root )
+    const beforeUnload = (event: BeforeUnloadEvent) => {
+        if (import.meta.env.MODE == "production") {
+            if ($active.undo) {
+                event.preventDefault();
+                event.returnValue = "";
+                return "";
+            }
+        }
+    };
+    // TODO re-parse notes in case there are errors in $tags
     const downloadNotes = () => {
-        saveFile(new Blob([editor.getHTML()]), 'Notes.html');
-    }
+        saveFile(new Blob([JSON.stringify(editor.getDelta())]), "Notes.json");
+    };
+
+    const downloadTxt = () => {
+        saveFile(new Blob([editor.getText()]), "Notes.txt");
+    };
+
+    const downloadCsv = () => {
+        const tsLines = editor.doc.lines
+            .filter((line) => line.content.ops.some((op) => op?.attributes?.ts))
+            .flatMap((line) => {
+                const noteContent = line.content.ops
+                    .map((op) => op.insert)
+                    .join();
+                const rows = line.content.ops
+                    .filter((op) => op?.attributes?.ts)
+                    .map((op) => {
+                        const { ts, label, color, id } = op.attributes;
+                        const { start, end } = parseRangeString(ts);
+                        return { start, end, label, color, id, noteContent };
+                    });
+                return rows;
+            });
+        saveFile(new Blob([unparse(tsLines)]), "Notes.csv");
+    };
 </script>
-<svelte:window on:beforeunload={beforeUnload}/>
+
+<svelte:window on:beforeunload={beforeUnload} />
 
 <h3>Notes</h3>
 <div class="toolbar">
-    <!-- TODO make toolbar sticky -->
-<Toolbar {editor} let:active let:commands>
-   
+    <Toolbar {editor} let:active let:commands>
         <button
             class="toolbar-button material-icons"
             class:active={active.header === 2}
@@ -111,18 +267,35 @@
             disabled={!active.undo}
             on:click={commands.undo}>undo</button
         >
-
         <button
             class="toolbar-button material-icons"
             disabled={!active.redo}
             on:click={commands.redo}>redo</button
         >
-        <button
-        class="toolbar-button material-icons right"
-        disabled={!active.undo}
-        on:click={downloadNotes}>file_download</button
-    >
-</Toolbar>
+        <div class="dropdown">
+            <button
+                class="toolbar-button material-icons "
+                disabled={!active.undo}>file_download</button
+            >
+            <div class="dropdown-content">
+                <button
+                    class="drop-btn"
+                    on:click={downloadNotes}
+                    disabled={!active.undo}>Notes</button
+                >
+                <button
+                    class="drop-btn"
+                    on:click={downloadCsv}
+                    disabled={!active.undo}>CSV</button
+                >
+                <button
+                    class="drop-btn"
+                    on:click={downloadTxt}
+                    disabled={!active.undo}>Text</button
+                >
+            </div>
+        </div>
+    </Toolbar>
 </div>
 
 <BubbleMenu {editor} let:active let:commands let:placement let:selection>
@@ -140,26 +313,61 @@
             {#if active.ts}
                 <button
                     class="menu-button material-icons"
-                    on:click={(e) => playTs(active.ts)}>
-                    {#if playingNote}
-                    pause
-                    {/if}
-                    play_arrow
-                    </button
+                    on:click={() => playTs(active.ts)}
                 >
+                    {#if $paused}
+                        play_arrow
+                    {:else}
+                        pause
+                    {/if}
+                </button>
+                {#each Object.values($tags) as tag}
+                    <button
+                        class="menu-button material-icons label"
+                        style="--tag-color: {tag.color}"
+                        on:click={() => {
+                            console.log(active);
+                            editor.formatText({
+                                color: tag.color,
+                                label: tag.label,
+                            });
+                            swapLabel(active.id, active.label, tag.label);
+                        }}>circle</button
+                    >
+                {/each}
+                {#if active.ts.includes("-")}
+                    {#if downloadingVid}
+                        <Jumper
+                            size="34"
+                            color="#e6e4fe"
+                            unit="px"
+                            duration="1s"
+                        />
+                    {:else}
+                        <button
+                            class="menu-button material-icons"
+                            on:click={() => {
+                                downloadingVid = true;
+                                clip(active.ts, ffmpeg).then(
+                                    () => (downloadingVid = false)
+                                );
+                            }}>file_download</button
+                        >
+                    {/if}
+                {/if}
             {/if}
         </div>
     {/if}
 </BubbleMenu>
 
-<Root {editor} class="text-content" >
-    
-</Root>
+<Root {editor} class="text-content" />
 
 <style>
     .toolbar {
         display: flex;
         background: #eee;
+        position: sticky;
+        top: 0;
         padding: 8px;
         margin-bottom: 8px;
         border-radius: 3px;
@@ -194,6 +402,7 @@
 
     :global(.placeholder) {
         position: relative;
+        z-index: 1;
     }
     :global(.placeholder::before) {
         content: attr(data-placeholder);
@@ -201,6 +410,7 @@
         left: 0;
         right: 0;
         opacity: 0.5;
+        z-index: 1;
     }
 
     :global(.text-content) {
@@ -208,15 +418,10 @@
         padding: 8px 16px;
         border-radius: 3px;
         min-height: 100px;
+        max-height: 30vh;
         overflow-y: auto;
         border: 1px solid #ced4da;
         transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
-    }
-
-    :global(.timestamp) {
-        color: rgb(131, 131, 255);
-        text-decoration: underline;
-        cursor: pointer;
     }
 
     .menu {
@@ -244,6 +449,9 @@
         outline: none;
         cursor: pointer;
     }
+    .menu-button.label {
+        color: var(--tag-color);
+    }
     .menu-button:first-child {
         padding-left: 14px;
     }
@@ -261,6 +469,7 @@
     }
     :global(.bubble-menu.active) {
         transition: all 75ms ease-out;
+        z-index: 2;
     }
     .arrow {
         display: block;
@@ -296,8 +505,44 @@
             opacity: 1;
         }
     }
-    .right{
-        margin-left: auto; 
+    .right {
+        margin-left: auto;
         margin-right: 0;
+    }
+    .tag-select {
+        background-color: rgb(216, 216, 216);
+        color: white;
+        padding: 5px 10px;
+        border-radius: 25px;
+        font-size: 13px;
+        display: flex;
+        align-items: center;
+    }
+    .dropdown {
+        position: relative;
+        display: inline-block;
+    }
+    .dropdown-content {
+        display: none;
+        position: absolute;
+        z-index: 10000;
+
+        /* background-color: #f1f1f1;
+        min-width: 160px;
+        box-shadow: 0px 8px 16px 0px rgba(0, 0, 0, 0.2);
+        z-index: 1; */
+    }
+    /* Show the dropdown menu on hover */
+    .dropdown:hover .dropdown-content {
+        display: block;
+    }
+    .drop-btn {
+        width: 100%;
+        margin: 0px;
+    }
+    .drop-btn:hover {
+        outline: none;
+        border-color: #80bdff;
+        box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
     }
 </style>

@@ -1,136 +1,220 @@
 <script lang="ts">
-	// 	 on:mousedown={(e)=>{if(e.shiftKey){selecting=true; $curKeypoint.id = getId('transcript_')}}}
-	//  on:mousemove={selection}
-	//  on:mouseup={(e)=>{if(selecting){selection(e);selecting=false; window.getSelection().empty()}}}
-	import { cueData, currentTime } from './stores';
-	import { onMount } from 'svelte';
-	import Toggle from 'svelte-toggle';
-	import { saveFile } from './util.js'
-	import { createPopper } from '@popperjs/core';
+	import { Annotation, cueData, currentTime, tags } from "./stores";
+	import type { Tags } from "./stores";
+	import { onMount, tick } from "svelte";
+	import Toggle from "svelte-toggle";
+	import {
+		saveFile,
+		getElementRange,
+		createId,
+		getTranscriptIdxs,
+	} from "./util.js";
+	import { createPopper } from "@popperjs/core";
+	import { appendLabel } from "./Notes.svelte";
+	import TagSelect from "./TagSelect.svelte";
+	$: updateMarkers($tags);
 
-	let transcriptBox;
-	let transcriptContent;
-	let currentCue;
+	// TODO make cell unactive on click
+	// TODO sticky headers https://css-tricks.com/position-sticky-and-table-headers/
+	const updateMarkers = async (trigger: Tags) => {
+		tick().then(() => {
+			transcriptContent
+				.querySelectorAll(".marker")
+				.forEach((rowMarker) => rowMarker.classList.remove("marked"));
+			Object.values(trigger).forEach((tag) => {
+				tag.annotations.forEach(({ start, end }: Annotation, _) => {
+					let idxs = getTranscriptIdxs(start, end);
+
+					idxs.forEach((idx) => {
+						const rowMarker = transcriptContent.querySelector(
+							`.marker[data-idx="${idx}"].${tag.label}`
+						);
+						rowMarker?.classList.add("marked");
+					});
+				});
+			});
+		});
+	};
+
+	// hack to keep popper running
+	window.process = { env: { NODE_ENV: import.meta.env.MODE } };
+	let transcriptBox: HTMLDivElement;
+	let transcriptContent: HTMLDivElement;
+	let currentCue = 0;
 	let editable = false;
-	// the highlighted range
-    let start;
-    let end;
-    let mDown = false;
-	let highlight;
-	let color = "#fff";
-	let colors = ["rgb(255, 255, 131)", "rgb(166, 255, 233)","rgb(255, 199, 186)","rgb(217, 195, 255)",
-				"rgb(184, 238, 255)", "rgb(255, 208, 239)","rgb(255,255,255)"];
+	let elements: HTMLElement[] = [];
+	let mousedown = false;
+	let highlight: HTMLDivElement;
+	let start: HTMLDivElement;
+	let end: HTMLDivElement;
 
-    onMount(() => {
+	$: elements?.forEach((element) => {
+		element.classList.add("active-highlight");
+	});
+
+	onMount(() => {
 		$cueData.forEach((cue) => {
-			const activeNode = transcriptContent.childNodes[cue.id - 1];
+			const activeNode = <HTMLElement>(
+				transcriptContent.querySelector(
+					`div.content[data-idx="${cue.id - 1}"]`
+				)
+			);
 			cue.onenter = () => {
 				currentCue = cue.id - 1;
-				const middleOffset = transcriptBox.getBoundingClientRect().height / 2;
+				const middleOffset =
+					transcriptBox.getBoundingClientRect().height / 2;
 				transcriptBox.scrollTo({
 					left: 0,
 					top: activeNode.offsetTop - middleOffset,
-					behavior: 'smooth'
+					behavior: "smooth",
 				});
 			};
 		});
 	});
-	
-	function change_highlightarea(){
-		// do highlight
-	}
 
-	$: start, end, change_highlightarea();
-
-	const downloadTranscript = async () => {
-		// console.log(transcriptContent.childNodes[0]);
-		let content = 'WEBVTT\n';
-		$cueData.forEach((cue) => {
-			const activeNode = transcriptContent.childNodes[cue.id - 1];
-			content += `\n${cue.id}\n${new Date(cue.startTime * 1000)
-				.toISOString()
-				.slice(11, -1)} --> ${new Date(cue.endTime * 1000).toISOString().slice(11, -1)}\n${
-				activeNode.querySelector('span:nth-child(2)').textContent
-			}\n`;
-		});
-		saveFile(new Blob([content]), 'transcript.vtt');
+	const onMouseDown = (e: MouseEvent) => {
+		start = (<HTMLDivElement>e.target).closest("div.content");
+		mousedown = true;
+	};
+	const onMouseUp = (e: MouseEvent) => {
+		if (mousedown && !editable) {
+			end = (<HTMLDivElement>e.target).closest("div.content");
+			elements = getElementRange(start, end);
+			createPopper(elements[elements.length - 1], highlight, {
+				placement: "bottom-end",
+			});
+			highlight.style.display = "";
+			mousedown = false;
+		}
 	};
 
-    const mouseDown = (e) => {
-        mDown = true;
-        // e.preventDefault()
-        const target = e.target.closest('p');
-		// highlight.style.visibility='hidden';
-		if(target){
-			// set the highlight area : [start, end]
-			start = parseInt(target.id.replace("trans",""));
-			// if only one section is selected, set end to start;
-			end = start;
+	const onMouseMove = (e: MouseEvent) => {
+		if (mousedown) {
+			end = (<HTMLDivElement>e.target).closest("div.content");
+			elements = getElementRange(start, end);
 		}
-    }
+	};
 
-    const mouseMove = (e) => {
-        if(mDown){
-            const target = e.target.closest('p')
-			if(target){
-				end = parseInt(target.id.replace("trans",""));
-			}
-        }
-    }
+	const downloadTranscript = async () => {
+		let content = "WEBVTT\n";
+		$cueData.forEach((cue) => {
+			const activeNode = <HTMLElement>(
+				transcriptContent.querySelector(
+					`div.content[data-idx="${cue.id - 1}"]`
+				)
+			);
+			content += `\n${cue.id}\n${new Date(cue.startTime * 1000)
+				.toISOString()
+				.slice(11, -1)} --> ${new Date(cue.endTime * 1000)
+				.toISOString()
+				.slice(11, -1)}\n${
+				activeNode.querySelector("span:nth-child(2)").textContent
+			}\n`;
+		});
+		saveFile(new Blob([content]), "transcript.vtt");
+	};
 
-    const mouseUp = (e) => {
-        console.log('up')
-        if(mDown){
-            mDown = false;
-			const endElement = document.getElementById("trans"+String(end));
-			// highlight.style.visibility = "visible";
-			// console.log(highlight);
-			// show tooltip
-			createPopper(endElement, highlight, {
-				placement: 'bottom-end',
-			});
-        }
-    }
+	const tagSelectCallback = (_label: string, _color: string) => {
+		const start = parseFloat(elements[0].dataset.starttime);
+		const end = parseFloat(elements[elements.length - 1].dataset.endtime);
+		const id = createId($tags[_label].annotations);
+		const line = appendLabel(start, end, _label, _color, id);
+		$tags[_label].annotations.set(id, {
+			start,
+			end,
+			line,
+		});
+		$tags = $tags;
+		highlight.style.display = "none";
+	};
 </script>
 
 <div class="transcript-container" bind:this={transcriptBox}>
 	<div class="settings">
 		<Toggle small label="Edit transcript" bind:toggled={editable} />
-		<button on:click={downloadTranscript} style="margin-bottom: 0em;">Download</button>
+		<button on:click={downloadTranscript} style="margin-bottom: 0em;"
+			>Download</button
+		>
 	</div>
-	<div bind:this={highlight} id="tooltip" data-popper-reference-hidden data-popper-arrow >
-		{#each colors as c}
-			<span class="liner-circle" style="background-color:{c}" on:click={()=>{color=c}}>
-			</span>
-		{/each}
+
+	<div
+		bind:this={highlight}
+		class="transcript-tooltip"
+		data-popper-reference-hidden
+		data-popper-arrow
+	>
+		<TagSelect callback={tagSelectCallback} />
 	</div>
-	<div bind:this={transcriptContent} on:mousedown={mouseDown} on:mouseup={mouseUp} on:mousemove={mouseMove}>
-		{#each $cueData as cue, index}
-			<p
-				class:activeLine={index === currentCue}
-				style={(index >= start && index <= end) ? "background-color:" + color + ";" : ""}
-				on:click ={()=>{if(!editable)$currentTime = cue.startTime}}
-				data-startTime={cue.startTime}
-				data-endTime={cue.endTime}
-				data-idx={index}
-				id={"trans"+index}
-			>
-				<span class="bold"
-					>{new Date(cue.startTime * 1000).toISOString().substring(11, 19)}-{new Date(
-						cue.endTime * 1000
-					)
-						.toISOString()
-						.substring(11, 19)}</span
-				>:
-				<span
-					class={editable ? 'edit-mode' : 'read-mode'}
-					class:editing={editable}
-					contenteditable={editable}
+	<div
+		tabindex="0"
+		on:focusin={() => {}}
+		on:blur={() => {
+			document
+				.querySelectorAll(".active-highlight")
+				.forEach((element) =>
+					element.classList.remove("active-highlight")
+				);
+			highlight.style.display = "none";
+			window.getSelection()?.removeAllRanges();
+			// elements = [];
+		}}
+	>
+		<div
+			bind:this={transcriptContent}
+			class="transcript-content"
+			style="grid-template-columns: repeat({Object.values($tags)
+				.length}, minmax(6px, auto)) 95%;"
+			on:mouseup={onMouseUp}
+			on:mousedown={onMouseDown}
+			on:mousemove={onMouseMove}
+		>
+			{#each $cueData as cue, index}
+				<!-- <tr
+					data-startTime={cue.startTime}
+					data-endTime={cue.endTime}
+					data-idx={index}
+				> -->
+				{#each Object.values($tags) as tag}
+					<div
+						class="marker {tag.label}"
+						style="--tag-color: {tag.color}"
+						data-idx={index}
+					/>
+				{/each}
+
+				<div
+					class="content"
+					data-starttime={cue.startTime}
+					data-endtime={cue.endTime}
+					data-idx={index}
 				>
-					{cue.text}</span
-				>
-			</p>
-		{/each}
+					<p
+						class:activeLine={index === currentCue}
+						on:click={() => {
+							if (!editable) $currentTime = cue.startTime;
+						}}
+					>
+						<span class="bold"
+							>{new Date(cue.startTime * 1000)
+								.toISOString()
+								.substring(11, 19)}-{new Date(
+								cue.endTime * 1000
+							)
+								.toISOString()
+								.substring(11, 19)}</span
+						>:
+						<span
+							class={editable ? "edit-mode" : "read-mode"}
+							class:editing={editable}
+							contenteditable={editable}
+						>
+							{cue.text}</span
+						>
+					</p>
+				</div>
+				<!-- </tr> -->
+			{/each}
+		</div>
 	</div>
 </div>
 
@@ -140,6 +224,7 @@
 		padding: 0 0.5em 0.5em 0.5em;
 		display: block;
 		overflow: auto;
+		/* user-select: none; */
 	}
 	.editing {
 		color: #3f2e65;
@@ -155,35 +240,53 @@
 	.settings > button {
 		margin-left: 1rem;
 	}
-    .activeLine {
+	.activeLine {
 		font-size: 1.1em;
 	}
-    :global(.bound){
-        height: 1em;
-        width: 100%;
-        background-color: red;
-    }
-	#tooltip {
+	:global(.bound) {
+		height: 1em;
+		width: 100%;
+		background-color: red;
+	}
+	.transcript-tooltip {
 		background-color: rgb(216, 216, 216);
 		color: white;
 		padding: 5px 10px;
 		border-radius: 25px;
 		font-size: 13px;
-		display: inline-block;
+		display: flex;
+		align-items: center;
 	}
 	/* Hide the popper when the reference is hidden */
-	#tooltip[data-popper-reference-hidden] {
-	visibility: hidden;
-	pointer-events: none;
+	.transcript-tooltip[data-popper-reference-hidden] {
+		/* visibility: hidden; */
+		pointer-events: none;
+		display: none;
+	}
+	.marked {
+		/* width: 9px; */
+		background-color: var(--tag-color);
+		/* padding: 0px; */
+	}
+	.marker {
+		/* width: 9px; */
+		/* background-color: var(--tag-color); */
+		padding: 0px;
+	}
+	.transcript-content {
+		display: grid;
 	}
 
-	.liner-circle {
-		height: 18px;
-		width: 18px;
-		margin: 0 5px;
-		border-radius: 50%;
-		display: inline-block;
-		cursor: pointer;
+	.content {
+		padding-left: 8px;
 	}
-
+	p {
+		margin: 0.5em 0em 0.5em 0em;
+	}
+	:global(.active-highlight) {
+		background-color: #e6e4fe;
+	}
+	:global(.active-highlight::selection) {
+		background-color: transparent;
+	}
 </style>

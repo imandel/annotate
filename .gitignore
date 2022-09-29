@@ -1,4 +1,6 @@
 /node_modules/
 /public/build/
-
+/public/example_files/*.mp4
+/public/example_files/*.vtt
 .DS_Store
+*.local

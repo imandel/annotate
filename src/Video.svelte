@@ -1,9 +1,31 @@
-<script context="module">
-    let player;
+<script context="module" lang="ts">
+    let player: HTMLVideoElement;
     export function play() {
         if (player && player.readyState) {
             player.play();
         }
+    }
+
+    export async function playUntil(timestamp: Number) {
+        return new Promise((resolve) => {
+            if (player && player.readyState) {
+                player.play();
+                // pause at end timestamp
+                player.ontimeupdate = () => {
+                    // TODO cancel if user interacts with video otherwise?
+                    // player.onseeking = () => {
+                    //     player.ontimeupdate = () => {};
+                    //     player.onseeking = () => {};
+                    // };
+                    if (player.currentTime > timestamp) {
+                        player.pause();
+                        // remove this event handler
+                        player.ontimeupdate = () => {};
+                        resolve(1);
+                    }
+                };
+            }
+        });
     }
 
     export function pause() {
@@ -14,14 +36,18 @@
 </script>
 
 <script lang="ts">
-    import { onMount } from "svelte";
-    import { cueData, duration, currentTime, paused } from "./stores";
-    let files: FileList;
-    export let videoFile = undefined;
+    import {
+        cueData,
+        duration,
+        currentTime,
+        paused,
+        videoFile,
+    } from "./stores";
+    // let files: FileList;
+    // export let $videoFile = undefined;
     export let captionsFile = undefined;
 
     let track: HTMLTrackElement;
-    let height;
 
     const setupCues = () => {
         console.log("cues loaded");
@@ -30,9 +56,15 @@
     };
 </script>
 
-{#if videoFile}
-    <div id="vid-div">
-        <div id="vid-container" bind:clientHeight={height}>
+{#if $videoFile}
+    <div
+        id="vid-div"
+        on:wheel={(e) => {
+            e.preventDefault();
+            $currentTime -= e.deltaY / 10;
+        }}
+    >
+        <div id="vid-container">
             <video
                 bind:this={player}
                 controls
@@ -40,7 +72,7 @@
                 bind:duration={$duration}
                 bind:paused={$paused}
             >
-                <source src={videoFile} type="video/mp4" />
+                <source src={$videoFile} type="video/mp4" />
                 <track
                     default
                     bind:this={track}
