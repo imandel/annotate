@@ -1,16 +1,19 @@
 <script>
+	import {tags} from "./stores"
 	// This is a dragbar for one rectangle
-    // Arguments:
-    // start: starting point
-    // width: time length of the bar
-    // height: change height while scrolling 
+	export let label = ""
+	export let key = ""
+	export let zoom = 10
 	export let grabberWidth = 10
-	export let start = 20
-	export let width = 60
     export let height = 40
+
+	// everything can be accessed by label and key
+	$: annotation = $tags[label]["annotations"].get(key)
+	$: start = annotation["start"] * zoom
+	$: end = annotation["end"] * zoom
+	$: width = (annotation["end"] - annotation["start"] ) * zoom
     // for expanding blocks
 	let expanding = null, startPoint = null, initial = null
-	
 	function startExpand(type, event ) {
 		expanding = type
 		startPoint = event.pageX
@@ -27,23 +30,21 @@
 		if (!expanding) return
 		
 		if (expanding == 'left') {
-			const delta = start-event.pageX
-			start = initial.x - delta
+			const delta = startPoint - event.pageX
+			start = initial.start - delta
 			width = initial.width + delta
 			return
 		}
 		
 		if (expanding == 'right') {
-			const delta = event.pageX-start
+			const delta = event.pageX - startPoint
 			width = initial.width + delta
 			return
 		}
 	}
 
     function drag(event) {
-		// console.log(node)
 		let moving = false;
-		// console.log(node)
 		event.addEventListener('mousedown', () => {
 			moving = true;
 		});
@@ -51,6 +52,9 @@
 			if (moving) {
 				// console.log(e)
 				start += e.movementX;
+				end += e.movementX;
+				annotation["start"] = start / zoom;
+				annotation["end"] = end / zoom;
 			}
 		});
 		
@@ -64,7 +68,7 @@
 
 <g>
 	<svg {height} on:mousemove={expand} class:expanding>
-		<rect x={start} y=2 {width} height={height-4} class="step" use:drag />
+		<rect x={start} y=2 width={width} height={height-4} class="step" use:drag />
 		<rect x={start} y=2 width={grabberWidth} height={height-4} fill=red class="grip" on:mousedown={startExpand.bind(this, 'left')}  class:active={expanding=='left'}/>
 		<rect x={start+width-grabberWidth} y=2 width={grabberWidth} height={height-4} fill=blue class="grip" on:mousedown={startExpand.bind(this, 'right')} class:active={expanding=='right'}/>
 	</svg>

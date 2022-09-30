@@ -6,6 +6,8 @@
   let zoom = 1.5;
   let scrollX = 0;
   $: console.log($tags)
+
+
   function onMouseMove(event) {
     scrollX += event.deltaX;
     console.log("what");
@@ -36,14 +38,13 @@
       on:mousedown={onMouseDown}
     />
 	<div class="timeline">
-		<svg height="40">
-			<Dragbar start={40} width={100} />
-			<Dragbar start={180} width={400} />
-		</svg>
-		<svg height="40">
-			<Dragbar start={100} width={500} />
-			<Dragbar start={700} width={200} />
-		</svg>
+		{#each Object.entries($tags) as [label, tag]}
+			<svg height="40">
+				{#each [...tag["annotations"].keys()] as key}
+					<Dragbar {label} {key} />
+				{/each}
+			</svg>
+		{/each}
 	</div>
 
 </div>
