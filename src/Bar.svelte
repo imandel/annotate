@@ -10,7 +10,8 @@
     export let height = 40
     // for expanding blocks
 	let expanding = null, start = null, initial = null
-	
+	let x1 = 
+
 	function startExpand(type, event) {
 		expanding = type
 		start = event.pageX
@@ -69,7 +70,7 @@
     </g>
     
     <g on:mousemove={expand} class:expanding>
-        <rect {x} y=2 {width} height={height-4} class="step" use:dragMe />
+        <rect {x1} y=2 {width} height={height-4} class="step" use:dragMe />
         <rect {x} y=2 width={grabberWidth} height={height-4} fill=red class="grip" on:mousedown={startExpand.bind(this, 'left')}  class:active={expanding=='left'}/>
         <rect x={x+width-grabberWidth} y=2 width={grabberWidth} height={height-4} fill=blue class="grip" on:mousedown={startExpand.bind(this, 'right')} class:active={expanding=='right'}/>
     </g>

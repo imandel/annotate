@@ -5,7 +5,7 @@
   let ruler;
   let zoom = 1.5;
   let scrollX = 0;
-  console.log($tags)
+  $: console.log($tags)
   function onMouseMove(event) {
     scrollX += event.deltaX;
     console.log("what");
@@ -25,7 +25,6 @@
 
 <div class="container">
   <h3>Timeline</h3>
-  <div class="timeline">
     <Ruler
       bind:this={ruler}
       type="horizontal"
@@ -36,12 +35,17 @@
       {zoom}
       on:mousedown={onMouseDown}
     />
-    <Dragbar x={40} width={100} />
-    <Dragbar x={60} width={400} />
-    <Dragbar x={360} width={600} />
-    <Dragbar x={100} width={500} />
-    <Dragbar x={20} width={200} />
-  </div>
+	<div class="timeline">
+		<svg height="40">
+			<Dragbar start={40} width={100} />
+			<Dragbar start={180} width={400} />
+		</svg>
+		<svg height="40">
+			<Dragbar start={100} width={500} />
+			<Dragbar start={700} width={200} />
+		</svg>
+	</div>
+
 </div>
 
 <style>

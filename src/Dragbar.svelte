@@ -1,27 +1,25 @@
 <script>
-	const grabberWidth = 10
+	// This is a dragbar for one rectangle
     // Arguments:
-    // x: starting point
+    // start: starting point
     // width: time length of the bar
     // height: change height while scrolling 
+	export let grabberWidth = 10
+	export let start = 20
 	export let width = 60
-	export let x = 20
     export let height = 40
-
-	export let x1 = 220
-	export let width1 = 60
     // for expanding blocks
-	let expanding = null, start = null, initial = null
+	let expanding = null, startPoint = null, initial = null
 	
-	function startExpand(type, event) {
+	function startExpand(type, event ) {
 		expanding = type
-		start = event.pageX
-		initial = { x, width }
+		startPoint = event.pageX
+		initial = { start, width }
 	}
 	
 	function stopExpand() {
 		expanding = null
-		start = null
+		startPoint = null
 		initial = null
 	}
 	
@@ -30,7 +28,7 @@
 		
 		if (expanding == 'left') {
 			const delta = start-event.pageX
-			x = initial.x - delta
+			start = initial.x - delta
 			width = initial.width + delta
 			return
 		}
@@ -42,18 +40,17 @@
 		}
 	}
 
-    function dragMe(node) {
+    function drag(event) {
 		// console.log(node)
 		let moving = false;
-		let rect = node.srcElement;
-		node.addEventListener('mousedown', () => {
+		// console.log(node)
+		event.addEventListener('mousedown', () => {
 			moving = true;
 		});
-		console.log(rect)
 		window.addEventListener('mousemove', (e) => {
 			if (moving) {
-				console.log(e)
-				rect.x += e.movementX;
+				// console.log(e)
+				start += e.movementX;
 			}
 		});
 		
@@ -65,15 +62,14 @@
 
 <svelte:window on:mouseup={stopExpand} />
 
-<svg {height} on:mousemove={expand} class:expanding>
-    <rect {x} y=2 {width} height={height-4} class="step" use:dragMe />
-    <rect {x} y=2 width={grabberWidth} height={height-4} fill=red class="grip" on:mousedown={startExpand.bind(this, 'left')}  class:active={expanding=='left'}/>
-    <rect x={x+width-grabberWidth} y=2 width={grabberWidth} height={height-4} fill=blue class="grip" on:mousedown={startExpand.bind(this, 'right')} class:active={expanding=='right'}/>
+<g>
+	<svg {height} on:mousemove={expand} class:expanding>
+		<rect x={start} y=2 {width} height={height-4} class="step" use:drag />
+		<rect x={start} y=2 width={grabberWidth} height={height-4} fill=red class="grip" on:mousedown={startExpand.bind(this, 'left')}  class:active={expanding=='left'}/>
+		<rect x={start+width-grabberWidth} y=2 width={grabberWidth} height={height-4} fill=blue class="grip" on:mousedown={startExpand.bind(this, 'right')} class:active={expanding=='right'}/>
+	</svg>
+</g>
 
-	<rect x={x1} y=2 width={width1} height={height-4} class="step" use:dragMe />
-    <rect x={x1} y=2 width={grabberWidth} height={height-4} fill=red class="grip" on:mousedown={startExpand.bind(this, 'left')}  class:active={expanding=='left'}/>
-    <rect x={x1+width1-grabberWidth} y=2 width={grabberWidth} height={height-4} fill=blue class="grip" on:mousedown={startExpand.bind(this, 'right')} class:active={expanding=='right'}/>
-</svg>
 
 
 <style>
