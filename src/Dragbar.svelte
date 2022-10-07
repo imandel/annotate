@@ -9,15 +9,23 @@
 
 	// everything can be accessed by label and key
 	$: annotation = $tags[label]["annotations"].get(key)
+	let start = null, end = null
 	$: start = annotation["start"] * zoom
 	$: end = annotation["end"] * zoom
-	$: width = (annotation["end"] - annotation["start"] ) * zoom
+	$: width = end - start
+
+	function update_annotation() {
+		$tags[label]["annotations"].set(key, annotation)
+		$tags = $tags
+	}
+	$: annotation, update_annotation()
+
     // for expanding blocks
 	let expanding = null, startPoint = null, initial = null
 	function startExpand(type, event ) {
 		expanding = type
 		startPoint = event.pageX
-		initial = { start, width }
+		initial = { start, end }
 	}
 	
 	function stopExpand() {
@@ -32,13 +40,12 @@
 		if (expanding == 'left') {
 			const delta = startPoint - event.pageX
 			start = initial.start - delta
-			width = initial.width + delta
 			return
 		}
 		
 		if (expanding == 'right') {
 			const delta = event.pageX - startPoint
-			width = initial.width + delta
+			end = initial.end + delta
 			return
 		}
 	}
@@ -50,11 +57,8 @@
 		});
 		window.addEventListener('mousemove', (e) => {
 			if (moving) {
-				// console.log(e)
 				start += e.movementX;
 				end += e.movementX;
-				annotation["start"] = start / zoom;
-				annotation["end"] = end / zoom;
 			}
 		});
 		
@@ -70,7 +74,7 @@
 	<svg {height} on:mousemove={expand} class:expanding>
 		<rect x={start} y=2 width={width} height={height-4} class="step" use:drag />
 		<rect x={start} y=2 width={grabberWidth} height={height-4} fill=red class="grip" on:mousedown={startExpand.bind(this, 'left')}  class:active={expanding=='left'}/>
-		<rect x={start+width-grabberWidth} y=2 width={grabberWidth} height={height-4} fill=blue class="grip" on:mousedown={startExpand.bind(this, 'right')} class:active={expanding=='right'}/>
+		<rect x={end - grabberWidth} y=2 width={grabberWidth} height={height-4} fill=blue class="grip" on:mousedown={startExpand.bind(this, 'right')} class:active={expanding=='right'}/>
 	</svg>
 </g>
 

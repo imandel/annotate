@@ -3,18 +3,15 @@
   import { duration, currentTime, tags } from "./stores";
   import Ruler from "svelte-ruler";
   let ruler;
-  let zoom = 1.5;
+  let zoom = 15;
   let scrollX = 0;
-  $: console.log($tags)
-
-
+  
+  
   function onMouseMove(event) {
     scrollX += event.deltaX;
-    console.log("what");
     ruler.scroll(scrollX);
   }
   function onMouseDown(event) {
-    console.log("Down");
     addEventListener("mousemove", onMouseMove);
     addEventListener("mouseup", onMouseUp);
   }
@@ -25,8 +22,10 @@
 
 </script>
 
+
+
+<h3>Timeline</h3>
 <div class="container">
-  <h3>Timeline</h3>
     <Ruler
       bind:this={ruler}
       type="horizontal"
@@ -37,16 +36,16 @@
       {zoom}
       on:mousedown={onMouseDown}
     />
-	<div class="timeline">
-		{#each Object.entries($tags) as [label, tag]}
-			<svg height="40">
-				{#each [...tag["annotations"].keys()] as key}
-					<Dragbar {label} {key} />
-				{/each}
-			</svg>
-		{/each}
-	</div>
-
+    <div class="timeline">
+      
+      {#each Object.entries($tags) as [label, tag]}
+        <svg height="40">
+          {#each [...tag["annotations"].keys()] as key}
+            <Dragbar {label} {key} {zoom}/>
+          {/each}
+        </svg>
+      {/each}
+    </div>
 </div>
 
 <style>

@@ -39,6 +39,7 @@
     "svelte-guides": "^0.18.0",
     "svelte-ruler": "^0.11.0",
     "svelte-toggle": "^3.1.0",
-    "typewriter-editor": "github:imandel/typewriter"
+    "typewriter-editor": "github:imandel/typewriter",
+    "wavesurfer.js": "^6.3.0"
   }
 }

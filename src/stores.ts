@@ -3,7 +3,6 @@ import { writable } from 'svelte/store';
 export type Annotation = {
     start: number,
     end: number,
-    width: number,
     line?: string
 }
 
