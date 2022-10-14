@@ -27,11 +27,11 @@
 	});
 </script>
 
-
+<!-- this special element will be explained in a later section -->
 <svelte:head>
 	<link
 		rel="stylesheet"
-		href="./mapbox-gl.css"
+		href="../node_modules/mapbox-gl/dist/mapbox-gl.css"
 		on:load={load}
 	/>
 </svelte:head>
