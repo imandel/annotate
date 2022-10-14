@@ -1,55 +1,65 @@
 <script>
-	import {tags} from "./stores"
+	import {tags, duration} from "./stores"
 	// This is a dragbar for one rectangle
 	export let label = ""
-	export let key = ""
-	export let zoom = 10
-	export let grabberWidth = 10
-    export let height = 40
+	export let id = ""
+	let grabberWidth = 10
+    let height = 40
+	let minimum_width = 2
 
-	// everything can be accessed by label and key
-	$: annotation = $tags[label]["annotations"].get(key)
-	let start = null, end = null
-	$: start = annotation["start"] * zoom
-	$: end = annotation["end"] * zoom
-	$: width = end - start
+	// READ: everything can be accessed by label and id
+	// start, end change with store.ts
+	let start = null, end = null, line = null, color = "#8884"
+	$: color = $tags[label].color
+	$: annotation = $tags[label].annotations.get(id)
+	$: start = annotation["start"]
+	$: end = annotation["end"]
+	$: line = annotation["line"]
+	$:console.log(start)
 
+	// READ
+	// tmp_start, tmp_end dynamically assigned when start, end change
+	let tmp_start = null, tmp_end = null
+	$: start, end, assign_annotation()
+	function assign_annotation() {
+		tmp_start = start;
+		tmp_end = end;
+	}
+	$: width = tmp_end - tmp_start
+
+	// WRITE
+	// write tmp to store, then will READ again
+	// only called when changes stop
 	function update_annotation() {
-		$tags[label]["annotations"].set(key, annotation)
+		$tags[label].annotations.set(id, {
+			start: tmp_start,
+			end: tmp_end,
+			line: line
+		})
 		$tags = $tags
 	}
-	$: annotation, update_annotation()
 
+	// EXPAND
     // for expanding blocks
-	let expanding = null, startPoint = null, initial = null
-	function startExpand(type, event ) {
-		expanding = type
-		startPoint = event.pageX
-		initial = { start, end }
-	}
-	
-	function stopExpand() {
-		expanding = null
-		startPoint = null
-		initial = null
-	}
-	
+	let expanding = null;
 	function expand(event) {
-		if (!expanding) return
-		
-		if (expanding == 'left') {
-			const delta = startPoint - event.pageX
-			start = initial.start - delta
-			return
-		}
-		
-		if (expanding == 'right') {
-			const delta = event.pageX - startPoint
-			end = initial.end + delta
-			return
-		}
+		window.addEventListener('mousemove', (e) => {
+			if ( expanding == 'left') {
+				tmp_start += e.movementX;
+			}
+			else if ( expanding == 'right') {
+				tmp_end += e.movementX;
+			}
+		});
+		window.addEventListener('mouseup', () => {
+			if ( expanding ) {
+				expanding = null
+				update_annotation()
+			}
+		});
 	}
 
+	// DRAG
     function drag(event) {
 		let moving = false;
 		event.addEventListener('mousedown', () => {
@@ -57,24 +67,27 @@
 		});
 		window.addEventListener('mousemove', (e) => {
 			if (moving) {
-				start += e.movementX;
-				end += e.movementX;
+				tmp_start += e.movementX;
+				tmp_end += e.movementX;
 			}
 		});
 		
 		window.addEventListener('mouseup', () => {
-			moving = false;
+			if (moving) {
+				console.log("stop drag")
+				moving = false;
+				update_annotation()
+			}
 		});
     }
 </script>
 
-<svelte:window on:mouseup={stopExpand} />
 
 <g>
-	<svg {height} on:mousemove={expand} class:expanding>
-		<rect x={start} y=2 width={width} height={height-4} class="step" use:drag />
-		<rect x={start} y=2 width={grabberWidth} height={height-4} fill=red class="grip" on:mousedown={startExpand.bind(this, 'left')}  class:active={expanding=='left'}/>
-		<rect x={end - grabberWidth} y=2 width={grabberWidth} height={height-4} fill=blue class="grip" on:mousedown={startExpand.bind(this, 'right')} class:active={expanding=='right'}/>
+	<svg>
+		<rect x={tmp_start} y=2 fill={color} width={width} class="step" use:drag />
+		<rect x={tmp_start} y=2 width={grabberWidth} fill={color} class="grip" on:mousedown={() => (expanding = 'left')} use:expand  class:active={expanding=='left'} />
+		<rect x={tmp_end - grabberWidth} y=2 width={grabberWidth} fill={color} class="grip" on:mousedown={() => (expanding = 'right')} use:expand class:active={expanding=='right'} />
 	</svg>
 </g>
 
@@ -82,22 +95,20 @@
 
 <style>
 	.step {
-		fill: #8884;
 		stroke: #222a;
 		rx: 2;
         cursor: pointer;
         transition: fill .2s linear;
+		height: 90%;
 	}
     .step:hover {
         fill: rgba(239, 239, 239, 0.085);
     }
-	.expanding .step{
-		stroke: #222a;
-	}
 	.grip {
 		cursor: col-resize;
 		fill: #fff0;
         transition: fill .2s linear;
+		height: 90%;
 	}
 	.grip.active, .grip:hover {
 		fill: #222a;

@@ -5,20 +5,7 @@
   let ruler;
   let zoom = 15;
   let scrollX = 0;
-  
-  
-  function onMouseMove(event) {
-    scrollX += event.deltaX;
-    ruler.scroll(scrollX);
-  }
-  function onMouseDown(event) {
-    addEventListener("mousemove", onMouseMove);
-    addEventListener("mouseup", onMouseUp);
-  }
-  function onMouseUp() {
-    removeEventListener("mousemove", onMouseMove);
-    removeEventListener("mouseup", onMouseUp);
-  }
+  $: console.log($currentTime)
 
 </script>
 
@@ -26,22 +13,20 @@
 
 <h3>Timeline</h3>
 <div class="container">
-    <Ruler
-      bind:this={ruler}
-      type="horizontal"
-      height="30"
-      backgroundColor="#8884"
-      textColor="#222a"
-      unit="100"
-      {zoom}
-      on:mousedown={onMouseDown}
-    />
+    
     <div class="timeline">
-      
+        <Ruler
+        bind:this={ruler}
+        type="horizontal"
+        height="30"
+        backgroundColor="#8884"
+        textColor="#222a"
+        class="row"
+      />
       {#each Object.entries($tags) as [label, tag]}
-        <svg height="40">
-          {#each [...tag["annotations"].keys()] as key}
-            <Dragbar {label} {key} {zoom}/>
+        <svg viewBox="{$currentTime} 0 1000 40" overflow="scroll" preserveAspectRatio="xMidYMid meet" class="row">
+          {#each [...tag["annotations"].keys()] as id}
+            <Dragbar {label} {id} />
           {/each}
         </svg>
       {/each}
@@ -53,7 +38,9 @@
     display: flex;
     flex-direction: column;
   }
-  .timeline :global(svg) {
+  .row {
+    width: 100%;
+    height: 40px;
     border-bottom: solid 1px #ccc;
   }
   .timeline :global(:first-child) {
