@@ -49,6 +49,7 @@
   }
 </script>
 
+
 <button
   on:click={() => {
     zoom *= 2;
