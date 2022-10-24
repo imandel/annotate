@@ -3,9 +3,13 @@
 	// This is a dragbar for one rectangle
 	export let label = ""
 	export let id = ""
-	let grabberWidth = 10
-    let height = 40
-	let minimum_width = 2
+	export let index = 0
+	export let zoom = 1
+	let grabberWidth = 4
+	$: minimum_width = 10 / zoom;
+	$: length = Object.keys($tags).length;
+	
+	// $:console.log("index", index)
 
 	// READ: everything can be accessed by label and id
 	// start, end change with store.ts
@@ -15,7 +19,7 @@
 	$: start = annotation["start"]
 	$: end = annotation["end"]
 	$: line = annotation["line"]
-	$:console.log(start)
+	// $:console.log(start)
 
 	// READ
 	// tmp_start, tmp_end dynamically assigned when start, end change
@@ -45,10 +49,16 @@
 	function expand(event) {
 		window.addEventListener('mousemove', (e) => {
 			if ( expanding == 'left') {
-				tmp_start += e.movementX;
+				const nextStart = tmp_start + e.movementX / (zoom * 2);
+				if(tmp_end - nextStart >= minimum_width && nextStart >= 0){
+					tmp_start = nextStart;
+				}
 			}
 			else if ( expanding == 'right') {
-				tmp_end += e.movementX;
+				const nextEnd = tmp_end + e.movementX / (zoom * 2);
+				if(nextEnd - tmp_start >= minimum_width && nextEnd <= $duration) {
+					tmp_end = nextEnd;
+				} 
 			}
 		});
 		window.addEventListener('mouseup', () => {
@@ -67,14 +77,18 @@
 		});
 		window.addEventListener('mousemove', (e) => {
 			if (moving) {
-				tmp_start += e.movementX;
-				tmp_end += e.movementX;
+				const nextStart = tmp_start + e.movementX / zoom;
+				const nextEnd = tmp_end + e.movementX / zoom;
+				if(nextStart >=0 && nextEnd <= $duration) {
+					tmp_start = nextStart;
+					tmp_end = nextEnd;
+				}
 			}
 		});
 		
 		window.addEventListener('mouseup', () => {
 			if (moving) {
-				console.log("stop drag")
+				// console.log("stop drag")
 				moving = false;
 				update_annotation()
 			}
@@ -84,10 +98,10 @@
 
 
 <g>
-	<svg>
-		<rect x={tmp_start} y=2 fill={color} width={width} class="step" use:drag />
-		<rect x={tmp_start} y=2 width={grabberWidth} fill={color} class="grip" on:mousedown={() => (expanding = 'left')} use:expand  class:active={expanding=='left'} />
-		<rect x={tmp_end - grabberWidth} y=2 width={grabberWidth} fill={color} class="grip" on:mousedown={() => (expanding = 'right')} use:expand class:active={expanding=='right'} />
+	<svg viewBox="0 {(length - 1 - index) * 40} {$duration * zoom} 40" preserveAspectRatio="xMinYMax meet">
+		<rect x={tmp_start * zoom} y=2 fill={color} width={width * zoom} class="step" use:drag />
+		<rect x={tmp_start * zoom} y=2 width={grabberWidth} fill={color} class="grip" on:mousedown={() => (expanding = 'left')} use:expand  class:active={expanding=='left'} />
+		<rect x={tmp_end * zoom - grabberWidth} y=2 width={grabberWidth} fill={color} class="grip" on:mousedown={() => (expanding = 'right')} use:expand class:active={expanding=='right'} />
 	</svg>
 </g>
 
