@@ -9,7 +9,7 @@
 	import Timeline from "./Timeline.svelte";
 
 	import Map from './Map.svelte';
-	import MapMarker from './MapMarker.svelte';
+	// import MapMarker from './MapMarker.svelte';
 
 	let captionsFile: string;
 
