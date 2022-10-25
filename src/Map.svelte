@@ -1,4 +1,18 @@
 <script>
+	
+	import { gpx } from '@tmcw/togeojson';
+  	import { point } from '@turf/helpers';
+  	import { getId } from './util';
+  	import nearestPointOnLine from '@turf/nearest-point-on-line';
+
+	import { curKeypoint, timingObject, mapStyle, gps } from './stores';
+  	let mapRef;
+	let line;
+	let route;
+	let start;
+	let keyOrigin;
+	let hidden = false;
+
 	import { onDestroy, setContext } from 'svelte';
 	import { mapbox, key } from './mapbox.js';
 
