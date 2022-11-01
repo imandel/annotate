@@ -30,11 +30,11 @@
 				console.log(captionsFile);
 				console.log(file);
 			}
-			if (file.type == "gpx" || file.name.endsWith(".gpx")) {
-				captionsFile = URL.createObjectURL(file);
-				// console.log(captionsFile);
-				// console.log(file);
-			}
+			// if (file.type == "text/gpx" || file.name.endsWith(".gpx")) {
+			// 	captionsFile = URL.createObjectURL(file);
+			// 	console.log(mapFile);
+			// 	console.log(file);
+			// }
 
 			if (file.type == "application/json" && !loadedNotes) {
 				fileToJSON(file).then((data: Delta) => {
