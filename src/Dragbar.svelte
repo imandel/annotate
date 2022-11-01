@@ -8,8 +8,6 @@
 	let grabberWidth = 4
 	$: minimum_width = 10 / zoom;
 	$: length = Object.keys($tags).length;
-	
-	// $:console.log("index", index)
 
 	// READ: everything can be accessed by label and id
 	// start, end change with store.ts

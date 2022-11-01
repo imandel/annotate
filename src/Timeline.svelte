@@ -7,7 +7,7 @@
   let zoom = 1;
   let SvgTimeline;
   let scrollPosition = 0;
-  let changeTime = false;
+
   $: length = Object.keys($tags).length;
   $: ranges = [0, $duration];
 
@@ -17,7 +17,7 @@
   }
 
   // DRAG current time
-  function drag(event) {
+  function cursor_drag(event) {
     let moving = false;
     event.addEventListener("mousedown", () => {
       moving = true;
@@ -37,7 +37,24 @@
     });
   }
 
-  // Seconds to Time
+  // Change current time in ruler
+  function change_current_time(event) {
+    let changeTime = false;
+    event.addEventListener("mousedown", (e) => {
+      changeTime = true;
+      $currentTime = e.offsetX / zoom + scrollPosition;
+    });
+    event.addEventListener("mousemove", (e) => {
+      if (changeTime) {
+        $currentTime = e.offsetX / zoom + scrollPosition;
+      }
+    });
+    event.addEventListener("mouseup", () => {
+      changeTime = false;
+    });
+  }
+
+  // Util: Seconds to Time
   function time_convert(num) {
     let minutes = Math.floor(num / 60);
     let seconds = num % 60;
@@ -49,44 +66,13 @@
   }
 </script>
 
-
-<button
-  on:click={() => {
-    zoom *= 2;
-  }}
->
-  +
-</button>
-<button
-  on:click={() => {
-    zoom = 1;
-  }}>{zoom}</button
->
-<button
-  on:click={() => {
-    zoom /= 2;
-  }}
->
-  -
-</button>
-
 {#if $duration != 0}
   <h3>Timeline</h3>
+  <button on:click={() => {zoom *= 2;}}> + </button>
+  <button on:click={() => {zoom = 1;}}>{zoom}</button>
+  <button on:click={() => {zoom /= 2;}}> - </button>
   <div class="container">
-    <div
-      on:mousedown={(e) => {
-        changeTime = true;
-        $currentTime = e.offsetX / zoom + scrollPosition ;
-      }}
-      on:mousemove={(e) => {
-        if (changeTime) {
-          $currentTime = e.offsetX / zoom + scrollPosition;
-        }
-      }}
-      on:mouseup={() => {
-        changeTime = false;
-      }}
-    >
+    <div use:change_current_time>
       <Ruler
         bind:this={ruler}
         type="horizontal"
@@ -127,7 +113,7 @@
           y1="-100"
           x2={$currentTime * zoom}
           y2={length * 40}
-          use:drag
+          use:cursor_drag
           class="current"
         />
       </svg>
@@ -151,6 +137,6 @@
   .current:hover {
     stroke: #222a;
     stroke-width: 5;
-    transition: .2s linear;
+    transition: 0.2s linear;
   }
 </style>
