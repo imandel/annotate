@@ -137,10 +137,11 @@ export const clip = async (timeString: string, ffmpeg: FFmpeg) => {
     console.log(data);
     ffmpeg.FS("writeFile", "srcfile.mp4", data);
     await ffmpeg.run(
-        "-i",
-        "srcfile.mp4",
         "-ss",
         start.toString(),
+        "-i",
+        "srcfile.mp4",
+
         "-to",
         end.toString(),
         "-c",

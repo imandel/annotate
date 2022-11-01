@@ -9,10 +9,10 @@
 
 	let captionsFile: string;
 
-	if (import.meta.env.MODE == "development") {
-        $videoFile = import.meta.env.VITE_VIDEO_FILE
-		captionsFile = import.meta.env.VITE_TRANSCRIPT_FILE
-    }
+	// if (import.meta.env.MODE == "development") {
+    //     $videoFile = import.meta.env.VITE_VIDEO_FILE
+	// 	captionsFile = import.meta.env.VITE_TRANSCRIPT_FILE
+    // }
 
 </script>
 
