@@ -6,9 +6,12 @@
   	import nearestPointOnLine from '@turf/nearest-point-on-line';
 
 	import { curKeypoint, timingObject, mapStyle, gps } from './stores';
+<<<<<<< HEAD
 
     import {onMount} from "svelte"
 
+=======
+>>>>>>> 4579f351a70c71143f5a4eb0b50e4d7f23f4933d
   	let mapRef;
 	let line;
 	let route;
@@ -43,6 +46,7 @@
     ],
     };
 
+<<<<<<< HEAD
     let files;
 
     document.addEventListener('DOMContentLoaded', ()=>{
@@ -75,18 +79,29 @@
 
 	function load(coord) {
         
+=======
+	function load() {
+>>>>>>> 4579f351a70c71143f5a4eb0b50e4d7f23f4933d
 		map = new mapbox.Map({
 			container,
 			style: 'mapbox://styles/mapbox/streets-v9',
 			//center: [lon, lat],
+<<<<<<< HEAD
             center: [-73.98513941419534, 40.666829038314006] ,
+=======
+            center: [-122.486052, 37.830348],
+>>>>>>> 4579f351a70c71143f5a4eb0b50e4d7f23f4933d
 			//zoom,
             zoom: 15
 
 		});
         map.on('load', () => {
+<<<<<<< HEAD
  
             
+=======
+
+>>>>>>> 4579f351a70c71143f5a4eb0b50e4d7f23f4933d
         map.addSource('route', {
             'type': 'geojson',
             'data': {
@@ -94,6 +109,7 @@
                 'properties': {},
                 'geometry': {
                     'type': 'LineString',
+<<<<<<< HEAD
                     'coordinates': [coord]
                     //[[-73.98513941419534, 40.666829038314006]]
                     // [
@@ -119,6 +135,31 @@
                     //     [-122.492237, 37.833378],
                     //     [-122.493782, 37.833683]
                     // ]
+=======
+                    'coordinates': [
+                        [-122.483696, 37.833818],
+                        [-122.483482, 37.833174],
+                        [-122.483396, 37.8327],
+                        [-122.483568, 37.832056],
+                        [-122.48404, 37.831141],
+                        [-122.48404, 37.830497],
+                        [-122.483482, 37.82992],
+                        [-122.483568, 37.829548],
+                        [-122.48507, 37.829446],
+                        [-122.4861, 37.828802],
+                        [-122.486958, 37.82931],
+                        [-122.487001, 37.830802],
+                        [-122.487516, 37.831683],
+                        [-122.488031, 37.832158],
+                        [-122.488889, 37.832971],
+                        [-122.489876, 37.832632],
+                        [-122.490434, 37.832937],
+                        [-122.49125, 37.832429],
+                        [-122.491636, 37.832564],
+                        [-122.492237, 37.833378],
+                        [-122.493782, 37.833683]
+                    ]
+>>>>>>> 4579f351a70c71143f5a4eb0b50e4d7f23f4933d
                     }
             }
         });
@@ -140,7 +181,11 @@
     
     } 
     
+<<<<<<< HEAD
     
+=======
+
+>>>>>>> 4579f351a70c71143f5a4eb0b50e4d7f23f4933d
 
 	onDestroy(() => {
 		if (map) map.remove();
