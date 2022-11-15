@@ -55,11 +55,11 @@
             let xml = parser.parseFromString(data, "application/xml");
             let list = xml.getElementsByTagName('trkpt')
             let coord = Array(list.length)
-            
-            console.log(xml)
+            console.log([coord])
+            //console.log(xml)
             //console.log(list[0].innerHTML)
-            console.log(list[0].getAttribute("lat"))
-            console.log(list[0].getAttribute("lon"))
+           // console.log(list[0].getAttribute("lat"))
+            //console.log(list[0].getAttribute("lon"))
             
 
             for(let i=0; i<list.length; i++){
@@ -67,7 +67,7 @@
                 coord[i] =[list[i].getAttribute("lon"), list[i].getAttribute("lat")];
                 
             }
-            console.log(coord)
+            //console.log(coord)
             //load(coord);
 
             })
@@ -84,7 +84,7 @@
             zoom: 15
 
 		});
-        map.on('load', (coord) => {
+        map.on('load', () => {
  
             
         map.addSource('route', {
@@ -94,7 +94,7 @@
                 'properties': {},
                 'geometry': {
                     'type': 'LineString',
-                    'coordinates': coord
+                    'coordinates': [coord]
                     //[[-73.98513941419534, 40.666829038314006]]
                     // [
                     //     [-122.483696, 37.833818],
