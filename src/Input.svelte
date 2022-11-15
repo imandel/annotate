@@ -4,6 +4,7 @@
 	import { setData } from "./Notes.svelte";
 	import { parseRangeString } from "./customFormatting";
 	import type { Delta } from "@typewriter/document";
+    import { text } from "stream/consumers";
 	let files: FileList;
 	export let captionsFile: string = undefined;
 	let fileSpan = [];
@@ -30,9 +31,9 @@
 				console.log(captionsFile);
 				console.log(file);
 			}
-			// if (file.type == "text/gpx" || file.name.endsWith(".gpx")) {
-			// 	captionsFile = URL.createObjectURL(file);
-			// 	console.log(mapFile);
+			//if (file.type == "text/plain" || file.name.endsWith(".gpx")) {
+			//	captionsFile = URL.createObjectURL(file);
+			// 	console.log({file.text()});
 			// 	console.log(file);
 			// }
 
@@ -76,8 +77,12 @@
 		<details>
 			<summary>Selected files</summary>
 			<div class="dropdown-content">
-				{#each files as file}
+				{#each Array.from(files) as file, i}
 					<p>{file.name}</p>
+					{#await file.text() then text}
+						<p>e: {text} i: {i}</p>
+						console.log({text})
+					{/await}
 				{/each}
 			</div>
 		</details>

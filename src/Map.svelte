@@ -2,9 +2,9 @@
 	
 	import { gpx } from '@tmcw/togeojson';
 	import mapboxgl from 'mapbox-gl';
-  	import { point } from '@turf/helpers';
-  	import { getId } from './util';
-  	import nearestPointOnLine from '@turf/nearest-point-on-line';
+  import { point } from '@turf/helpers';
+  import { getId } from './util';
+  import nearestPointOnLine from '@turf/nearest-point-on-line';
 
 	
 

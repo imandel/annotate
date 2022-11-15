@@ -40,6 +40,7 @@
     "svelte-actions": "^0.2.2",
     "svelte-gantt": "^4.0.3-beta",
     "svelte-toggle": "^3.1.0",
+    "timing-object": "^3.1.49",
     "typewriter-editor": "github:imandel/typewriter"
   }
 }
