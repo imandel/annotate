@@ -7,6 +7,7 @@
     import { text } from "stream/consumers";
 	let files: FileList;
 	export let captionsFile: string = undefined;
+	export let mapFile: string = undefined;
 	let fileSpan = [];
 	async function fileToJSON(file: File) {
 		return new Promise((resolve, reject) => {
@@ -31,11 +32,12 @@
 				console.log(captionsFile);
 				console.log(file);
 			}
-			//if (file.type == "text/plain" || file.name.endsWith(".gpx")) {
-			//	captionsFile = URL.createObjectURL(file);
-			// 	console.log({file.text()});
-			// 	console.log(file);
-			// }
+			if (file.type == "text/plain" || file.name.endsWith(".gpx")) {
+				mapFile = URL.createObjectURL(file);
+				console.log("Map loaded");
+				// console.log(file.text());
+				// console.log(file);
+			}
 
 			if (file.type == "application/json" && !loadedNotes) {
 				fileToJSON(file).then((data: Delta) => {
