@@ -55,6 +55,7 @@
         lat = lat_sum / size;
         lon = lon_sum / size;
       });
+    if (map) map.remove();
     map = new mapbox.Map({
       container,
       style: "mapbox://styles/mapbox/streets-v9",
@@ -88,9 +89,6 @@
 </script>
 
 <div bind:this={container}>
-  {#if map}
-    <slot />
-  {/if}
 </div>
 
 <style>
