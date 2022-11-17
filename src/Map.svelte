@@ -39,8 +39,8 @@
         coords = gpx(new DOMParser().parseFromString(data, "application/xml"));
         // also calculate the average lat, lon
         const size = coords["features"][0]["geometry"]["coordinates"].length;
-        let lat_sum = 0.0
-        let lon_sum = 0.0
+        let lat_sum = 0.0;
+        let lon_sum = 0.0;
         for (let i = 0; i < size; i++) {
           const lat_now = Number(
             coords["features"][0]["geometry"]["coordinates"][i][0]
@@ -88,8 +88,7 @@
   });
 </script>
 
-<div bind:this={container}>
-</div>
+<div bind:this={container} />
 
 <style>
   div {
