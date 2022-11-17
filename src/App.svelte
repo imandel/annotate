@@ -6,7 +6,7 @@
 	import Input from "./Input.svelte";
 	import Notes from "./Notes.svelte";
 	import Labels from "./Labels.svelte";
-	import Map from './mapLoad.svelte';
+	import Map from './map.svelte';
 
 	let captionsFile: string;
 	let mapFile: string;
