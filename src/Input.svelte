@@ -4,8 +4,10 @@
 	import { setData } from "./Notes.svelte";
 	import { parseRangeString } from "./customFormatting";
 	import type { Delta } from "@typewriter/document";
+    import { text } from "stream/consumers";
 	let files: FileList;
 	export let captionsFile: string = undefined;
+	export let mapFile: string = undefined;
 	let fileSpan = [];
 	async function fileToJSON(file: File) {
 		return new Promise((resolve, reject) => {
@@ -30,6 +32,13 @@
 				console.log(captionsFile);
 				console.log(file);
 			}
+			if (file.type == "text/plain" || file.name.endsWith(".gpx")) {
+				mapFile = URL.createObjectURL(file);
+				console.log("Map loaded");
+				// console.log(file.text());
+				// console.log(file);
+			}
+
 			if (file.type == "application/json" && !loadedNotes) {
 				fileToJSON(file).then((data: Delta) => {
 					loadedNotes = data;
@@ -70,8 +79,12 @@
 		<details>
 			<summary>Selected files</summary>
 			<div class="dropdown-content">
-				{#each files as file}
+				{#each Array.from(files) as file, i}
 					<p>{file.name}</p>
+					{#await file.text() then text}
+						<p>e: {text} i: {i}</p>
+						console.log({text})
+					{/await}
 				{/each}
 			</div>
 		</details>

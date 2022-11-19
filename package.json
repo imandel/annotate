@@ -23,12 +23,17 @@
     "vite-plugin-cross-origin-isolation": "^0.1.6"
   },
   "dependencies": {
+    "@beyonk/svelte-mapbox": "^8.2.0",
     "@ffmpeg/core": "^0.10.0",
     "@ffmpeg/ffmpeg": "^0.10.1",
     "@popperjs/core": "^2.11.4",
     "@rollup/plugin-replace": "^4.0.0",
+    "@tmcw/togeojson": "^5.5.0",
+    "@turf/helpers": "^6.5.0",
+    "@turf/nearest-point-on-line": "^6.5.0",
     "@typewriter/delta": "^1.0.2",
     "@typewriter/document": "^0.7.3",
+    "mapbox-gl": "^2.11.0",
     "moment": "^2.29.1",
     "papaparse": "^5.3.2",
     "path-browserify": "^1.0.1",
@@ -36,6 +41,7 @@
     "svelte-actions": "^0.2.2",
     "svelte-gantt": "^4.0.3-beta",
     "svelte-toggle": "^3.1.0",
+    "timing-object": "^3.1.49",
     "typewriter-editor": "github:imandel/typewriter"
   }
 }
