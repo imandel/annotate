@@ -7,6 +7,8 @@
 	import Notes from "./Notes.svelte";
 	import Labels from "./Labels.svelte";
 	import Map from './map.svelte';
+	import Timeline from "./Timeline.svelte";
+
 
 	let captionsFile: string;
 	let mapFile: string;
@@ -35,6 +37,7 @@
 	<Map mapFile={mapFile} />
 	
 </div>
+<Timeline />
 
 <Notes />
 
