@@ -7,6 +7,38 @@ import { parseRangeString } from './customFormatting';
 import { fetchFile, FFmpeg } from "@ffmpeg/ffmpeg";
 import path from "path";
 
+export function getId(prefix: string): string {
+    if (prefix === undefined) {
+      prefix = '_';
+    }
+    return prefix + Math.random().toString(32).substring(2);
+  }
+
+  export interface keyConfig {
+    [index: string]: Function;
+  }
+  
+  export function processKey(e: KeyboardEvent, config: keyConfig): void {
+    let shortcut = '';
+    if (e.ctrlKey) {
+      shortcut += 'ctrl+';
+    }
+    if (e.altKey) {
+      shortcut += 'alt+';
+    }
+    if (e.shiftKey) {
+      shortcut += 'shift+';
+    }
+    shortcut += e.code;
+    console.log(shortcut);
+    if (config[shortcut]?.(e)) {
+      return;
+    } else {
+      config['quicktag'](e);
+    }
+  }
+
+
 export async function saveFile(data: Blob, fileName: string) {
     // create a new handle
     const newHandle = await window.showSaveFilePicker({ suggestedName: fileName });
