@@ -1,16 +1,30 @@
 <script>
   import Dragbar from "./Dragbar.svelte";
-  import { duration, tags, timer } from "./stores";
+  import { duration, tags, timer, zoom } from "./stores";
+  // @ts-ignore
   import Ruler from "svelte-ruler";
 
   let ruler;
-  let zoom = 1;
+  let timePosition;
+  let nextTime = 0;
+  let lastTime = 0;
+  let lastVelocity = 0;
+  let moving = false;
   let SvgTimeline;
   let scrollPosition = 0;
-  $: console.log($timer.query().position)
 
   $: length = Object.keys($tags).length;
   $: ranges = [0, $duration];
+  $: if (moving) {
+    timePosition = nextTime;
+  }
+  requestAnimationFrame(function updateUI() {
+    const { position } = $timer.query();
+    if (!moving) {
+      timePosition = position;
+    }
+    requestAnimationFrame(updateUI);
+  });
 
   // make sure ruler scrolls with the timeline
   $: if (ruler) {
@@ -19,23 +33,27 @@
 
   // DRAG current time
   function cursor_drag(event) {
-    let moving = false;
     event.addEventListener("mousedown", () => {
       moving = true;
+      ({ position: lastTime, velocity: lastVelocity } = $timer.query());
+      $timer.update({ velocity: 0 });
     });
     window.addEventListener("mousemove", (e) => {
       if (moving) {
-        console.log('moving')
-        const nextTime = $timer.query().position + e.movementX / zoom;
-        if (nextTime >= 0 && nextTime <= $duration) {
-          $timer.update({position: nextTime})
-          // $timer = $timer
+        nextTime = Math.min(
+          $duration,
+          Math.max(0, nextTime + e.movementX / $zoom)
+        );
+        if (Math.abs(nextTime - lastTime) > 2) {
+          $timer.update({ position: nextTime });
+          lastTime = nextTime;
         }
       }
     });
     window.addEventListener("mouseup", () => {
       if (moving) {
         moving = false;
+        $timer.update({ velocity: lastVelocity });
       }
     });
   }
@@ -45,11 +63,11 @@
     let changeTime = false;
     event.addEventListener("mousedown", (e) => {
       changeTime = true;
-      $timer.update( {position: e.offsetX / zoom + scrollPosition});
+      $timer.update({ position: e.offsetX / $zoom + scrollPosition });
     });
     event.addEventListener("mousemove", (e) => {
       if (changeTime) {
-        $timer.update( {position: e.offsetX / zoom + scrollPosition});
+        $timer.update({ position: e.offsetX / $zoom + scrollPosition });
       }
     });
     event.addEventListener("mouseup", () => {
@@ -70,9 +88,6 @@
 </script>
 
 {#if $duration != 0}
-  <button on:click={() => {zoom *= 2;}}> + </button>
-  <button on:click={() => {zoom = 1;}}>{zoom}</button>
-  <button on:click={() => {zoom /= 2;}}> - </button>
   <div class="container">
     <div use:change_current_time>
       <Ruler
@@ -82,7 +97,7 @@
         range={ranges}
         backgroundColor="#ccc"
         textColor="#222a"
-        {zoom}
+        {$zoom}
         unit="60"
         textFormat={time_convert}
       />
@@ -90,30 +105,30 @@
     <div
       class="timeline"
       bind:this={SvgTimeline}
-      on:scroll={() => (scrollPosition = SvgTimeline.scrollLeft / zoom)}
+      on:scroll={() => (scrollPosition = SvgTimeline.scrollLeft / $zoom)}
     >
       <svg
-        width={$duration * zoom}
+        width={$duration * $zoom}
         height={length * 40}
-        viewBox="0 0 {$duration * zoom} {length * 40}"
+        viewBox="0 0 {$duration * $zoom} {length * 40}"
         preserveAspectRatio="xMinYMin meet"
       >
         {#each Object.entries($tags) as [label, tag], index (label)}
           {#each [...tag["annotations"].keys()] as id}
-            <Dragbar {label} {id} {index} {zoom} />
+            <Dragbar {label} {id} {index} />
           {/each}
           <line
             x1="0"
             y1="{(index + 1) * 40} "
-            x2={$duration * zoom}
+            x2={$duration * $zoom}
             y2={(index + 1) * 40}
             style="stroke:gray;stroke-width:0.4"
           />
         {/each}
         <line
-          x1={$timer.query().position * zoom}
+          x1={timePosition}
           y1="-100"
-          x2={$timer.query().position * zoom}
+          x2={timePosition}
           y2={length * 40}
           use:cursor_drag
           class="current"
