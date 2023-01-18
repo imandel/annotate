@@ -42,18 +42,26 @@
         currentTime,
         paused,
         videoFile,
+        timer,
     } from "./stores";
     // let files: FileList;
     // export let $videoFile = undefined;
     export let captionsFile = undefined;
-
+    console.log($videoFile);
     let track: HTMLTrackElement;
 
     const setupCues = () => {
         console.log("cues loaded");
         player.textTracks[0].mode = "hidden";
         $cueData = [...track.track.cues];
+        timer.setTimingsrc(player, 0);
+        timer.setTimingsrc(player2, 5);
     };
+    let player2;
+
+    // setInterval(() => {
+    //     console.log($currentTime - $timer.query().position);
+    // }, 400);
 </script>
 
 {#if $videoFile}
@@ -61,13 +69,17 @@
         id="vid-div"
         on:wheel={(e) => {
             e.preventDefault();
+            console.log('here')
             $currentTime -= e.deltaY / 10;
         }}
     >
         <div id="vid-container">
+            <video 
+                src="./example_files/caminandes-llamigos.mp4" 
+                bind:this={player2}
+            />
             <video
                 bind:this={player}
-                controls
                 bind:currentTime={$currentTime}
                 bind:duration={$duration}
                 bind:paused={$paused}
@@ -79,7 +91,6 @@
                     on:load={setupCues}
                     kind="captions"
                     src={captionsFile}
-                    type="text/vtt"
                     srclang="En"
                 />
             </video>
