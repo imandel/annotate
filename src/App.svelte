@@ -5,6 +5,7 @@
 	import Input from "./Input.svelte";
 	import Notes from "./Notes.svelte";
 	import Labels from "./Labels.svelte";
+	import Controls from "./Controls.svelte";
 	// import Map from "./Map.svelte";
 	import Timeline from "./Timeline.svelte";
 
@@ -28,6 +29,7 @@
 
 	<!-- <Map {mapFile} /> -->
 </div>
+<Controls></Controls>
 <Timeline />
 
 <Notes />

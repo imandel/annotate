@@ -1,12 +1,13 @@
 <script>
   import Dragbar from "./Dragbar.svelte";
-  import { duration, currentTime, tags } from "./stores";
+  import { duration, currentTime, tags, timer } from "./stores";
   import Ruler from "svelte-ruler";
 
   let ruler;
   let zoom = 1;
   let SvgTimeline;
   let scrollPosition = 0;
+  $: console.log($timer.query().position)
 
   $: length = Object.keys($tags).length;
   $: ranges = [0, $duration];
@@ -24,9 +25,11 @@
     });
     window.addEventListener("mousemove", (e) => {
       if (moving) {
-        const nextTime = $currentTime + e.movementX / zoom;
+        console.log('moving')
+        const nextTime = $timer.query().position + e.movementX / zoom;
         if (nextTime >= 0 && nextTime <= $duration) {
-          $currentTime = nextTime;
+          $timer.update({position: nextTime})
+          // $timer = $timer
         }
       }
     });
@@ -42,11 +45,11 @@
     let changeTime = false;
     event.addEventListener("mousedown", (e) => {
       changeTime = true;
-      $currentTime = e.offsetX / zoom + scrollPosition;
+      $timer.update( {position: e.offsetX / zoom + scrollPosition});
     });
     event.addEventListener("mousemove", (e) => {
       if (changeTime) {
-        $currentTime = e.offsetX / zoom + scrollPosition;
+        $timer.update( {position: e.offsetX / zoom + scrollPosition});
       }
     });
     event.addEventListener("mouseup", () => {
@@ -67,7 +70,6 @@
 </script>
 
 {#if $duration != 0}
-  <h3>Timeline</h3>
   <button on:click={() => {zoom *= 2;}}> + </button>
   <button on:click={() => {zoom = 1;}}>{zoom}</button>
   <button on:click={() => {zoom /= 2;}}> - </button>
@@ -109,9 +111,9 @@
           />
         {/each}
         <line
-          x1={$currentTime * zoom}
+          x1={$timer.query().position * zoom}
           y1="-100"
-          x2={$currentTime * zoom}
+          x2={$timer.query().position * zoom}
           y2={length * 40}
           use:cursor_drag
           class="current"
