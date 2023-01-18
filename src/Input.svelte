@@ -4,7 +4,7 @@
 	import { setData } from "./Notes.svelte";
 	import { parseRangeString } from "./customFormatting";
 	import type { Delta } from "@typewriter/document";
-    import { text } from "stream/consumers";
+	import { text } from "stream/consumers";
 	let files: FileList;
 	export let captionsFile: string = undefined;
 	export let mapFile: string = undefined;

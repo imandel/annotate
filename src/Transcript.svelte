@@ -191,7 +191,8 @@
 					<p
 						class:activeLine={index === currentCue}
 						on:click={() => {
-							if (!editable) $timer.update({position:cue.startTime});
+							if (!editable)
+								$timer.update({ position: cue.startTime });
 						}}
 					>
 						<span class="bold"

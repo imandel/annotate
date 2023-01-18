@@ -20,16 +20,16 @@ export type Tags = {
 function createTimingObject() {
     const timingObject = new TimingObject();
     // let {position, velocity} = timingObject.query()
-	const { subscribe, set, update } = writable(timingObject);
-   
+    const { subscribe, set, update } = writable(timingObject);
 
-	return {
-		subscribe,
-        setTimingsrc: (mediaElement, offset)=> setTimingsrc(mediaElement, timingObject,  ({ position, ...vector }) => ({ ...vector, position: position - offset })),
-		play: ()=> update(timer => {timer.update({velocity: 1}); return timer}),
-        pause: ()=> update(timer => {timer.update({velocity: 0}); return timer}),
-        set: (time: number) => timingObject.update({position: time})
-	};
+
+    return {
+        subscribe,
+        setTimingsrc: (mediaElement, offset) => setTimingsrc(mediaElement, timingObject, ({ position, ...vector }) => ({ ...vector, position: position - offset })),
+        play: () => update(timer => { timer.update({ velocity: 1 }); return timer }),
+        pause: () => update(timer => { timer.update({ velocity: 0 }); return timer }),
+        set: (time: number) => timingObject.update({ position: time })
+    };
 }
 
 export const timer = createTimingObject();
