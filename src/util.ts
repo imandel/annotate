@@ -1,6 +1,6 @@
 import { get } from 'svelte/store'
 import type { EditorRange } from 'typewriter-editor';
-import { Annotation, cueData, currentTime, videoFile, paused, tags } from './stores';
+import { Annotation, cueData, timer, videoFile, paused, tags } from './stores';
 // @ts-ignore https://github.com/sveltejs/svelte-preprocess/issues/91
 import { play, pause, playUntil } from "./Video.svelte";
 import { parseRangeString } from './customFormatting';
@@ -151,10 +151,10 @@ export const playTs = (ts: string) => {
     if (get(paused)) {
         const { start, end } = parseRangeString(ts);
         if (start !== end) {
-            currentTime.set(start);
+            timer.set(start);
             playUntil(end).then(() => (paused.set(true)));
         } else {
-            currentTime.set(start);
+            timer.set(start);
             play();
         }
     } else {

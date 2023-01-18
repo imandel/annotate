@@ -1,6 +1,6 @@
 <script>
   import Dragbar from "./Dragbar.svelte";
-  import { duration, currentTime, tags, timer } from "./stores";
+  import { duration, tags, timer } from "./stores";
   import Ruler from "svelte-ruler";
 
   let ruler;

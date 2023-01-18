@@ -2,9 +2,6 @@ import { writable } from 'svelte/store';
 import { TimingObject } from 'timing-object';
 import { setTimingsrc } from 'timingsrc';
 
-
-
-
 export type Annotation = {
     start: number,
     end: number,
@@ -20,22 +17,6 @@ export type Tags = {
     }
 }
 
-// const timingObject2 = new TimingObject();
-// export const setTimingObj = (mediaElement:HTMLMediaElement, offset:Number) => setTimingsrc(mediaElement, timingObject2,  ({ position, ...vector }) => ({ ...vector, position: position + offset }))
-
-// function createCurrentTime(){
-//     const { subscribe, set, update } = writable(0);
-//     requestAnimationFrame(function updateUI() {
-//         const {position} = timingObject2.query();
-//         set(position)
-//         requestAnimationFrame(updateUI);
-//     });
-//     return {
-//         subscribe,
-//         update: () => update()
-//     }
-// }
-
 function createTimingObject() {
     const timingObject = new TimingObject();
     // let {position, velocity} = timingObject.query()
@@ -47,7 +28,7 @@ function createTimingObject() {
         setTimingsrc: (mediaElement, offset)=> setTimingsrc(mediaElement, timingObject,  ({ position, ...vector }) => ({ ...vector, position: position - offset })),
 		play: ()=> update(timer => {timer.update({velocity: 1}); return timer}),
         pause: ()=> update(timer => {timer.update({velocity: 0}); return timer}),
-        set: (time: umber) => timingObject.update({position: time})
+        set: (time: number) => timingObject.update({position: time})
 	};
 }
 

@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { Annotation, cueData, currentTime, tags } from "./stores";
+	import { Annotation, cueData, timer, tags } from "./stores";
 	import type { Tags } from "./stores";
 	import { onMount, tick } from "svelte";
 	import Toggle from "svelte-toggle";
@@ -191,7 +191,7 @@
 					<p
 						class:activeLine={index === currentCue}
 						on:click={() => {
-							if (!editable) $currentTime = cue.startTime;
+							if (!editable) $timer.update({position:cue.startTime});
 						}}
 					>
 						<span class="bold"
