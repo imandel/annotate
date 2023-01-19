@@ -7,12 +7,7 @@
 	let files: FileList;
 	export let captionsFile: string = undefined;
 	export let mapFile: string = undefined;
-	let fileSpan = [];
-	let visible = [];
-	$: console.log(visible);
-	$: for (const [key, value] of Object.entries($videoFiles)) {
-		console.log(key, value);
-	}
+	let loadedNotes: Delta;
 
 	async function fileToJSON(file: File) {
 		return new Promise((resolve, reject) => {
@@ -23,7 +18,6 @@
 			fileReader.readAsText(file);
 		});
 	}
-	let loadedNotes: Delta;
 
 	$: if (files) {
 		let offset: File;
@@ -81,7 +75,6 @@
 					setData(data as Delta);
 				});
 			}
-			fileSpan = [...fileSpan, file.name];
 		}
 		if (offset) {
 			fileToJSON(offset).then((data) => {
@@ -95,7 +88,7 @@
 					}
 				}
 			});
-		} else{
+		} else {
 			$audio = Object.keys($videoFiles).pop();
 		}
 	}
@@ -116,7 +109,7 @@
 							>👀
 							<input
 								type="checkbox"
-								bind:checked={value.visible}
+								bind:checked={$videoFiles[name].visible}
 								value={name}
 							/>
 						</label>

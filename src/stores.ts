@@ -21,7 +21,9 @@ export type VideoFiles = {
     [name: string]: {
         src: string,
         offset: number,
-        visible: boolean
+        visible: boolean,
+        element?: HTMLMediaElement
+
     }
 }
 
