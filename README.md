@@ -2,11 +2,14 @@ TODO
 
 - [x] bug in timeline when dragging cursor  
 - [ ] UI for zooming timeline?
-- [ ] load in video files
-- [ ] load in transcripts
+- [x] load in video files
 - [ ] select audio
 - [ ] hide videos
-
+- [ ] keyboard shortcuts
+- [ ] change how `$videoFile` is selected
+- [ ] selection box spacing is ugly
+- [ ] remove `$paused`
+- [ ] for now always use transcript from video with lower offset
 *Psst — looking for a more complete solution? Check out [SvelteKit](https://kit.svelte.dev), the official framework for building web applications of all sizes, with a beautiful development experience and flexible filesystem-based routing.*
 
 *Looking for a shareable component template instead? You can [use SvelteKit for that as well](https://kit.svelte.dev/docs#packaging) or the older [sveltejs/component-template](https://github.com/sveltejs/component-template)*
