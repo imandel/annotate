@@ -1,4 +1,4 @@
-import { writable } from 'svelte/store';
+import { writable, derived } from 'svelte/store';
 import { TimingObject } from 'timing-object';
 import { setTimingsrc } from 'timingsrc';
 
@@ -38,5 +38,6 @@ export const tags = writable(<Tags>{ note: { label: "note", color: "#ebebff", an
 export const currentTime = writable(0);
 export const duration = writable(0);
 export const paused = writable(true);
-export const videoFile = writable('');
+export const videoFiles = writable([]);
+export const videoFile = derived(videoFiles, $videoFiles => $videoFiles.reduce((prev, curr) => prev.offset < curr.offset ? prev : curr).src);
 export const zoom = writable(1);

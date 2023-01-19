@@ -2,6 +2,10 @@ TODO
 
 - [x] bug in timeline when dragging cursor  
 - [ ] UI for zooming timeline?
+- [ ] load in video files
+- [ ] load in transcripts
+- [ ] select audio
+- [ ] hide videos
 
 *Psst — looking for a more complete solution? Check out [SvelteKit](https://kit.svelte.dev), the official framework for building web applications of all sizes, with a beautiful development experience and flexible filesystem-based routing.*
 

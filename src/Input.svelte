@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { tags, videoFile } from "./stores";
+	import { tags, videoFiles } from "./stores";
 	import { get } from "svelte/store";
 	import { setData } from "./Notes.svelte";
 	import { parseRangeString } from "./customFormatting";
@@ -24,8 +24,8 @@
 		for (const file of files) {
 			// console.log(`${file.name}: ${file.size} bytes`);
 			if (file.type == "video/mp4") {
-				$videoFile = URL.createObjectURL(file);
-				console.log($videoFile);
+				$videoFiles[file.name] = {src: URL.createObjectURL(file)};
+				console.log($videoFiles);
 			}
 			if (file.type == "text/vtt" || file.name.endsWith(".vtt")) {
 				captionsFile = URL.createObjectURL(file);
@@ -35,8 +35,10 @@
 			if (file.type == "text/plain" || file.name.endsWith(".gpx")) {
 				mapFile = URL.createObjectURL(file);
 				console.log("Map loaded");
-				// console.log(file.text());
-				// console.log(file);
+			}
+
+			if(file.type == "application/json" && file.name == "offsets.json"){
+
 			}
 
 			if (file.type == "application/json" && !loadedNotes) {
