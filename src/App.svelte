@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { cueData, videoFiles } from "./stores";
+	import { cueData, videoFiles, audio } from "./stores";
 	import Video from "./Video.svelte";
 	import Transcript from "./Transcript.svelte";
 	import Input from "./Input.svelte";
@@ -13,12 +13,19 @@
 	let mapFile: string;
 
 	if (import.meta.env.MODE == "development") {
-		const paths = import.meta.env.VITE_VIDEO_FILES.split(',');
+		const paths = import.meta.env.VITE_VIDEO_FILES.split(",");
 		captionsFile = import.meta.env.VITE_TRANSCRIPT_FILE;
 		// mapFile =  import.meta.env.VITE_TRANSCRIPT_FILE;
 		const offsets = JSON.parse(import.meta.env.VITE_OFFSETS);
-		$videoFiles = paths.map((a)=> {return {src: a , offset: offsets[a.split('/').pop()]}})
-		console.log($videoFiles.reduce((prev, curr) => prev.offset < curr.offset ? prev : curr).src)
+		paths.forEach((a) => {
+			const name = a.split("/").pop();
+			$videoFiles[name] = {
+				src: a,
+				offset: offsets[name],
+				visible: offsets[name] == 0 ? true : false,
+			};
+			$audio=name;
+		});
 	}
 </script>
 
@@ -32,7 +39,7 @@
 
 	<!-- <Map {mapFile} /> -->
 </div>
-<Controls></Controls>
+<Controls />
 <Timeline />
 
 <Notes />

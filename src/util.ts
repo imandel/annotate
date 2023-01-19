@@ -1,6 +1,6 @@
 import { get } from 'svelte/store'
 import type { EditorRange } from 'typewriter-editor';
-import { Annotation, cueData, timer, videoFile, paused, tags } from './stores';
+import { Annotation, cueData, timer, videoFile, videoFiles, paused, tags } from './stores';
 // @ts-ignore https://github.com/sveltejs/svelte-preprocess/issues/91
 import { play, pause, playUntil } from "./Video.svelte";
 import { parseRangeString } from './customFormatting';
@@ -165,7 +165,7 @@ export const playTs = (ts: string) => {
 // TODO error handling
 export const clip = async (timeString: string, ffmpeg: FFmpeg) => {
     const { start, end } = parseRangeString(timeString);
-    const data = await fetchFile(get(videoFile));
+    const data = await fetchFile(get(videoFiles)[get(videoFile)].src);
     console.log(data);
     ffmpeg.FS("writeFile", "srcfile.mp4", data);
     await ffmpeg.run(
@@ -183,7 +183,7 @@ export const clip = async (timeString: string, ffmpeg: FFmpeg) => {
     const outData = ffmpeg.FS("readFile", "clip.mp4");
     await saveFile(
         new Blob([outData.buffer]),
-        `${path.parse(get(videoFile)).name}_${start}_${end}`.replace(".", "m") +
+        `${path.parse(get(videoFiles)[get(videoFile)].src).name}_${start}_${end}`.replace(".", "m") +
         ".mp4"
     );
     return true;

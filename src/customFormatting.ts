@@ -1,6 +1,6 @@
 import { get } from 'svelte/store';
 import { format, h} from 'typewriter-editor';
-import { currentTime, tags } from "./stores";
+import { timer, tags } from "./stores";
 import { createId } from './util';
 import type { Replacement } from "typewriter-editor/lib/modules/smartEntry"
 import type { AttributeMap } from '@typewriter/document';
@@ -35,7 +35,7 @@ export const parseRangeString = (timeString: string) => {
 //  TODO ordering start and end?
 const tsReplacements: Replacement[] = [
   [/@\(\d+(\.\d+)?\).$/s, capture => ({ ts: capture })],
-  [/@now.$/s, _ => ({ ts: `@(${get(currentTime).toFixed(1)})` })],
+  [/@now.$/s, _ => ({ ts: `@(${get(timer).query().position.toFixed(1)})` })],
   [/@\(\d+((:\d+){1,2})?(\.\d+)?(-?\d+((:\d+){1,2})?(\.\d+)?)\).$/s, (capture) => {
     const { start, end } = parseRangeString(capture)
     return capture.includes('-') ? { ts: `@(${start}-${end})` } : { ts: `@(${parseTimes(capture.slice(2, -1))})` };

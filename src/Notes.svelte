@@ -194,7 +194,7 @@
     };
     // TODO re-parse notes in case there are errors in $tags
     const downloadNotes = () => {
-        saveFile(new Blob([JSON.stringify(editor.getDelta())]), "Notes.json");
+        saveFile(new Blob([JSON.stringify(editor.getDelta())]), "Notes.annotations.json");
     };
 
     const downloadTxt = () => {

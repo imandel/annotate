@@ -39,64 +39,61 @@
     import {
         cueData,
         duration,
-        currentTime,
         paused,
         videoFile,
+        videoFiles,
         timer,
+        audio
     } from "./stores";
-    // let files: FileList;
-    // export let $videoFile = undefined;
+
     export let captionsFile = undefined;
     console.log($videoFile);
     let track: HTMLTrackElement;
+
+    const scrollTime = (e) => {
+        // e.preventDefault();
+        // const {position} = $timer.query()
+        // $timer.update({position: position - e.deltaY / 10});
+    };
 
     const setupCues = () => {
         console.log("cues loaded");
         player.textTracks[0].mode = "hidden";
         $cueData = [...track.track.cues];
         timer.setTimingsrc(player, 0);
-        timer.setTimingsrc(player2, 5);
     };
-    let player2;
-
-    // setInterval(() => {
-    //     console.log($currentTime - $timer.query().position);
-    // }, 400);
 </script>
 
-{#if $videoFile}
-    <div
-        id="vid-div"
-        on:wheel={(e) => {
-            e.preventDefault();
-            console.log('here')
-            $currentTime -= e.deltaY / 10;
-        }}
-    >
-        <div id="vid-container">
-            <video 
-                src="./example_files/caminandes-llamigos.mp4" 
-                bind:this={player2}
-            />
-            <video
-                bind:this={player}
-                bind:currentTime={$currentTime}
-                bind:duration={$duration}
-                bind:paused={$paused}
-            >
-                <source src={$videoFile} type="video/mp4" />
-                <track
-                    default
-                    bind:this={track}
-                    on:load={setupCues}
-                    kind="captions"
-                    src={captionsFile}
-                    srclang="En"
-                />
-            </video>
-        </div>
+<div id="vid-div" on:wheel={scrollTime}>
+    <div id="vid-container">
+        {#each Object.entries($videoFiles) as [name, value]}
+            {#if name == $videoFile}
+                <video
+                    bind:this={player}
+                    bind:duration={$duration}
+                    bind:paused={$paused}
+                    muted={$audio !== name}
+                >
+                    <source
+                        src={value.src}
+                        type="video/mp4"
+                    />
+                    <track
+                        default
+                        bind:this={track}
+                        on:load={setupCues}
+                        kind="captions"
+                        src={captionsFile}
+                        srclang="En"
+                    />
+                </video>
+                {:else}
+                <!-- svelte-ignore a11y-media-has-caption -->
+                <video src={value.src} muted={$audio !== name}></video>
+            {/if}
+        {/each}
     </div>
-{/if}
+</div>
 
 <style>
     #vid-div {

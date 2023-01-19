@@ -17,6 +17,14 @@ export type Tags = {
     }
 }
 
+export type VideoFiles = {
+    [name: string]: {
+        src: string,
+        offset: number,
+        visible: boolean
+    }
+}
+
 function createTimingObject() {
     const timingObject = new TimingObject();
     // let {position, velocity} = timingObject.query()
@@ -38,6 +46,7 @@ export const tags = writable(<Tags>{ note: { label: "note", color: "#ebebff", an
 export const currentTime = writable(0);
 export const duration = writable(0);
 export const paused = writable(true);
-export const videoFiles = writable([]);
-export const videoFile = derived(videoFiles, $videoFiles => $videoFiles.reduce((prev, curr) => prev.offset < curr.offset ? prev : curr).src);
+export const videoFiles = writable(<VideoFiles>{});
+export const videoFile = derived(videoFiles, $videoFiles => Object.keys($videoFiles).filter(x => $videoFiles[x].offset == 0)[0]);
 export const zoom = writable(1);
+export const audio = writable('');
