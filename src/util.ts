@@ -152,10 +152,11 @@ export const playTs = (ts: string) => {
         const { start, end } = parseRangeString(ts);
         if (start !== end) {
             timer.set(start);
-            playUntil(end).then(() => (paused.set(true)));
+            timer.play()
+            // playUntil(end).then(() => (paused.set(true)));
         } else {
             timer.set(start);
-            play();
+            timer.play();
         }
     } else {
         pause();
