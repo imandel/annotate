@@ -8,7 +8,7 @@
     });
 
     const onClick = () => {
-        if ($paused) {
+        if ($timer.query().velocity===0) {
             timer.play();
         } else {
             timer.pause();

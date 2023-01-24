@@ -45,9 +45,7 @@
         timer,
         audio,
     } from "./stores";
-    $: console.log($audio)
     export let captionsFile = undefined;
-    console.log($videoFile);
     let track: HTMLTrackElement;
 
     const scrollTime = (e) => {
@@ -57,14 +55,17 @@
     };
 
     const setupVideo = (fileName: string) => {
-        const videoData = $videoFiles[fileName];
-        console.log("loading", fileName, videoData.offset);
-        if (fileName == $videoFile) {
-            console.log("cues loaded");
-            videoData.element.textTracks[0].mode = "hidden";
-            $cueData = [...track.track.cues];
-        }
-        timer.setTimingsrc(videoData.element, videoData.offset);
+        const { element, offset } = $videoFiles[fileName];
+        console.log('setupVideo', fileName, element, offset)
+        timer.setTimingsrc(element, offset);
+    };
+
+    const setupTrack = (fileName: string) => {
+        console.log('setupTrack')
+        const { element } = $videoFiles[fileName];
+        console.log("cues loaded");
+        element.textTracks[0].mode = "hidden";
+        $cueData = [...track.track.cues];
     };
 </script>
 
@@ -79,16 +80,19 @@
                     class="vid"
                     class:visible={$videoFiles[name].visible}
                     muted={$audio !== name}
+                    on:loadedmetadata={() => setupVideo(name)}
                 >
                     <source src={value.src} type="video/mp4" />
-                    <track
-                        default
-                        bind:this={track}
-                        on:load={() => setupVideo(name)}
-                        kind="captions"
-                        src={captionsFile}
-                        srclang="En"
-                    />
+                    {#if captionsFile}
+                        <track
+                            default
+                            bind:this={track}
+                            on:load={() => setupTrack(name)}
+                            kind="captions"
+                            src={captionsFile}
+                            srclang="En"
+                        />
+                    {/if}
                 </video>
             {:else}
                 <!-- svelte-ignore a11y-media-has-caption -->
@@ -98,7 +102,7 @@
                     bind:this={$videoFiles[name].element}
                     class="vid"
                     class:visible={$videoFiles[name].visible}
-                    on:canplay={() => setupVideo(name)}
+                    on:loadedmetadata={() => setupVideo(name)}
                 />
             {/if}
         {/each}

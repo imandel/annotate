@@ -18,8 +18,9 @@
 			fileReader.readAsText(file);
 		});
 	}
-
-	$: if (files) {
+	// TODO this is running twice even though files are only being loaded once. this needs to be fixed this is just a hacky work around
+	$: if (files && Object.keys($videoFiles).length === 0) {
+		console.log('load files')
 		let offset: File;
 		for (const file of files) {
 			if (file.type == "video/mp4") {
@@ -31,18 +32,17 @@
 			}
 			if (
 				file.type == "application/json" &&
-				file.name == "offsets.json"
+				file.name.includes("offset")
 			) {
 				offset = file;
 			}
 			if (file.type == "text/vtt" || file.name.endsWith(".vtt")) {
 				captionsFile = URL.createObjectURL(file);
-				console.log(captionsFile);
-				console.log(file);
+				console.log('captions', file);
 			}
 			if (file.type == "text/plain" || file.name.endsWith(".gpx")) {
 				mapFile = URL.createObjectURL(file);
-				console.log("Map loaded");
+				console.log("map", mapFile);
 			}
 
 			if (
@@ -79,6 +79,7 @@
 		if (offset) {
 			fileToJSON(offset).then((data) => {
 				for (const [key, value] of Object.entries(data)) {
+					console.log('offset', offset)
 					$videoFiles[key].offset = value;
 					if (value == 0) {
 						$videoFiles[key].visible = true;
