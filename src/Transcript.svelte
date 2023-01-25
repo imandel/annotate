@@ -13,6 +13,7 @@
 	import { appendLabel } from "./Notes.svelte";
 	import TagSelect from "./TagSelect.svelte";
 	$: updateMarkers($tags);
+	$: console.log(currentCue);
 
 	// TODO make cell unactive on click
 	// TODO sticky headers https://css-tricks.com/position-sticky-and-table-headers/
@@ -53,10 +54,10 @@
 	});
 
 	onMount(() => {
-		$cueData.forEach((cue) => {
+		$cueData.forEach((cue, index) => {
 			const activeNode = <HTMLElement>(
 				transcriptContent.querySelector(
-					`div.content[data-idx="${cue.id - 1}"]`
+					`div.content[data-idx="${index}"]`
 				)
 			);
 			cue.onenter = () => {

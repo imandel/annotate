@@ -4,3 +4,4 @@
 /public/example_files/*.vtt
 .DS_Store
 *.local
+/example_files
