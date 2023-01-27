@@ -35,6 +35,7 @@
 				file.name.includes("offset")
 			) {
 				offset = file;
+				console.log('offset')
 			}
 			if (file.type == "text/vtt" || file.name.endsWith(".vtt")) {
 				captionsFile = URL.createObjectURL(file);
@@ -78,6 +79,7 @@
 		}
 		if (offset) {
 			fileToJSON(offset).then((data) => {
+				console.log('here', data)
 				for (const [key, value] of Object.entries(data)) {
 					console.log('offset', offset)
 					$videoFiles[key].offset = value;

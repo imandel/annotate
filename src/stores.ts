@@ -49,6 +49,7 @@ export const currentTime = writable(0);
 export const duration = writable(0);
 export const paused = writable(true);
 export const videoFiles = writable(<VideoFiles>{});
+// TODO this is actually a really bad heuristic for the "main" file
 export const videoFile = derived(videoFiles, $videoFiles => Object.keys($videoFiles).filter(x => $videoFiles[x].offset == 0)[0]);
 export const zoom = writable(1);
 export const audio = writable('');

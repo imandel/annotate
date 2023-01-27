@@ -47,6 +47,7 @@
     } from "./stores";
     export let captionsFile = undefined;
     let track: HTMLTrackElement;
+    $: console.log($videoFile)
 
     const scrollTime = (e) => {
         // e.preventDefault();
