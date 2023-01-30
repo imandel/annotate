@@ -1,7 +1,7 @@
 TODO
 
 - [x] bug in timeline when dragging cursor  
-- [ ] UI for zooming timeline is broken
+- [x] UI for zooming timeline is broken
 - [x] load in video files
 - [x] select audio
 - [x] hide videos

@@ -34,8 +34,9 @@
   // DRAG current time
   function cursor_drag(event) {
     event.addEventListener("mousedown", () => {
-      moving = true;
       ({ position: lastTime, velocity: lastVelocity } = $timer.query());
+      nextTime = lastTime;
+      moving = true;
       $timer.update({ velocity: 0 });
     });
     window.addEventListener("mousemove", (e) => {
@@ -97,7 +98,7 @@
         range={ranges}
         backgroundColor="#ccc"
         textColor="#222a"
-        {$zoom}
+        zoom={$zoom}
         unit="60"
         textFormat={time_convert}
       />
@@ -126,9 +127,9 @@
           />
         {/each}
         <line
-          x1={timePosition}
+          x1={timePosition * $zoom}
           y1="-100"
-          x2={timePosition}
+          x2={timePosition * $zoom}
           y2={length * 40}
           use:cursor_drag
           class="current"
