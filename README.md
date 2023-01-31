@@ -35,6 +35,11 @@ Install `surge` if you haven't already:
 npm install -g surge
 ```
 
+To run locally: 
+```bash
+npm run dev
+```
+
 Then, from within your project folder:
 
 ```bash
