@@ -3,7 +3,7 @@
 
   // label, id -> annotation
   let tag_info = {};
-  let cols = ["label", "start", "end"];
+  let cols = ["label", "start", "end", "notes"];
 
   function update_from_tags() {
     const new_tag_info = {};
@@ -11,7 +11,7 @@
         new_tag_info[label] = {};
         const color = $tags[label].color;
         for (let [id, annotation] of tag["annotations"]) {
-            new_tag_info[label][id] = [color, annotation["start"], annotation["end"]];
+            new_tag_info[label][id] = [color, annotation["start"], annotation["end"], ""];
         }
     }
     tag_info = new_tag_info;
@@ -24,7 +24,7 @@
             $tags[label].annotations.set(id, {
                 start: tag_info[label][id][1],
                 end: tag_info[label][id][2],
-                line: "",
+                line: tag_info[label][id][3],
             });
             // TODO: line is not filled here.
         }
@@ -73,6 +73,13 @@
               type="number"
               style="width:100px"
               bind:value={tag_info[label][id][2]}
+            />
+          </td>
+          <td>
+            <input
+              type="text"
+              style="width:500px"
+              bind:value={tag_info[label][id][3]}
             />
           </td>
         </tr>
