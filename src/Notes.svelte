@@ -123,6 +123,9 @@
                         allFormats.ts = match;
                         const { start, end } = parseRangeString(match);
                         const { id, label } = allFormats;
+                        console.log("here");
+                        console.log(start, end, id, label);
+                        console.log(startIdx, endIdx)
                         editor.formatText(allFormats, <EditorRange>[
                             startIdx,
                             endIdx,
@@ -141,11 +144,13 @@
 
     editor.on("changed", onTextChanged);
     editor.on("changing", (event: EditorChangeEvent) => {
+        // console.log(editor.doc);
         const { change } = event;
         const ops = change.delta.ops;
         const convert = new Delta();
         let pos = 0;
         ops.forEach((op) => {
+            // console.log(op, op.retain, pos, pos + op.delete);
             if (op.retain) pos += op.retain;
             else if (typeof op.insert === "string") pos += op.insert.length;
             else if (op.delete) {
@@ -155,6 +160,7 @@
                     pos,
                     pos + op.delete,
                 ]);
+                console.log(pos, pos + op.delete, ts, id, label)
                 const deleted = change.doc.getText([pos, pos + op.delete]);
                 if (ts && /@|\(|\)/.test(deleted)) {
                     let start = startIdx[deleted](ts);
