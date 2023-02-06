@@ -1,5 +1,5 @@
 TODO
-
+- [ ] timeline bar is too tall. Seems to act strange when clicking
 - [x] bug in timeline when dragging cursor  
 - [x] UI for zooming timeline is broken
 - [x] load in video files
