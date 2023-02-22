@@ -19,6 +19,8 @@
 	$: start = annotation["start"];
 	$: end = annotation["end"];
 	$: line = annotation["line"];
+	$: note = annotation["note"];
+	$: createTime = annotation["createTime"];
 	// $:console.log(start)
 
 	// READ
@@ -40,6 +42,8 @@
 			start: tmp_start,
 			end: tmp_end,
 			line: line,
+			note: note,
+			createTime: createTime,
 		});
 		$tags = $tags;
 	}

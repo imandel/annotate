@@ -8,7 +8,8 @@
 	import Controls from "./Controls.svelte";
 	// import Map from "./Map.svelte";
 	import Timeline from "./Timeline.svelte";
-  	import SpreadSheet from "./SpreadSheet.svelte";
+  	import SpreadSheet from "./SpreadSheet.svelte"; 
+	import Template from "./template.svelte";
 
 	let captionsFile: string;
 	let mapFile: string;
@@ -43,6 +44,7 @@
 <Controls />
 <Timeline />
 <SpreadSheet />
+<!-- <Template /> -->
 <Notes />
 
 <style>

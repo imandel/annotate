@@ -5,7 +5,9 @@ import { setTimingsrc } from 'timingsrc';
 export type Annotation = {
     start: number,
     end: number,
-    line?: string
+    line?: string,
+    note?: string,
+    createTime?: number,
 }
 
 // TODO: this wants to be a class? (unique ids)
