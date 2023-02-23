@@ -60,6 +60,7 @@
     } from "typewriter-editor/lib/modules/smartEntry";
     import { Jumper } from "svelte-loading-spinners";
     import { createFFmpeg } from "@ffmpeg/ffmpeg";
+    import { label_colors } from "./stores";
     // TODO: idea capature shift up or down to add/reduce time on tag?
     let downloadingVid = false;
     // TODO fix regex to treat @(10-) as @(10)
@@ -78,6 +79,11 @@
     // $: console.log($tags)
     window.process = { env: { NODE_ENV: import.meta.env.MODE } };
     if (import.meta.env.MODE == "development") {
+        $label_colors = {
+            cat: "teal",
+            bat: "#9d9dff", 
+            ...$label_colors,
+        };
         $tags = {
             cat: { label: "cat", color: "teal", annotations: new Map() },
             bat: { label: "bat", color: "#9d9dff", annotations: new Map() },

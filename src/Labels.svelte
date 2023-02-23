@@ -9,12 +9,6 @@
         {#if Object.keys($tags).length}
             {#each Object.values($tags) as tag}
                 <div class="check-container" style="background-color: {tag.color};">
-                    <!-- <input
-                        type="checkbox"
-                        bind:group={$selectedTags}
-                        value={tag}
-                        id={tag.label}
-                    /> -->
                     <span><label for={tag.label}>{tag.label}</label></span>
                 </div>
             {/each}

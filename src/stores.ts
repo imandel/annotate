@@ -11,6 +11,7 @@ export type Annotation = {
 }
 
 // TODO: this wants to be a class? (unique ids)
+// label: (id, color, annotations)
 export type Tags = {
     [label: string]: {
         label: string,
@@ -55,3 +56,4 @@ export const videoFiles = writable(<VideoFiles>{});
 export const videoFile = derived(videoFiles, $videoFiles => Object.keys($videoFiles).filter(x => $videoFiles[x].offset == 0)[0]);
 export const zoom = writable(1);
 export const audio = writable('');
+export const label_colors = writable({});

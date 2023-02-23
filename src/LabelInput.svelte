@@ -1,14 +1,18 @@
 <script lang="ts">
     import { tags } from "./stores";
     import { randomColor } from "./util";
+    import { label_colors } from "./stores";
     let newLabel: string;
 
     // TODO replace randomColor() with nice colorpallete chromajs
     const addLabel = () => {
         if (newLabel) {
+            const new_color = randomColor();
+            // save new color to store
+            $label_colors[newLabel] = new_color;
             $tags[newLabel] = {
                 label: newLabel,
-                color: randomColor(),
+                color: new_color,
                 annotations: new Map(),
             };
             newLabel = "";
