@@ -120,6 +120,7 @@
       end,
       line,
 	  createTime: Date.now(),
+	  note: "",
     });
     $tags = $tags;
     highlight.style.display = "none";

@@ -3,6 +3,7 @@
   import { label_colors } from "./stores";
   import { onMount } from "svelte";
 
+  // TODO: resume after refreshing the page
   onMount(() => {
     // console.log("onMount");
     // console.log($tags);
@@ -16,13 +17,13 @@
     }
   });
 
-  // label, id -> annotation
-  let tag_info = [];
   // id, label, color, start, end, note, createTime
+  let tag_info = [];
   let cols = ["label", "startTime", "endTime", "note"];
-  let label, startTime, endTime, newline, createTime;
-  // use createTime to sort the annotations
+  let selected_label, startTime, endTime, newline, createTime;
   $: labels = Object.keys($tags);
+  // TODO:use createTime to sort the annotations
+  
 
   // Download the tag_info as a JSON file
   function download() {;
@@ -45,7 +46,7 @@
       const file = fileInput.files[0];
       const reader = new FileReader();
       reader.onload = () => {
-        const text = reader.result;
+        const text = reader.result.toString();
         try {
           const data = JSON.parse(text);
           if (Array.isArray(data)) {
@@ -66,13 +67,13 @@
   // Update the tag_info with the new label information
   function addLabel() {
     // update tag_info with the new label information
-    if (label && startTime && endTime && endTime > startTime) {
+    if (selected_label && startTime && endTime && endTime > startTime) {
       const id = Date.now();
-      const color = $label_colors[label];
+      const color = $label_colors[selected_label];
       tag_info = [
         {
           id,
-          label,
+          label: selected_label,
           color,
           start: startTime,
           end: endTime,
@@ -86,7 +87,6 @@
     endTime = null;
     newline = null;
     createTime = null;
-    tag_info = tag_info;
   }
 
   // Update the tag_info with the new tag information
@@ -142,6 +142,22 @@
     $tags = $tags;
   }
 
+  // change the tag_info when the user changes the input
+  function handleStartTimeInput(event, i) {
+    tag_info[i]["start"] = parseInt(event.target.value);
+    tag_info = tag_info;
+  }
+
+  function handleEndTimeInput(event, i) {
+    tag_info[i]["end"] = parseInt(event.target.value);
+    tag_info = tag_info;
+  }
+
+  function handleNoteInput(event, i) {
+    tag_info[i]["note"] = event.target.value.toString();
+    tag_info = tag_info;
+  }
+
   $: $tags, update_from_tags();
   $: tag_info, update_to_tags();
 
@@ -164,9 +180,9 @@
     </tr>
     <tr>
       <td>
-        <select bind:value={label}>
+        <select bind:value={selected_label} style="background-color:{$label_colors[selected_label]}; width:70px; border:0px;">
           {#each labels as label}
-          <option value={label} style="background-color:{$label_colors[label]};">{label}</option>
+            <option value={label}>{label}</option>
           {/each}
         </select>
       </td>
@@ -206,11 +222,15 @@
           <tr>
             <td>
               <select
-                bind:value={tag_info[i].label}
+                value={tag_info[i].label}
                 style="background-color:{$label_colors[tag_info[i].label]}; width:70px; border:0px;"
+                on:change={(event) => {
+                  tag_info[i].label = event.target.value.toString();
+                  tag_info = tag_info;
+                }}>
               >
                 {#each labels as label_choice}
-                  <option value={label_choice} style="background-color:{$label_colors[tag_info[i].label]};">
+                  <option value={label_choice}>
                     {label_choice}
                   </option>
                 {/each}
@@ -220,27 +240,24 @@
               <input
                 type="number"
                 style="width:120px"
-                bind:value={tag_info[i].start}
-              />
+                value={tag_info[i]["start"]} on:input={(e) => handleStartTimeInput(e, i)} />
             </td>
             <td>
               <input
                 type="number"
                 style="width:120px"
-                bind:value={tag_info[i].end}
-              />
+                value={tag_info[i]["end"]} on:input={(e) => handleEndTimeInput(e, i)} />
             </td>
             <td>
               <input
                 type="text"
                 style="width:600px"
-                bind:value={tag_info[i].note}
-              />
+                value={tag_info[i]["note"]} on:input={(e) => handleNoteInput(e, i)} />
             </td>
             <td>
               <button
                 on:click={() => {
-                  tag_info.splice(i, 1);
+                  tag_info.splice(parseInt(i), 1);
                   tag_info = tag_info;
                 }}>-</button
               >

@@ -82,6 +82,7 @@
         $label_colors = {
             cat: "teal",
             bat: "#9d9dff", 
+            note: "#ebebff",
             ...$label_colors,
         };
         $tags = {
