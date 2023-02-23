@@ -1,29 +1,17 @@
 <script>
   import { tags } from "./stores";
   import { label_colors } from "./stores";
-  import { onMount } from "svelte";
-
-  // TODO: resume after refreshing the page
-  onMount(() => {
-    // console.log("onMount");
-    // console.log($tags);
-    // console.log($label_colors);
-    // Get tag_info from localStorage and parse it to JSON
-    console.log("loading tag_info from localStorage...")
-    const savedTagInfo = JSON.parse(localStorage.getItem('tag_info'));
-    console.log(savedTagInfo)
-    if (savedTagInfo) {
-      tag_info = savedTagInfo;
-    }
-  });
+  // import { onMount } from "svelte";
 
   // id, label, color, start, end, note, createTime
   let tag_info = [];
   let cols = ["label", "startTime", "endTime", "note"];
+  let all_cols = ["label", "start", "end", "note", "createTime"];
   let selected_label, startTime, endTime, newline, createTime;
+  let ifAutoSave = true;
   $: labels = Object.keys($tags);
-  // TODO:use createTime to sort the annotations
-  
+  // TODO:use different methods to sort the annotations
+  let sortMethod = "createTime";
 
   // Download the tag_info as a JSON file
   function download() {;
@@ -106,10 +94,17 @@
         });
       }
     }
-    // sort by createTime
-    new_tag_info.sort((a, b) => b.createTime - a.createTime);
+    if (!all_cols.includes(sortMethod)){
+      sortMethod = "createTime";
+    }
+    // sort by createTime default
+    if (sortMethod === "createTime") {
+      new_tag_info.sort((a, b) => b[sortMethod] - a[sortMethod]);
+    }
+    else{
+      new_tag_info.sort((a, b) => a[sortMethod] - b[sortMethod]);
+    }
     tag_info = new_tag_info;
-    console.log(tag_info)
   }
 
   // Update the $tags with the new tag_info
@@ -142,6 +137,20 @@
     $tags = $tags;
   }
 
+  // if sortMethod is changed, update the tag_info
+  $: if (sortMethod) {
+    update_from_tags();
+  }
+
+  // auto save the tag_info to localStorage
+  function autoSave() {
+    if(!ifAutoSave) {
+      return;
+    }
+    localStorage.setItem('tag_info', JSON.stringify(tag_info));
+    console.log("auto save tag_info to localStorage")
+  }
+
   // change the tag_info when the user changes the input
   function handleStartTimeInput(event, i) {
     tag_info[i]["start"] = parseInt(event.target.value);
@@ -160,27 +169,35 @@
 
   $: $tags, update_from_tags();
   $: tag_info, update_to_tags();
+  // TODO: autosave
+  // $: tag_info, autoSave();
 
   // Save tag_info to localStorage
   // $: tag_info, localStorage.setItem('tag_info', JSON.stringify(tag_info));
   // $: console.log(tag_info);
 </script>
 
-<div style="height: 200px; width: 80%;
- overflow: scroll; border: 1px solid gray; background-color: white; padding: 10px;
-  border-radius: 5px;
-">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.2/css/all.min.css" />
+
+<div class="spreadsheet">
   <table>
     <tr>
       {#each cols as col}
         <th>{col}</th>
       {/each}
-      <th><button on:click={download}>Download</button></th>
-      <th><button on:click={upload}>Upload</button></th>
+      <th><button on:click={download}><i class="fas fa-download"></i></button></th>
+      <th><button on:click={upload}><i class="fas fa-upload"></i></button></th>
+      <th>
+        <select bind:value={sortMethod} style="">
+          {#each all_cols as col}
+            <option value={col}>{col}</option> 
+          {/each}
+        </select>
+      </th>
     </tr>
     <tr>
       <td>
-        <select bind:value={selected_label} style="background-color:{$label_colors[selected_label]}; width:70px; border:0px;">
+        <select bind:value={selected_label} style="background-color:{$label_colors[selected_label]};">
           {#each labels as label}
             <option value={label}>{label}</option>
           {/each}
@@ -211,7 +228,7 @@
         />
       </td>
       <td>
-        <button on:click={addLabel}>Add</button>
+        <button on:click={addLabel}><i class="fas fa-plus"></i></button>
       </td>
     </tr>
 
@@ -223,7 +240,7 @@
             <td>
               <select
                 value={tag_info[i].label}
-                style="background-color:{$label_colors[tag_info[i].label]}; width:70px; border:0px;"
+                style="background-color:{$label_colors[tag_info[i].label]};"
                 on:change={(event) => {
                   tag_info[i].label = event.target.value.toString();
                   tag_info = tag_info;
@@ -239,19 +256,16 @@
             <td>
               <input
                 type="number"
-                style="width:120px"
                 value={tag_info[i]["start"]} on:input={(e) => handleStartTimeInput(e, i)} />
             </td>
             <td>
               <input
                 type="number"
-                style="width:120px"
                 value={tag_info[i]["end"]} on:input={(e) => handleEndTimeInput(e, i)} />
             </td>
             <td>
               <input
                 type="text"
-                style="width:600px"
                 value={tag_info[i]["note"]} on:input={(e) => handleNoteInput(e, i)} />
             </td>
             <td>
@@ -259,7 +273,7 @@
                 on:click={() => {
                   tag_info.splice(parseInt(i), 1);
                   tag_info = tag_info;
-                }}>-</button
+                }}><i class="fas fa-trash"></i></button
               >
             </td>
           </tr>
@@ -269,4 +283,47 @@
 </div>
 
 <style>
+  input[type=number] {
+    width: 120px;
+    padding: 5px;
+    border-radius: 5px;
+    border: 1px solid #ccc;
+    font-size: 16px;
+  }
+
+  input[type=text] {
+    width: 600px;
+    padding: 5px;
+    border-radius: 5px;
+    border: 1px solid #ccc;
+    font-size: 16px;
+  }
+
+  button {
+    width: 30px;
+    height: 30px;
+    border-radius: 5px;
+    border: 1px solid #ccc;
+    font-size: 16px;
+  }
+  select {
+    width: 100px;
+    height: 30px;
+    border-radius: 5px;
+    border: 1px solid #ccc;
+    font-size: 14px;
+  }
+
+  .spreadsheet {
+    width: 100%;
+    height: 200px;
+    overflow: scroll;
+    border: 1px solid #ccc;
+    background-color: white;
+    padding: 10px;
+    border-radius: 5px;
+    display: flex;
+    justify-content: center;
+  }
+
 </style>
