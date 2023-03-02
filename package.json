@@ -15,7 +15,6 @@
     "@types/node": "^18.0.0",
     "svelte": "^3.0.0",
     "svelte-check": "^2.0.0",
-    "svelte-grid": "^5.1.1",
     "svelte-loading-spinners": "^0.1.7",
     "svelte-preprocess": "^4.0.0",
     "tslib": "^2.0.0",
