@@ -1,4 +1,4 @@
-# Annotation Tool for multi-model data
+# Annotation Tool for Multimodal Data
 
 ⚡ Annotate your multi-model data in a simple web app ⚡
 
