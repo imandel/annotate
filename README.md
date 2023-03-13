@@ -13,7 +13,7 @@ Try it [here](https://annotate.surge.sh/).
 
 ## Overview
 
-<img src="images/img.png" alt="截屏2023-03-13 19.48.32" style="zoom:30%;" />
+<img src="images/img.png" alt="screenshot" style="zoom:30%;" />
 
 The task of annotating multi-modal data streams, such as videos, images, GPS data, and audios, is a challenging undertaking for researchers. To address this issue, we aim to develop a robust web tool that enables non-technical users to annotate these data streams seamlessly. Our tool is designed to allow users to label videos in a timeline, add customized tags, comments, and download/upload annotation files for further analysis. The tool will provide an all-in-one platform for investigating and labeling sensor data, video, transcripts, and annotations.
 
