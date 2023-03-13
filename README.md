@@ -1,6 +1,6 @@
-# Annotation
+# Annotation Tool for multi-model data
 
-⚡ Annotate your data in a simple web app ⚡
+⚡ Annotate your multi-model data in a simple web app ⚡
 
 Built with 
 
