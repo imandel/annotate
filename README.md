@@ -4,9 +4,9 @@
 
 Built with 
 
-- <img src="https://cdn.svgporn.com/logos/svelte-icon.svg" alt="Svelte" style="zoom:5%;" /> Svelte
+- Svelte
 - TypeScript & JavaScript
-- <img src="https://cdn.svgporn.com/logos/electron.svg" alt="Electron" style="zoom:5%;" /> Electron
+- Electron
 - Deployed on Surge
 
 Try it [here](https://annotate.surge.sh/).
