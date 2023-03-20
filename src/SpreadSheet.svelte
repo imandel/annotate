@@ -17,6 +17,10 @@
   let sortMethod = "createTime";
   let inverse = false;
 
+  // TODO allow copy and paste of one row
+  // only allow this in creatTime mode
+  let copyRow = null, copyIndex = null;
+
   // Download the tag_info as a JSON file
   function download() {
     const json = JSON.stringify(tag_info);
@@ -186,6 +190,58 @@
     tag_info = tag_info;
   }
 
+  function quitCopy(event) {
+    // put copyRow back to index copyIndex
+    if (copyRow) {
+      tag_info = [
+        ...tag_info.slice(0, copyIndex),
+        copyRow,
+        ...tag_info.slice(copyIndex),
+      ];
+      copyRow = null;
+      copyIndex = null;
+    }
+  }
+
+  function copyOneRow(event, i){
+    // copy index i row to clipboard
+    // console.log("copy", i);
+    copyIndex = i;
+    copyRow = tag_info[i];
+    // maybe? delete this row
+    if(i === tag_info.length - 1){
+      tag_info = tag_info.slice(0, i);
+      return;
+    }
+    tag_info = [...tag_info.slice(0, i), ...tag_info.slice(i+1)];
+    // TODO pop out notification "copied to clipboard"
+  }
+  
+  function pasteOneRow(event, i){
+    if(!copyRow){
+      return;
+    }
+    console.log("pasting to index", i, "row", copyRow);
+    // paste to index i + 1 row, change the creatTime to be in between the two rows
+    if(i === tag_info.length - 1){
+      // paste to the last row
+      const newCreateTime = (tag_info[i].createTime + Date.now())/2;
+      // change the createTime of the copyRow
+      copyRow.createTime = newCreateTime;
+      tag_info = [...tag_info, copyRow];
+    }else{
+      // console.log("first", tag_info[i]);
+      // console.log("second", i+1, tag_info[i+1], tag_info);
+      const newCreateTime = (tag_info[i].createTime + tag_info[i+1].createTime)/2;
+      // change the createTime of the copyRow
+      copyRow.createTime = newCreateTime;
+      tag_info = [...tag_info.slice(0, i+1), copyRow, ...tag_info.slice(i+1)];
+    }
+    copyRow = null;
+    copyIndex = null;
+    update_to_tags();
+  }
+
   $: $tags, update_from_tags();
   $: tag_info, update_to_tags();
   // TODO: autosave
@@ -258,7 +314,7 @@
 
     {#if tag_info}
       <!--id, label, color, start, end, note, createTime-->
-      {#each Object.entries(tag_info) as [i, _]}
+      {#each Object.entries(tag_info) as [i, _], index}
         <tr>
           <td>
             <select
@@ -306,6 +362,23 @@
               }}><i class="fas fa-trash" /></button
             >
           </td>
+          {#if sortMethod === "createTime" && !copyRow}
+          <td>
+            <button on:click={(e) => copyOneRow(e, parseInt(i))}><i class="fas fa-copy" style="color: gray;" /></button>
+          </td>
+          <td>
+            <button disabled><i class="fas fa-times"/></button>
+          </td>
+          {:else if sortMethod === "createTime" && copyRow}
+          <td>
+            <button on:click={(e) => pasteOneRow(e, parseInt(i))}><i class="fas fa-paste" /></button>
+          </td>
+          <td>
+            <button on:click={quitCopy}><i class="fas fa-times" /></button>
+          </td>
+          {/if}
+
+
         </tr>
       {/each}
     {/if}
