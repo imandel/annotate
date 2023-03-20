@@ -42,7 +42,7 @@ Then, from within your project folder:
 
 ```bash
 npm run build
-surge public my-project.surge.sh
+surge dist --domain https://annotate.surge.sh/
 ```
 
 
