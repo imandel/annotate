@@ -5,6 +5,7 @@
 
   // id, label, color, start, end, note, createTime
   let tag_info = [];
+  // TODO use tofixed for starttime and endtime, no need to show many digits
   let cols = ["label", "startTime", "endTime", "note"];
   let all_cols = ["label", "start", "end", "note", "createTime"];
   let selected_label, startTime, endTime, newline, createTime;
