@@ -47,6 +47,7 @@ function createTimingObject() {
 
 export const timer = createTimingObject();
 export const cueData = writable([]);
+// TODO no need to keep color of label in here
 export const tags = writable(<Tags>{ note: { label: "note", color: "#ebebff", annotations: new Map() } });
 export const currentTime = writable(0);
 export const duration = writable(0);
@@ -56,4 +57,5 @@ export const videoFiles = writable(<VideoFiles>{});
 export const videoFile = derived(videoFiles, $videoFiles => Object.keys($videoFiles).filter(x => $videoFiles[x].offset == 0)[0]);
 export const zoom = writable(1);
 export const audio = writable('');
+// map from label to color
 export const label_colors = writable({});

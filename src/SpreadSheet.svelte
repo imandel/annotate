@@ -9,9 +9,12 @@
   let all_cols = ["label", "start", "end", "note", "createTime"];
   let selected_label, startTime, endTime, newline, createTime;
   let ifAutoSave = true;
+  // labels are dynamaically generated from the $tags
   $: labels = Object.keys($tags);
-  // TODO:use different methods to sort the annotations
+  // $: console.log("labels changed", labels);
+  // TODO use different methods to sort the annotations
   let sortMethod = "createTime";
+  let inverse = false;
 
   // Download the tag_info as a JSON file
   function download() {;
@@ -39,6 +42,13 @@
           const data = JSON.parse(text);
           if (Array.isArray(data)) {
             tag_info = data;
+            // update label_colors
+            const new_label_colors = {};
+            for (let tag of tag_info) {
+              new_label_colors[tag.label] = tag.color;
+            }
+            $label_colors = new_label_colors;
+            update_to_tags();
           } else {
             throw new Error("Invalid JSON file");
           }
@@ -99,20 +109,31 @@
     }
     // sort by createTime default
     if (sortMethod === "createTime") {
-      new_tag_info.sort((a, b) => b[sortMethod] - a[sortMethod]);
+      if (inverse) {
+        new_tag_info.sort((a, b) => b[sortMethod] - a[sortMethod]);
+      }
+      else{
+        new_tag_info.sort((a, b) => a[sortMethod] - b[sortMethod]);
+      }
+      // new_tag_info.sort((a, b) => b[sortMethod] - a[sortMethod]);
     }
     else{
-      new_tag_info.sort((a, b) => a[sortMethod] - b[sortMethod]);
+      if (inverse) {
+        new_tag_info.sort((a, b) => a[sortMethod] - b[sortMethod]);
+      }
+      else{
+        new_tag_info.sort((a, b) => b[sortMethod] - a[sortMethod]);
+      }
+      // new_tag_info.sort((a, b) => a[sortMethod] - b[sortMethod]);
     }
     tag_info = new_tag_info;
   }
 
   // Update the $tags with the new tag_info
   function update_to_tags() {
-    // id, label, start, end, note, createTime
-    for(let [label, tag] of Object.entries($tags)) {
-      $tags[label].annotations = new Map();
-    }
+    // delete all the annotations in the $tags
+    // delete all labels in the $tags
+    $tags = {};
     if(!tag_info) {
       $tags = $tags;
       return;
@@ -138,7 +159,7 @@
   }
 
   // if sortMethod is changed, update the tag_info
-  $: if (sortMethod) {
+  $: if (sortMethod || inverse) {
     update_from_tags();
   }
 
@@ -187,6 +208,7 @@
       {/each}
       <th><button on:click={download}><i class="fas fa-download"></i></button></th>
       <th><button on:click={upload}><i class="fas fa-upload"></i></button></th>
+      <th><button on:click={()=>{inverse=!inverse}}><i class="fas fa-sort-amount-down"></i></button></th>
       <th>
         <select bind:value={sortMethod} style="">
           {#each all_cols as col}

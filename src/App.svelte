@@ -37,8 +37,6 @@
 	{#if $cueData.length}
 		<Transcript />
 	{/if}
-
-	<!-- <Map {mapFile} /> -->
 </div>
 <Controls />
 <Timeline />
