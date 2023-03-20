@@ -18,7 +18,7 @@
   let inverse = false;
 
   // Download the tag_info as a JSON file
-  function download() {;
+  function download() {
     const json = JSON.stringify(tag_info);
     const blob = new Blob([json], { type: "application/json" });
     const url = URL.createObjectURL(blob);
@@ -105,24 +105,21 @@
         });
       }
     }
-    if (!all_cols.includes(sortMethod)){
+    if (!all_cols.includes(sortMethod)) {
       sortMethod = "createTime";
     }
     // sort by createTime default
     if (sortMethod === "createTime") {
       if (inverse) {
         new_tag_info.sort((a, b) => b[sortMethod] - a[sortMethod]);
-      }
-      else{
+      } else {
         new_tag_info.sort((a, b) => a[sortMethod] - b[sortMethod]);
       }
       // new_tag_info.sort((a, b) => b[sortMethod] - a[sortMethod]);
-    }
-    else{
+    } else {
       if (inverse) {
         new_tag_info.sort((a, b) => a[sortMethod] - b[sortMethod]);
-      }
-      else{
+      } else {
         new_tag_info.sort((a, b) => b[sortMethod] - a[sortMethod]);
       }
       // new_tag_info.sort((a, b) => a[sortMethod] - b[sortMethod]);
@@ -135,7 +132,7 @@
     // delete all the annotations in the $tags
     // delete all labels in the $tags
     $tags = {};
-    if(!tag_info) {
+    if (!tag_info) {
       $tags = $tags;
       return;
     }
@@ -166,11 +163,11 @@
 
   // auto save the tag_info to localStorage
   function autoSave() {
-    if(!ifAutoSave) {
+    if (!ifAutoSave) {
       return;
     }
-    localStorage.setItem('tag_info', JSON.stringify(tag_info));
-    console.log("auto save tag_info to localStorage")
+    localStorage.setItem("tag_info", JSON.stringify(tag_info));
+    console.log("auto save tag_info to localStorage");
   }
 
   // change the tag_info when the user changes the input
@@ -199,7 +196,10 @@
   // $: console.log(tag_info);
 </script>
 
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.2/css/all.min.css" />
+<link
+  rel="stylesheet"
+  href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.2/css/all.min.css"
+/>
 
 <div class="spreadsheet">
   <table>
@@ -207,115 +207,122 @@
       {#each cols as col}
         <th>{col}</th>
       {/each}
-      <th><button on:click={download}><i class="fas fa-download"></i></button></th>
-      <th><button on:click={upload}><i class="fas fa-upload"></i></button></th>
-      <th><button on:click={()=>{inverse=!inverse}}><i class="fas fa-sort-amount-down"></i></button></th>
+      <th><button on:click={download}><i class="fas fa-download" /></button></th
+      >
+      <th><button on:click={upload}><i class="fas fa-upload" /></button></th>
+      <th
+        ><button
+          on:click={() => {
+            inverse = !inverse;
+          }}
+        >
+          {#if inverse}
+            <i class="fas fa-sort-amount-up" />
+          {:else}
+            <i class="fas fa-sort-amount-down" />
+          {/if}
+        </button></th
+      >
       <th>
         <select bind:value={sortMethod} style="">
           {#each all_cols as col}
-            <option value={col}>{col}</option> 
+            <option value={col}>{col}</option>
           {/each}
         </select>
       </th>
     </tr>
     <tr>
       <td>
-        <select bind:value={selected_label} style="background-color:{$label_colors[selected_label]};">
+        <select
+          bind:value={selected_label}
+          style="background-color:{$label_colors[selected_label]};"
+        >
           {#each labels as label}
             <option value={label}>{label}</option>
           {/each}
         </select>
       </td>
       <td>
-        <input
-          type="number"
-          style="width:120px"
-          bind:value={startTime}
-          placeholder="Start Time"
-        />
+        <input type="number" bind:value={startTime} placeholder="Start Time" />
       </td>
       <td>
-        <input
-          type="number"
-          style="width:120px"
-          bind:value={endTime}
-          placeholder="End Time"
-        />
+        <input type="number" bind:value={endTime} placeholder="End Time" />
       </td>
       <td>
-        <input
-          type="text"
-          style="width:600px"
-          bind:value={newline}
-          placeholder="Notes"
-        />
+        <input type="text" bind:value={newline} placeholder="Notes" />
       </td>
       <td>
-        <button on:click={addLabel}><i class="fas fa-plus"></i></button>
+        <button on:click={addLabel}><i class="fas fa-plus" /></button>
       </td>
     </tr>
 
     {#if tag_info}
-    
-    <!--id, label, color, start, end, note, createTime-->
-      {#each Object.entries(tag_info) as [i, _] }
-          <tr>
-            <td>
-              <select
-                value={tag_info[i].label}
-                style="background-color:{$label_colors[tag_info[i].label]};"
-                on:change={(event) => {
-                  tag_info[i].label = event.target.value.toString();
-                  tag_info = tag_info;
-                }}>
+      <!--id, label, color, start, end, note, createTime-->
+      {#each Object.entries(tag_info) as [i, _]}
+        <tr>
+          <td>
+            <select
+              value={tag_info[i].label}
+              style="background-color:{$label_colors[tag_info[i].label]};"
+              on:change={(event) => {
+                tag_info[i].label = event.target.value.toString();
+                tag_info = tag_info;
+              }}
+            >
               >
-                {#each labels as label_choice}
-                  <option value={label_choice}>
-                    {label_choice}
-                  </option>
-                {/each}
-              </select>
-            </td>
-            <td>
-              <input
-                type="number"
-                value={tag_info[i]["start"]} on:input={(e) => handleStartTimeInput(e, i)} />
-            </td>
-            <td>
-              <input
-                type="number"
-                value={tag_info[i]["end"]} on:input={(e) => handleEndTimeInput(e, i)} />
-            </td>
-            <td>
-              <input
-                type="text"
-                value={tag_info[i]["note"]} on:input={(e) => handleNoteInput(e, i)} />
-            </td>
-            <td>
-              <button
-                on:click={() => {
-                  tag_info.splice(parseInt(i), 1);
-                  tag_info = tag_info;
-                }}><i class="fas fa-trash"></i></button
-              >
-            </td>
-          </tr>
-        {/each}
+              {#each labels as label_choice}
+                <option value={label_choice}>
+                  {label_choice}
+                </option>
+              {/each}
+            </select>
+          </td>
+          <td>
+            <input
+              type="number"
+              value={tag_info[i]["start"]}
+              on:input={(e) => handleStartTimeInput(e, i)}
+            />
+          </td>
+          <td>
+            <input
+              type="number"
+              value={tag_info[i]["end"]}
+              on:input={(e) => handleEndTimeInput(e, i)}
+            />
+          </td>
+          <td>
+            <input
+              type="text"
+              value={tag_info[i]["note"]}
+              on:input={(e) => handleNoteInput(e, i)}
+            />
+          </td>
+          <td>
+            <button
+              on:click={() => {
+                tag_info.splice(parseInt(i), 1);
+                tag_info = tag_info;
+              }}><i class="fas fa-trash" /></button
+            >
+          </td>
+        </tr>
+      {/each}
     {/if}
   </table>
 </div>
 
 <style>
-  input[type=number] {
-    width: 120px;
+  input[type="number"] {
+    width: 80px;
     padding: 5px;
     border-radius: 5px;
     border: 1px solid #ccc;
     font-size: 16px;
   }
 
-  input[type=text] {
-    width: 600px;
+  input[type="text"] {
+    width: 800px;
     padding: 5px;
     border-radius: 5px;
     border: 1px solid #ccc;
@@ -339,7 +346,7 @@
 
   .spreadsheet {
     width: 100%;
-    height: 200px;
+    height: 250px;
     overflow: scroll;
     border: 1px solid #ccc;
     background-color: white;
@@ -348,5 +355,4 @@
     display: flex;
     justify-content: center;
   }
-
 </style>
