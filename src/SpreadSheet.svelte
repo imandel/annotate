@@ -21,6 +21,9 @@
   // only allow this in creatTime mode
   let copyRow = null, copyIndex = null;
 
+  let hoveringIndex = null;
+  $:console.log("hoveringIndex", hoveringIndex);
+
   // Download the tag_info as a JSON file
   function download() {
     const json = JSON.stringify(tag_info);
@@ -314,8 +317,8 @@
 
     {#if tag_info}
       <!--id, label, color, start, end, note, createTime-->
-      {#each Object.entries(tag_info) as [i, _], index}
-        <tr>
+      {#each Object.entries(tag_info) as [i, _]}
+        <tr on:mouseover={()=>{hoveringIndex=parseInt(i);}} on:focus={()=>{hoveringIndex=parseInt(i);}}>
           <td>
             <select
               value={tag_info[i].label}
@@ -362,6 +365,8 @@
               }}><i class="fas fa-trash" /></button
             >
           </td>
+          {#if hoveringIndex === parseInt(i)}
+
           {#if sortMethod === "createTime" && !copyRow}
           <td>
             <button on:click={(e) => copyOneRow(e, parseInt(i))}><i class="fas fa-copy" style="color: gray;" /></button>
@@ -376,6 +381,7 @@
           <td>
             <button on:click={quitCopy}><i class="fas fa-times" /></button>
           </td>
+          {/if}
           {/if}
 
 
