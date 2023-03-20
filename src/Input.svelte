@@ -81,8 +81,13 @@
 			fileToJSON(offset).then((data) => {
 				console.log('here', data)
 				for (const [key, value] of Object.entries(data)) {
-					console.log('offset', offset)
+					if (key in $videoFiles == false) {
+						// console.log("file not found", key);
+						continue;
+					}
+					console.log("setting offset", key, value);
 					$videoFiles[key].offset = value;
+					// console.log("Now we have these videoFiles", $videoFiles)
 					if (value == 0) {
 						$videoFiles[key].visible = true;
 						$audio = key;
