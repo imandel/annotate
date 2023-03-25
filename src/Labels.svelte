@@ -1,15 +1,15 @@
 <script lang="ts">
-    import { tags } from "./stores";
+    import { tags, label_colors } from "./stores";
     import LabelInput from "./LabelInput.svelte" 
     // let selected = [];
 
 </script>
 <span style="margin:0 0 0.5em 0;"><LabelInput><button slot='add'>+</button></LabelInput></span>
     <div class="tagChecks">
-        {#if Object.keys($tags).length}
-            {#each Object.values($tags) as tag}
-                <div class="check-container" style="background-color: {tag.color};">
-                    <span><label for={tag.label}>{tag.label}</label></span>
+        {#if Object.keys($label_colors).length}
+            {#each Object.keys($label_colors) as tag}
+                <div class="check-container" style="background-color: {$label_colors[tag]};">
+                    <span><label for={tag}>{tag}</label></span>
                 </div>
             {/each}
         {/if}

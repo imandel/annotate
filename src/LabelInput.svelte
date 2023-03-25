@@ -10,11 +10,6 @@
             const new_color = randomColor();
             // save new color to store
             $label_colors[newLabel] = new_color;
-            $tags[newLabel] = {
-                label: newLabel,
-                color: new_color,
-                annotations: new Map(),
-            };
             newLabel = "";
         }
     };

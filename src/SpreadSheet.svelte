@@ -11,7 +11,7 @@
   let selected_label, startTime, endTime, newline, createTime;
   let ifAutoSave = true;
   // labels are dynamaically generated from the $tags
-  $: labels = Object.keys($tags);
+  $: labels = Object.keys($label_colors);
   // $: console.log("labels changed", labels);
   // TODO use different methods to sort the annotations
   let sortMethod = "createTime";
@@ -332,14 +332,13 @@
         >
           <td>
             <select
-              value={tag_info[i].label}
+              bind:value={tag_info[i].label}
               style="background-color:{$label_colors[tag_info[i].label]};"
               on:change={(event) => {
                 tag_info[i].label = event.target.value.toString();
                 tag_info = tag_info;
               }}
             >
-              >
               {#each labels as label_choice}
                 <option value={label_choice}>
                   {label_choice}
