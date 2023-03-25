@@ -37,6 +37,10 @@
 				offset = file;
 				console.log('offset')
 			}
+			if (file.type == "application/json" && file.name.includes("tag")) {
+				// TODO: accept tags.json
+				console.log('tag')
+			}
 			if (file.type == "text/vtt" || file.name.endsWith(".vtt")) {
 				captionsFile = URL.createObjectURL(file);
 				console.log('captions', file);
@@ -46,6 +50,7 @@
 				console.log("map", mapFile);
 			}
 
+			// TODO: change this part
 			if (
 				file.type == "application/json" &&
 				file.name.endsWith(".annotations.json") &&

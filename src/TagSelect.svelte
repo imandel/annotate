@@ -1,10 +1,12 @@
 <script lang="ts">
     import { slide } from "svelte/transition";
-    import { tags } from "./stores";
+    import { tags, label_colors} from "./stores";
     import LabelInput from "./LabelInput.svelte";
     export let callback = (_label:string, _color:string) => {}
     let addTag = false;
-    
+
+    // labels are not stored in $tags, but in $label_colors
+
     // TODO clearHighlight
     const selected = (label:string, color: string) => {
         callback(label,color)
@@ -12,11 +14,11 @@
 
 </script>
 
-{#each Object.values($tags) as tag}
+{#each Object.keys($label_colors) as label}
     <span
         class="liner-circle"
-        style="background-color:{tag.color}"
-        on:mousedown={()=>selected(tag.label, tag.color)}
+        style="background-color:{$label_colors[label]}"
+        on:mousedown={()=>selected(label, $label_colors[label])}
     />
 {/each}
 {#if addTag}

@@ -3,6 +3,11 @@
   import { label_colors } from "./stores";
   // import { onMount } from "svelte";
 
+  // sort label_colors by aphabetic order
+  $: $label_colors = Object.fromEntries(
+    Object.entries($label_colors).sort((a, b) => a[0].localeCompare(b[0]))
+  );
+
   // id, label, color, start, end, note, createTime
   let tag_info = [];
   // TODO use tofixed for starttime and endtime, no need to show many digits
@@ -36,7 +41,7 @@
   }
 
   // Upload a JSON file and update the tag_info
-  function upload() {
+  export function upload_tag() {
     const fileInput = document.createElement("input");
     fileInput.type = "file";
     fileInput.accept = "application/json";
@@ -116,7 +121,7 @@
     }
     // sort by createTime default
     if (sortMethod === "createTime") {
-      if (inverse) {
+      if (!inverse) {
         new_tag_info.sort((a, b) => b[sortMethod] - a[sortMethod]);
       } else {
         new_tag_info.sort((a, b) => a[sortMethod] - b[sortMethod]);
@@ -272,7 +277,7 @@
       {/each}
       <th><button on:click={download}><i class="fas fa-download" /></button></th
       >
-      <th><button on:click={upload}><i class="fas fa-upload" /></button></th>
+      <th><button on:click={upload_tag}><i class="fas fa-upload" /></button></th>
       <th
         ><button
           on:click={() => {
@@ -442,7 +447,6 @@
     background-color: white;
     padding: 10px;
     border-radius: 5px;
-    display: flex;
     justify-content: center;
   }
 </style>

@@ -1,6 +1,6 @@
 <script>
   import Dragbar from "./Dragbar.svelte";
-  import { duration, tags, timer, zoom } from "./stores";
+  import { duration, tags, timer, zoom, label_colors } from "./stores";
   // @ts-ignore
   import Ruler from "svelte-ruler";
 
@@ -13,7 +13,7 @@
   let SvgTimeline;
   let scrollPosition = 0;
 
-  $: length = Object.keys($tags).length;
+  $: length = Object.keys($label_colors).length;
   $: ranges = [0, $duration];
   $: if (moving) {
     timePosition = nextTime;
@@ -114,18 +114,23 @@
         viewBox="0 0 {$duration * $zoom} {length * 40}"
         preserveAspectRatio="xMinYMin meet"
       >
-        {#each Object.entries($tags) as [label, tag], index (label)}
-          {#each [...tag["annotations"].keys()] as id}
+
+      {#each Object.entries($label_colors).reverse() as [label, color], index (label)}
+        {#if $tags[label]}
+          {#each [...$tags[label]["annotations"].keys()] as id}
             <Dragbar {label} {id} {index} />
           {/each}
-          <line
+        {/if}
+        <line
             x1="0"
             y1="{(index + 1) * 40} "
             x2={$duration * $zoom}
             y2={(index + 1) * 40}
             style="stroke:gray;stroke-width:0.4"
           />
-        {/each}
+      {/each}
+
+
         <line
           x1={timePosition * $zoom}
           y1="-100"

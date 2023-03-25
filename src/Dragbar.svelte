@@ -105,7 +105,7 @@
 
 <g>
 	<svg
-		viewBox="0 {(length - 1 - index) * 40} {$duration * $zoom} 40"
+		viewBox="0 {(index) * 40} {$duration * $zoom} 40"
 		preserveAspectRatio="xMinYMax meet"
 	>
 		<rect

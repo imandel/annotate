@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { Annotation, cueData, timer, tags } from "./stores";
+  import { Annotation, cueData, timer, tags, label_colors} from "./stores";
   import type { Tags } from "./stores";
   import { onMount, tick } from "svelte";
   import Toggle from "svelte-toggle";
@@ -111,16 +111,26 @@
   };
 
   const tagSelectCallback = (_label: string, _color: string) => {
+    // check if annotation already exists
+    if (!$tags[_label]) {
+        $tags[_label] = {
+        label: _label,
+        color: $label_colors[_label],
+        annotations: new Map(),
+      };
+    }
+
     const start = parseFloat(elements[0].dataset.starttime);
     const end = parseFloat(elements[elements.length - 1].dataset.endtime);
     const id = createId($tags[_label].annotations);
     const line = appendLabel(start, end, _label, _color, id);
+    
     $tags[_label].annotations.set(id, {
       start,
       end,
       line,
-	  createTime: Date.now(),
-	  note: "",
+      createTime: Date.now(),
+      note: "",
     });
     $tags = $tags;
     highlight.style.display = "none";

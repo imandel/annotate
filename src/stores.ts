@@ -34,8 +34,6 @@ function createTimingObject() {
     const timingObject = new TimingObject();
     // let {position, velocity} = timingObject.query()
     const { subscribe, set, update } = writable(timingObject);
-
-
     return {
         subscribe,
         setTimingsrc: (mediaElement, offset) => setTimingsrc(mediaElement, timingObject, ({ position, ...vector }) => ({ ...vector, position: position - offset })),
@@ -57,5 +55,5 @@ export const videoFiles = writable(<VideoFiles>{});
 export const videoFile = derived(videoFiles, $videoFiles => Object.keys($videoFiles).filter(x => $videoFiles[x].offset == 0)[0]);
 export const zoom = writable(1);
 export const audio = writable('');
-// map from label to color
+// map from label to color, all possible labels are stored here.
 export const label_colors = writable({});
