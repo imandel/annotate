@@ -78,19 +78,19 @@
     // TODO move fn to util and await promise on interface
     // $: console.log($tags)
     window.process = { env: { NODE_ENV: import.meta.env.MODE } };
-    if (import.meta.env.MODE == "development") {
-        $label_colors = {
-            cat: "teal",
-            bat: "#9d9dff", 
-            note: "#ebebff",
-            ...$label_colors,
-        };
-        $tags = {
-            cat: { label: "cat", color: "teal", annotations: new Map() },
-            bat: { label: "bat", color: "#9d9dff", annotations: new Map() },
-            ...$tags,
-        };
-    }
+    // if (import.meta.env.MODE == "development") {
+    //     $label_colors = {
+    //         cat: "teal",
+    //         bat: "#9d9dff", 
+    //         note: "#ebebff",
+    //         ...$label_colors,
+    //     };
+    //     $tags = {
+    //         cat: { label: "cat", color: "teal", annotations: new Map() },
+    //         bat: { label: "bat", color: "#9d9dff", annotations: new Map() },
+    //         ...$tags,
+    //     };
+    // }
     editor = window.editor = new Editor({
         modules: {
             placeholder: placeholder(

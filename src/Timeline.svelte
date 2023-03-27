@@ -108,38 +108,67 @@
       bind:this={SvgTimeline}
       on:scroll={() => (scrollPosition = SvgTimeline.scrollLeft / $zoom)}
     >
-      <svg
-        width={$duration * $zoom}
-        height={length * 40}
-        viewBox="0 0 {$duration * $zoom} {length * 40}"
-        preserveAspectRatio="xMinYMin meet"
-      >
 
-      {#each Object.entries($label_colors).reverse() as [label, color], index (label)}
-        {#if $tags[label]}
-          {#each [...$tags[label]["annotations"].keys()] as id}
-            <Dragbar {label} {id} {index} />
-          {/each}
-        {/if}
-        <line
-            x1="0"
-            y1="{(index + 1) * 40} "
-            x2={$duration * $zoom}
-            y2={(index + 1) * 40}
-            style="stroke:gray;stroke-width:0.4"
-          />
-      {/each}
+    {#if Object.entries($label_colors).length > 0}
+        <svg
+          width={$duration * $zoom}
+          height={length * 40}
+          viewBox="0 0 {$duration * $zoom} {length * 40}"
+          preserveAspectRatio="xMinYMin meet"
+        >
+            {#each Object.entries($label_colors).reverse() as [label, color], index (label)}
+              {#if $tags[label]}
+                {#each [...$tags[label]["annotations"].keys()] as id}
+                  <Dragbar {label} {id} {index} />
+                {/each}
+              {/if}
+              <line
+                  x1="0"
+                  y1="{(index + 1) * 40} "
+                  x2={$duration * $zoom}
+                  y2={(index + 1) * 40}
+                  style="stroke:gray;stroke-width:0.4"
+                />
+            {/each}      
+            <line
+              x1={timePosition * $zoom}
+              y1="-100"
+              x2={timePosition * $zoom}
+              y2={length * 40}
+              use:cursor_drag
+              class="current"
+            />
+          
+        </svg>
 
 
-        <line
-          x1={timePosition * $zoom}
-          y1="-100"
-          x2={timePosition * $zoom}
-          y2={length * 40}
-          use:cursor_drag
-          class="current"
-        />
-      </svg>
+    {:else}
+    <svg
+          width={$duration * $zoom}
+          height={1 * 40}
+          viewBox="0 0 {$duration * $zoom} {1 * 40}"
+          preserveAspectRatio="xMinYMin meet"
+        >
+    <line
+      x1="0"
+      y1="{1 * 40} "
+      x2={$duration * $zoom}
+      y2={1 * 40}
+      style="stroke:gray;stroke-width:0.4"
+    />
+    <line
+      x1={timePosition * $zoom}
+      y1="-100"
+      x2={timePosition * $zoom}
+      y2={1 * 40}
+      use:cursor_drag
+      class="current"
+    />
+    </svg>
+{/if}
+
+
+      
     </div>
   </div>
 {/if}
