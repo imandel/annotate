@@ -1,12 +1,18 @@
 <script>
   import { tags } from "./stores";
-  import { label_colors, currentTime} from "./stores";
+  import { label_colors, start_time, end_time} from "./stores";
   // import { onMount } from "svelte";
 
   // sort label_colors by aphabetic order
   $: $label_colors = Object.fromEntries(
     Object.entries($label_colors).sort((a, b) => a[0].localeCompare(b[0]))
   );
+
+  // change default start_time and end_time
+  $: if($start_time && $end_time) {
+    startTime = $start_time;
+    endTime = $end_time;
+  }
 
   // id, label, color, start, end, note, createTime
   let tag_info = [];
