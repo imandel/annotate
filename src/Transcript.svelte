@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { Annotation, cueData, timer, tags, label_colors} from "./stores";
+  import { Annotation, cueData, timer, tags, label_colors, start_time, end_time} from "./stores";
   import type { Tags } from "./stores";
   import { onMount, tick } from "svelte";
   import Toggle from "svelte-toggle";
@@ -83,6 +83,9 @@
       });
       highlight.style.display = "";
       mousedown = false;
+      $start_time = parseFloat(elements[0].dataset.starttime);
+      $end_time = parseFloat(elements[elements.length - 1].dataset.endtime);
+      console.log($start_time, $end_time);
     }
   };
 

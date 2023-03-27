@@ -7,7 +7,7 @@
 	let files: FileList;
 	export let captionsFile: string = undefined;
 	export let mapFile: string = undefined;
-	export let tagFile: File = undefined;
+	export let tagFile: string = undefined;
 	let loadedNotes: Delta;
 
 	async function fileToJSON(file: File) {
@@ -40,7 +40,7 @@
 			}
 			if (file.type == "text/vtt" || file.name.endsWith(".vtt")) {
 				captionsFile = URL.createObjectURL(file);
-				console.log('captions', file);
+				console.log('captions', captionsFile);
 			}
 			if (file.type == "text/plain" || file.name.endsWith(".gpx")) {
 				mapFile = URL.createObjectURL(file);
@@ -48,7 +48,7 @@
 			}
 			if (file.type == "application/json" && file.name.includes("tag")) {				
 				// update to tagFile
-				tagFile = file;
+				tagFile = URL.createObjectURL(file);
 				console.log('tag', tagFile);
 			}
 

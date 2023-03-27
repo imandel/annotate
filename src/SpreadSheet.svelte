@@ -1,6 +1,6 @@
 <script>
   import { tags } from "./stores";
-  import { label_colors } from "./stores";
+  import { label_colors, currentTime} from "./stores";
   // import { onMount } from "svelte";
 
   // sort label_colors by aphabetic order
@@ -28,6 +28,7 @@
 
   let hoveringIndex = null;
 
+  // blob object
   export let tagFile = undefined;
 
   // Download the tag_info as a JSON file
@@ -50,14 +51,13 @@
     fileInput.onchange = () => {
       const file = fileInput.files[0];
       // update to tagFile
-      tagFile = file;
+      tagFile = URL.createObjectURL(file);
     };
     fileInput.click();
   }
 
-  // upload a json file and update the tag_info from path "tagFile", tagFile is a blob
+  // upload a json file and update the tag_info from path "tagFile", tagFile: string is a blob object, tagFile = URL.createObjectURL(file);, fetch file from tagFile
   $: if (tagFile) {
-    console.log("tagFile changed", tagFile);
     const reader = new FileReader();
     reader.onload = () => {
       const text = reader.result.toString();
@@ -80,7 +80,15 @@
         alert("Failed to load file");
       }
     };
-    reader.readAsText(tagFile);
+    // fetch file from tagFile blob object
+    fetch(tagFile)
+      .then((res) => res.blob())
+      .then((blob) => {
+        const file = new File([blob], "tags.json", {
+          type: "application/json",
+        });
+        reader.readAsText(file);
+      });
   }
 
   // Update the tag_info with the new label information

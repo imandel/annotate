@@ -57,3 +57,7 @@ export const zoom = writable(1);
 export const audio = writable('');
 // map from label to color, all possible labels are stored here.
 export const label_colors = writable({});
+
+// selected time
+export const start_time = writable(0);
+export const end_time = writable(0);

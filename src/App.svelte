@@ -12,7 +12,7 @@
 
 	let captionsFile: string;
 	let mapFile: string;
-	let tagFile: File;
+	let tagFile: string;
 
 	// if (import.meta.env.MODE == "development") {
 	// 	const paths = import.meta.env.VITE_VIDEO_FILES.split(",");
