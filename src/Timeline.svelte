@@ -184,4 +184,8 @@
     stroke-width: 5;
     transition: 0.2s linear;
   }
+  .container {
+    max-height: 400px;
+    overflow: scroll;
+  }
 </style>
