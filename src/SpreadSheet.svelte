@@ -28,6 +28,8 @@
 
   let hoveringIndex = null;
 
+  export let tagFile = undefined;
+
   // Download the tag_info as a JSON file
   function download() {
     const json = JSON.stringify(tag_info);
@@ -41,37 +43,44 @@
   }
 
   // Upload a JSON file and update the tag_info
-  export function upload_tag() {
+  function upload_tag() {
     const fileInput = document.createElement("input");
     fileInput.type = "file";
     fileInput.accept = "application/json";
     fileInput.onchange = () => {
       const file = fileInput.files[0];
-      const reader = new FileReader();
-      reader.onload = () => {
-        const text = reader.result.toString();
-        try {
-          const data = JSON.parse(text);
-          if (Array.isArray(data)) {
-            tag_info = data;
-            // update label_colors
-            const new_label_colors = {};
-            for (let tag of tag_info) {
-              new_label_colors[tag.label] = tag.color;
-            }
-            $label_colors = new_label_colors;
-            update_to_tags();
-          } else {
-            throw new Error("Invalid JSON file");
-          }
-        } catch (e) {
-          console.error(e);
-          alert("Failed to load file");
-        }
-      };
-      reader.readAsText(file);
+      // update to tagFile
+      tagFile = file;
     };
     fileInput.click();
+  }
+
+  // upload a json file and update the tag_info from path "tagFile", tagFile is a blob
+  $: if (tagFile) {
+    console.log("tagFile changed", tagFile);
+    const reader = new FileReader();
+    reader.onload = () => {
+      const text = reader.result.toString();
+      try {
+        const data = JSON.parse(text);
+        if (Array.isArray(data)) {
+          tag_info = data;
+          // update label_colors
+          const new_label_colors = {};
+          for (let tag of tag_info) {
+            new_label_colors[tag.label] = tag.color;
+          }
+          $label_colors = new_label_colors;
+          update_to_tags();
+        } else {
+          throw new Error("Invalid JSON file");
+        }
+      } catch (e) {
+        console.error(e);
+        alert("Failed to load file");
+      }
+    };
+    reader.readAsText(tagFile);
   }
 
   // Update the tag_info with the new label information

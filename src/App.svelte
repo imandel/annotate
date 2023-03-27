@@ -12,6 +12,7 @@
 
 	let captionsFile: string;
 	let mapFile: string;
+	let tagFile: File;
 
 	// if (import.meta.env.MODE == "development") {
 	// 	const paths = import.meta.env.VITE_VIDEO_FILES.split(",");
@@ -30,7 +31,7 @@
 	// }
 </script>
 
-<Input bind:captionsFile bind:mapFile />
+<Input bind:captionsFile bind:mapFile bind:tagFile/>
 <Labels />
 <div id="container">
 	<Video bind:captionsFile />
@@ -40,7 +41,7 @@
 </div>
 <Controls />
 <Timeline />
-<SpreadSheet />
+<SpreadSheet bind:tagFile />
 <Notes />
 
 <style>
