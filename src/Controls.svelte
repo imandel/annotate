@@ -12,6 +12,9 @@
     const onClick = () => {
         if ($timer.query().velocity===0) {
             timer.play();
+            if (selected !== $timer.query().velocity){
+                $timer.update({velocity:selected})
+            }
         } else {
             timer.pause();
         }
@@ -22,7 +25,8 @@
 <button on:click={onClick}>{$paused ? "play" : "pause"}</button>
 <button on:click ={()=>$timer.update({position: $timer.query().position + 1})}> &gt;&gt; </button>
 <button on:click ={()=>$timer.update({position: $timer.query().position +10})}> &gt; </button>
-<label style="display: inline-block;">speed: <select bind:value={selected} on:change={() => $timer.update({velocity:selected})}>
+<label style="display: inline-block;">speed: 
+    <select bind:value={selected} on:change={() => $timer.update({velocity:selected})}>
     {#each speeds as speed}
     <option value={speed}>{speed}</option>
     {/each}
