@@ -94,6 +94,7 @@
           type: "application/json",
         });
         reader.readAsText(file);
+        tagFile = undefined;
       });
   }
 
@@ -124,6 +125,7 @@
 
   // Update the tag_info with the new tag information
   function update_from_tags() {
+    // console.log("updating from tags")
     const new_tag_info = [];
     // id, label, start, end, note, createTime
     for (let [label, tag] of Object.entries($tags)) {
@@ -165,6 +167,7 @@
   function update_to_tags() {
     // delete all the annotations in the $tags
     // delete all labels in the $tags
+    // console.log("updating to tags")
     $tags = {};
     if (!tag_info) {
       $tags = $tags;
