@@ -44,6 +44,7 @@ function createTimingObject() {
 }
 
 export const timer = createTimingObject();
+export const predefined = writable(0);
 export const cueData = writable([]);
 // TODO no need to keep color of label in here
 export const tags = writable(<Tags>{ note: { label: "note", color: "#ebebff", annotations: new Map() } });

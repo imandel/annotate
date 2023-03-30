@@ -1,5 +1,5 @@
 <script>
-  import { tags } from "./stores";
+  import { tags, predefined} from "./stores";
   import { label_colors, start_time, end_time} from "./stores";
   // import { onMount } from "svelte";
 
@@ -71,13 +71,29 @@
         const data = JSON.parse(text);
         if (Array.isArray(data)) {
           tag_info = data;
-          // update label_colors
-          const new_label_colors = {};
-          for (let tag of tag_info) {
-            new_label_colors[tag.label] = tag.color;
+          // if have predefined label_colors, use it, only add new labels
+          if(predefined) {
+            const new_label_colors = $label_colors;
+            for (let tag of tag_info) {
+              if (tag.label in $label_colors) {
+                continue;
+              } else {
+                new_label_colors[tag.label] = tag.color;
+              }
+            }
+            $label_colors = new_label_colors;
+            console.log($label_colors)
+            update_to_tags();
+          } else {
+            // update label_colors
+            console.log("no predefined labels")
+            const new_label_colors = {};
+            for (let tag of tag_info) {
+              new_label_colors[tag.label] = tag.color;
+            }
+            $label_colors = new_label_colors;
+            update_to_tags();
           }
-          $label_colors = new_label_colors;
-          update_to_tags();
         } else {
           throw new Error("Invalid JSON file");
         }

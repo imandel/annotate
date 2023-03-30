@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { tags, videoFiles, audio } from "./stores";
+	import { tags, videoFiles, audio, label_colors, predefined} from "./stores";
 	import { get } from "svelte/store";
 	import { setData } from "./Notes.svelte";
 	import { parseRangeString } from "./customFormatting";
@@ -46,11 +46,30 @@
 				mapFile = URL.createObjectURL(file);
 				console.log("map", mapFile);
 			}
+			if (file.type == "application/json" && file.name.includes("predefined")) {
+				$predefined = 1;
+				// update to label_colors from predefined labels, predefined.json format: [label: color]
+				fileToJSON(file).then((data: any) => {
+					const new_label_colors = {};
+					// console.log('predefined', data);
+					for (const [label, color] of Object.entries(data)) {
+						// conver label and color to string
+						const labelStr = label.toString();
+						const colorStr = color.toString();
+						new_label_colors[labelStr] = colorStr;
+					}
+					// console.log("predefined", new_label_colors)
+					$label_colors = new_label_colors;
+					// console.log("predefined", $label_colors);
+				});
+				
+			}
 			if (file.type == "application/json" && file.name.includes("tag")) {				
 				// update to tagFile
 				tagFile = URL.createObjectURL(file);
 				console.log('tag', tagFile);
 			}
+			
 
 			// TODO: change this part
 			if (
