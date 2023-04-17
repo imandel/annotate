@@ -48,7 +48,6 @@
     export let captionsFile = undefined;
     let track: HTMLTrackElement;
     $: console.log($videoFile)
-
     const scrollTime = (e) => {
         // e.preventDefault();
         // const {position} = $timer.query()
@@ -79,6 +78,7 @@
                     bind:duration={$duration}
                     bind:paused={$paused}
                     class="vid"
+                    style="transform: rotate({$videoFiles[name].rotation}deg);"
                     class:visible={$videoFiles[name].visible}
                     muted={$audio !== name}
                     on:loadedmetadata={() => setupVideo(name)}
@@ -102,6 +102,7 @@
                     muted={$audio !== name}
                     bind:this={$videoFiles[name].element}
                     class="vid"
+                    style="transform: rotate({$videoFiles[name].rotation}deg);"
                     class:visible={$videoFiles[name].visible}
                     on:loadedmetadata={() => setupVideo(name)}
                 />
@@ -116,7 +117,9 @@
     }
     .vid {
         display: none;
+
     }
+
     .visible {
         display: inline;
     }

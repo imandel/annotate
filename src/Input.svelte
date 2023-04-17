@@ -1,5 +1,11 @@
 <script lang="ts">
-	import { tags, videoFiles, audio, label_colors, predefined} from "./stores";
+	import {
+		tags,
+		videoFiles,
+		audio,
+		label_colors,
+		predefined,
+	} from "./stores";
 	import { get } from "svelte/store";
 	import { setData } from "./Notes.svelte";
 	import { parseRangeString } from "./customFormatting";
@@ -9,6 +15,8 @@
 	export let mapFile: string = undefined;
 	export let tagFile: string = undefined;
 	let loadedNotes: Delta;
+
+	let videoAngles = [90, 180, 270];
 
 	async function fileToJSON(file: File) {
 		return new Promise((resolve, reject) => {
@@ -21,7 +29,7 @@
 	}
 	// TODO this is running twice even though files are only being loaded once. this needs to be fixed this is just a hacky work around
 	$: if (files && Object.keys($videoFiles).length === 0) {
-		console.log('load files')
+		console.log("load files");
 		let offset: File;
 		for (const file of files) {
 			if (file.type == "video/mp4") {
@@ -36,17 +44,20 @@
 				file.name.includes("offset")
 			) {
 				offset = file;
-				console.log('offset')
+				console.log("offset");
 			}
 			if (file.type == "text/vtt" || file.name.endsWith(".vtt")) {
 				captionsFile = URL.createObjectURL(file);
-				console.log('captions', captionsFile);
+				console.log("captions", captionsFile);
 			}
 			if (file.type == "text/plain" || file.name.endsWith(".gpx")) {
 				mapFile = URL.createObjectURL(file);
 				console.log("map", mapFile);
 			}
-			if (file.type == "application/json" && file.name.includes("predefined")) {
+			if (
+				file.type == "application/json" &&
+				file.name.includes("predefined")
+			) {
 				$predefined = 1;
 				// update to label_colors from predefined labels, predefined.json format: [label: color]
 				fileToJSON(file).then((data: any) => {
@@ -62,14 +73,12 @@
 					$label_colors = new_label_colors;
 					// console.log("predefined", $label_colors);
 				});
-				
 			}
-			if (file.type == "application/json" && file.name.includes("tag")) {				
+			if (file.type == "application/json" && file.name.includes("tag")) {
 				// update to tagFile
 				tagFile = URL.createObjectURL(file);
-				console.log('tag', tagFile);
+				console.log("tag", tagFile);
 			}
-			
 
 			// TODO: change this part
 			if (
@@ -105,7 +114,7 @@
 		}
 		if (offset) {
 			fileToJSON(offset).then((data) => {
-				console.log('here', data)
+				console.log("here", data);
 				for (const [key, value] of Object.entries(data)) {
 					if (key in $videoFiles == false) {
 						// console.log("file not found", key);
@@ -154,6 +163,14 @@
 								value={name}
 							/></label
 						>
+						<label class="vid-data"> deg
+						<select bind:value={$videoFiles[name].rotation}>
+							<option value="0" selected>0</option>
+							{#each videoAngles as angle}
+								<option value={angle}>{angle}</option>
+							{/each}
+						</select>
+					</label>
 					</p>
 				{/each}
 			</div>

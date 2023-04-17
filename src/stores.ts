@@ -25,6 +25,7 @@ export type VideoFiles = {
         src: string,
         offset: number,
         visible: boolean,
+        rotation: number,
         element?: HTMLMediaElement
 
     }
