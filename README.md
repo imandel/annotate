@@ -15,11 +15,19 @@ Try it [here](https://annotate.surge.sh/).
 
 <img src="images/img.png" alt="screenshot" style="zoom:30%;" />
 
-The task of annotating multi-modal data streams, such as videos, images, GPS data, and audios, is a challenging undertaking for researchers. To address this issue, we aim to develop a robust web tool that enables non-technical users to annotate these data streams seamlessly. Our tool is designed to allow users to label videos in a timeline, add customized tags, comments, and download/upload annotation files for further analysis. The tool will provide an all-in-one platform for investigating and labeling sensor data, video, transcripts, and annotations.
+### Project Background
 
-We recognize that existing tools for analyzing multi-modal data are often limited, particularly for non-technical users. Our aim is to create a user-friendly interface that can be used by a range of groups to label data streams. We are particularly focused on time-synchronized data streams, as this is an area where current tools fall short. Our project objective is to build a functional tool that incorporates data visualization, streaming data synchronization, multi-modal data synchronization, and an aesthetically pleasing and clear layout of visualizations. We will be using Svelte and Electron to build a cross-platform application.
+The challenge of annotating multi-modal data streams, such as videos, images, GPS data, and audios, presents significant difficulties for researchers. Existing tools for analyzing multi-modal data are often limited, particularly for non-technical users. This is especially true when it comes to time-synchronized data streams, an area where current tools frequently fall short. Recognizing these limitations, our project aims to develop a robust, user-friendly web tool that will enable non-technical users to seamlessly annotate these data streams.
 
-This project is instructed and innitialized by [Ilan Mandel](https://github.com/imandel) (Phd student at Cornell Tech), and was a special research project for Cornell Tech master students ([Chenran Ning](https://github.com/jw782cn) (cn257), Ka Wing Lui (kl647), Jeongmin Huh (jh2229)) from Feb 2021 to Dec 2021. Currently, this project is being developed by Chenran Ning and Ilan Mandel.
+### Project Description
+
+Our web tool is designed to provide an all-in-one platform for investigating and labeling sensor data, video, transcripts, and annotations. Users will be able to label videos in a timeline, add customized tags and comments, and download/upload annotation files for further analysis. The project objective is to build a functional tool that incorporates data visualization, streaming data synchronization, multi-modal data synchronization, and an aesthetically pleasing and clear layout of visualizations. To achieve this, we will be using Svelte and Electron to build a cross-platform application.
+
+### Project History
+
+This project was initiated and instructed by Ilan Mandel, a PhD student at Cornell Tech. It began as a special research project for Cornell Tech master's students Chenran Ning (cn257), Ka Wing Lui (kl647), and Jeongmin Huh (jh2229) from February 2021 to December 2021. Currently, the project is being developed by Chenran Ning and Ilan Mandel.
+
+
 
 ## Get started
 
@@ -50,6 +58,22 @@ surge dist --domain https://annotate.surge.sh/
 
 
 ## TODO
+
+- scale to fixed height while rotating
+
+- different color system?
+-  showing multiple people's tags
+- multiple tag files
+- maybe some shades(more users?)
+- different users
+- sticky videos (the whole row)
+- timeline
+- video
+- play
+- hide labels
+- data structures in another branch
+
+
 
 - [ ] timeline bar is too tall. Seems to act strange when clicking
 - [x] bug in timeline when dragging cursor  
