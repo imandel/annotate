@@ -1,6 +1,6 @@
 <script>
-  import { tags, predefined} from "./stores";
-  import { label_colors, start_time, end_time} from "./stores";
+  import { tags, predefined } from "./stores";
+  import { label_colors, start_time, end_time, timer } from "./stores";
   // import { onMount } from "svelte";
 
   // sort label_colors by aphabetic order
@@ -9,7 +9,7 @@
   );
 
   // change default start_time and end_time
-  $: if($start_time && $end_time) {
+  $: if ($start_time && $end_time) {
     startTime = $start_time;
     endTime = $end_time;
   }
@@ -72,7 +72,7 @@
         if (Array.isArray(data)) {
           tag_info = data;
           // if have predefined label_colors, use it, only add new labels
-          if(predefined) {
+          if (predefined) {
             const new_label_colors = $label_colors;
             for (let tag of tag_info) {
               if (tag.label in $label_colors) {
@@ -82,11 +82,11 @@
               }
             }
             $label_colors = new_label_colors;
-            console.log($label_colors)
+            console.log($label_colors);
             update_to_tags();
           } else {
             // update label_colors
-            console.log("no predefined labels")
+            console.log("no predefined labels");
             const new_label_colors = {};
             for (let tag of tag_info) {
               new_label_colors[tag.label] = tag.color;
@@ -117,21 +117,27 @@
   // Update the tag_info with the new label information
   function addLabel() {
     // update tag_info with the new label information
-    if (selected_label && startTime && endTime && endTime > startTime) {
-      const id = Date.now();
-      const color = $label_colors[selected_label];
-      tag_info = [
-        {
-          id,
-          label: selected_label,
-          color,
-          start: startTime,
-          end: endTime,
-          note: newline,
-          createTime: Date.now(),
-        },
-        ...tag_info,
-      ];
+    if (selected_label) {
+      if (!startTime && !endTime || endTime < startTime) {
+        startTime = $timer.query().position;
+        endTime= startTime+10;
+      }
+
+        const id = Date.now();
+        const color = $label_colors[selected_label];
+        tag_info = [
+          {
+            id,
+            label: selected_label,
+            color,
+            start: startTime,
+            end: endTime,
+            note: newline,
+            createTime: Date.now(),
+          },
+          ...tag_info,
+        ];
+      // }
     }
     startTime = null;
     endTime = null;
@@ -319,7 +325,8 @@
       {/each}
       <th><button on:click={download}><i class="fas fa-download" /></button></th
       >
-      <th><button on:click={upload_tag}><i class="fas fa-upload" /></button></th>
+      <th><button on:click={upload_tag}><i class="fas fa-upload" /></button></th
+      >
       <th
         ><button
           on:click={() => {

@@ -286,11 +286,11 @@
             on:click={commands.redo}>redo</button
         >
         <div class="dropdown">
-            <button
+            <!-- <button
                 class="toolbar-button material-icons "
                 disabled={!active.undo}>file_download</button
-            >
-            <div class="dropdown-content">
+            > -->
+            <!-- <div class="dropdown-content">
                 <button
                     class="drop-btn"
                     on:click={downloadNotes}
@@ -306,7 +306,7 @@
                     on:click={downloadTxt}
                     disabled={!active.undo}>Text</button
                 >
-            </div>
+            </div> -->
         </div>
     </Toolbar>
 </div>
